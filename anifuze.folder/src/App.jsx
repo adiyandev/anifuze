@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Search as SearchIcon, Home as HomeIcon, Tv as TvIcon, Menu, X, Bell, Download as DownloadIcon, Users, Award, BookOpen, User, CalendarDays, BarChart3, Library, Settings as SettingsIcon, Info } from 'lucide-react';
+import { Search as SearchIcon, Home as HomeIcon, Tv as TvIcon, Menu, X, Bell, Users, Award, BookOpen, User, CalendarDays, BarChart3, Library, Settings as SettingsIcon, Info } from 'lucide-react';
 import './styles/designTokens.css';
 import { useUser } from './api/UserContext';
 import { fetchSiteSettings } from './api/db';
@@ -23,7 +23,7 @@ const DramasMovies = lazy(() => import('./pages/DramasMovies'));
 const MovieWatch = lazy(() => import('./pages/MovieWatch'));
 const About = lazy(() => import('./pages/About'));
 const StaticPages = lazy(() => import('./pages/StaticPageRoute'));
-const Download = lazy(() => import('./pages/Download'));
+
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -46,7 +46,7 @@ const primaryNav = [
   ['/', 'Home', HomeIcon], ['/manga', 'Manga', BookOpen],
   ['/dramas-movies', 'Dramas & Movies', TvIcon], ['/schedule', 'Schedule', CalendarDays],
   ['/collections', 'Collections', Library], ['/community', 'Community', Users], ['/stats', 'Stats', BarChart3],
-  ['/notifications', 'Notifications', Bell], ['/download', 'Download', DownloadIcon],
+  ['/notifications', 'Notifications', Bell], 
 ];
 
 function App() {
@@ -139,7 +139,7 @@ function App() {
     </>}
 
     <main className="content"><Routes>
-      <Route path="/" element={<MixedHome />} /><Route path="/search" element={<Search />} /><Route path="/anime" element={<AnimeUnavailable />} /><Route path="/anime/:id" element={<AnimeUnavailable />} /><Route path="/manga" element={<MangaHome />} /><Route path="/manga/:id" element={<MangaDetails />} /><Route path="/dramas-movies" element={<DramasMovies />} /><Route path="/watch/:type/:id" element={<RequireAuth><MovieWatch /></RequireAuth>} /><Route path="/schedule" element={<Schedule />} /><Route path="/collections" element={<RequireAuth><Collections /></RequireAuth>} /><Route path="/community" element={<Community />} /><Route path="/stats" element={<RequireAuth><Stats /></RequireAuth>} /><Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} /><Route path="/about" element={<About />} /><Route path="/contact" element={<StaticPages page="contact" />} /><Route path="/faq" element={<StaticPages page="faq" />} /><Route path="/terms" element={<StaticPages page="terms" />} /><Route path="/privacy" element={<StaticPages page="privacy" />} /><Route path="/dmca" element={<StaticPages page="dmca" />} /><Route path="/request" element={<StaticPages page="request" />} /><Route path="/profile/:userid/*" element={<Profile />} /><Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} /><Route path="/forgot-password" element={<ForgotPassword />} /><Route path="/set-new-password" element={<SetNewPassword />} /><Route path="/download" element={<Download />} /><Route path="/admin/*" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} /><Route path="*" element={<NotFound />} />
+      <Route path="/" element={<MixedHome />} /><Route path="/search" element={<Search />} /><Route path="/anime" element={<AnimeUnavailable />} /><Route path="/anime/:id" element={<AnimeUnavailable />} /><Route path="/manga" element={<MangaHome />} /><Route path="/manga/:id" element={<MangaDetails />} /><Route path="/dramas-movies" element={<DramasMovies />} /><Route path="/watch/:type/:id" element={<RequireAuth><MovieWatch /></RequireAuth>} /><Route path="/schedule" element={<Schedule />} /><Route path="/collections" element={<RequireAuth><Collections /></RequireAuth>} /><Route path="/community" element={<Community />} /><Route path="/stats" element={<RequireAuth><Stats /></RequireAuth>} /><Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} /><Route path="/about" element={<About />} /><Route path="/contact" element={<StaticPages page="contact" />} /><Route path="/faq" element={<StaticPages page="faq" />} /><Route path="/terms" element={<StaticPages page="terms" />} /><Route path="/privacy" element={<StaticPages page="privacy" />} /><Route path="/dmca" element={<StaticPages page="dmca" />} /><Route path="/request" element={<StaticPages page="request" />} /><Route path="/profile/:userid/*" element={<Profile />} /><Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} /><Route path="/forgot-password" element={<ForgotPassword />} /><Route path="/set-new-password" element={<SetNewPassword />} /><Route path="/admin/*" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} /><Route path="*" element={<NotFound />} />
     </Routes></main><Footer />
     <nav className="bottom-nav" aria-label="Mobile quick navigation"><NavLink to="/" end className={({ isActive }) => isActive ? 'bottom-nav-link active' : 'bottom-nav-link'}><HomeIcon size={20} /><span>Home</span></NavLink><NavLink to="/dramas-movies" className={({ isActive }) => isActive ? 'bottom-nav-link active' : 'bottom-nav-link'}><TvIcon size={20} /><span>Dramas</span></NavLink><NavLink to="/search" className={({ isActive }) => isActive ? 'bottom-nav-link active' : 'bottom-nav-link'}><SearchIcon size={20} /><span>Search</span></NavLink></nav>
     <AuthModal /><UpdateCenter />{isSearchOpen && <SearchModal onClose={() => setIsSearchOpen(false)} />}

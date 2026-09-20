@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, ChevronRight, Download, Heart, Home, Library, Menu, Search, Settings, UserCircle, Users, X, History, Tv, BarChart3, Info } from 'lucide-react';
+import { Bell, ChevronRight, Heart, Home, Library, Menu, Search, Settings, UserCircle, Users, X, History, Tv, BarChart3, Info } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import RequireAuth from '../components/RequireAuth';
@@ -7,7 +7,7 @@ import RequireAdmin from '../components/RequireAdmin';
 import MixedHome from '../pages/MixedHome';
 import WebSearch from '../pages/Search';
 import AnimeUnavailable from '../pages/AnimeUnavailable';
-import DownloadsPage from './pages/DownloadsPage';
+
 import NotificationsPage from './pages/NotificationsPage';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
@@ -27,7 +27,7 @@ import { applyAccentColor, applyTheme } from '../utils/appearance';
 import { storage } from '../utils/storage';
 import './styles/tokens.css'; import './styles/base.css'; import './styles/typography.css'; import './styles/animations.css'; import './styles/utilities.css'; import './styles/mobile-native.css'; import './styles/account.css'; import './styles/safe-area.css'; import './mobile-android-design.css'; import './mobile-v2.css'; import './mobile-v2-shell.css'; import './mobile-v2-details.css'; import './mobile-v2-player.css'; import './mobile-v2-library.css'; import './mobile-v2-downloads.css'; import './mobile-v2-notifications.css'; import './mobile-v2-community.css'; import './mobile-v2-profile.css'; import './mobile-v2-settings.css'; import './mobile-v2-schedule.css'; import './mobile-v2-account.css'; import './styles/android-v3.css'; import './styles/android-v4-fixes.css'; import './styles/android-appearance.css';
 const DISCOVER = [['Home', Home, '/'], ['Search', Search, '/search'], ['Library', Library, '/collections'], ['Dramas & Movies', Tv, '/dramas-movies']];
-const VAULT = [['Continue Watching', History, '/collections'], ['Favorites', Heart, '/collections'], ['Downloads', Download, '/download'], ['Notifications', Bell, '/notifications'], ['Community', Users, '/community']];
+const VAULT = [['Continue Watching', History, '/collections'], ['Favorites', Heart, '/collections'], ['Notifications', Bell, '/notifications'], ['Community', Users, '/community']];
 function MobileAnimeUnavailable() { return <AnimeUnavailable />; }
 function MobileDramaDetails({ navigate }) { const { id } = useParams(); const query = new URLSearchParams(useLocation().search); return <DramaDetailPage params={{ id, mediaType: query.get('type') || 'tv', title: query.get('title') || undefined }} goBack={() => navigate(-1)} navigate={navigate} />; }
 function MobileWatchRoute({ navigate }) { const { kind, id } = useParams(); useEffect(() => { if (id) navigate(`/drama/${id}?type=${kind === 'movie' ? 'movie' : 'tv'}`); }, [id, kind, navigate]); return <div className="av-empty-state"><span className="av-loading-line" style={{ width: 160 }} /><p>Opening details…</p></div>; }
