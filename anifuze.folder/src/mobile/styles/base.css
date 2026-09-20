@@ -1,0 +1,58 @@
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  background: var(--bg-primary);
+  color-scheme: dark;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+html[data-av-theme='light'] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button { touch-action: manipulation; }
+img { max-width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+::selection { background: color-mix(in srgb, var(--accent-primary) 30%, transparent); color: var(--text-primary); }
