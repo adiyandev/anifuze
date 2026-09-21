@@ -29,15 +29,86 @@
   "build": {
     "appId": "com.animevault.app",
     "productName": "AnimeVault",
-    "directories": { "output": "release" },
+    "directories": {
+      "output": "release"
+    },
     "asar": true,
-    "files": ["dist/**/*", "electron/**/*.cjs", "electron/**/*.js", "build/**/*"],
+    "files": [
+      "dist/**/*",
+      "electron/**/*.cjs",
+      "electron/**/*.js",
+      "build/**/*"
+    ],
     "npmRebuild": false,
-    "nsis": { "allowToChangeInstallationDirectory": true, "oneClick": false },
-    "win": { "icon": "build/icon.ico", "target": [{ "target": "nsis", "arch": ["x64"] }], "artifactName": "AnimeVault-Windows-${arch}.${ext}", "publisherName": "AnimeVault", "forceCodeSigning": true, "signAndEditExecutable": true },
-    "mac": { "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }, { "target": "zip", "arch": ["x64", "arm64"] }], "hardenedRuntime": false, "gatekeeperAssess": false, "identity": null, "artifactName": "AnimeVault-macOS-${arch}.${ext}" },
-    "linux": { "target": [{ "target": "deb", "arch": ["x64"] }, { "target": "AppImage", "arch": ["x64"] }], "icon": "src/electron/.icon-ico/icon.png", "category": "AudioVideo", "maintainer": "AnimeVault Team", "artifactName": "AnimeVault-Linux-${arch}.${ext}" },
-    "publish": [{ "provider": "github", "releaseType": "release", "owner": "animevaultofficial", "repo": "animevaultofficial.github.io" }]
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "AnimeVault-Windows-${arch}.${ext}",
+      "publisherName": "AnimeVault",
+      "forceCodeSigning": true,
+      "signAndEditExecutable": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null,
+      "artifactName": "AnimeVault-macOS-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "src/electron/.icon-ico/icon.png",
+      "category": "AudioVideo",
+      "maintainer": "AnimeVault Team",
+      "artifactName": "AnimeVault-Linux-${arch}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release",
+        "owner": "animevaultofficial",
+        "repo": "animevaultofficial.github.io"
+      }
+    ]
   },
   "dependencies": {
     "@capacitor/app": "^6.0.3",
@@ -68,10 +139,10 @@
     "vidstack": "^1.12.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
     "@capacitor/android": "^6.2.1",
     "@capacitor/cli": "^6.2.1",
     "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "^42.4.0",
@@ -82,5 +153,7 @@
     "vite": "^5.4.21",
     "wait-on": "^7.2.0"
   },
-  "engines": { "node": ">=22.12.0" }
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }
