@@ -28,7 +28,7 @@ import {
   X,
   ExternalLink
 } from 'lucide-react';
-import { Badge } from '../ui/UIComponents';
+import { Badge } from '../components/ui/UIComponents';
 
 export default function CustomerAdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
