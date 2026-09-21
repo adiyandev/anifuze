@@ -1,93 +1,76 @@
-/* src/styles/designTokens.css */
-/* Premium design tokens – use throughout the app */
+/* AniFuze SaaS Palette & Design System Variables */
 :root {
-  /* Brand */
-  --brand-primary: hsl(340, 85%, 55%);
-  --brand-primary-light: hsl(340, 85%, 65%);
-  --brand-primary-dark: hsl(340, 85%, 45%);
-  --brand-color: var(--red);
+  /* Brand Colors - Deep Navy + Cyan + Violet System */
+  --bg-midnight: #070B17;
+  --bg-deep: #0B1020;
+  --panel-navy: #10172A;
+  --panel-elevated: #151D32;
+  --border-color: #26324A;
+  --border-subtle: #1E293B;
 
-  /* Accent Colors */
-  --red: #e50914;
-  --red2: #ff1a24;
-  --red-dim: rgba(229, 9, 20, 0.15);
-  --red-glow: 0 0 30px rgba(229, 9, 20, 0.3);
+  --cyan-electric: #22D3EE;
+  --cyan-bright: #67E8F9;
+  --violet-primary: #8B5CF6;
+  --violet-soft: #A78BFA;
 
-  /* Theme Variables */
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --surface2: #1a1a1a;
-  --surface3: #222222;
-  --border: #2a2a2a;
-  --text: #f0f0f0;
-  --text2: #c0c0c0;
-  --text3: #909090;
+  --text-white: #F8FAFC;
+  --text-muted-white: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-dark: #64748B;
 
-  /* Backgrounds (legacy) */
-  --bg-primary: var(--surface);
-  --bg-secondary: var(--surface2);
-  --bg-glass: rgba(255, 255, 255, 0.06);
-  --glass-border: var(--border);
+  --status-success: #22C55E;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-info: #38BDF8;
 
-  /* Text (legacy) */
-  --text-primary: var(--text);
-  --text-secondary: var(--text2);
-  --text-muted: var(--text3);
+  /* Legacy Compat Tokens for app shell */
+  --bg: #070B17;
+  --surface: #0B1020;
+  --surface2: #10172A;
+  --surface3: #151D32;
+  --border: #26324A;
+  --text: #F8FAFC;
+  --text2: #CBD5E1;
+  --text3: #94A3B8;
+  --brand-primary: #22D3EE;
+  --brand-color: #22D3EE;
 
-  /* Spacing */
-  --spacing-xs: 0.4rem;
-  --spacing-sm: 0.8rem;
-  --spacing-md: 1.6rem;
-  --spacing-lg: 2.4rem;
-  --spacing-xl: 3.2rem;
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
-
-  /* Animations */
-  --anim-duration: 0.25s;
-  --anim-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Spacing & Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 }
 
-/* Global helpers */
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-midnight);
+  color: var(--text-white);
+  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-a {
-  color: var(--brand-primary);
-  text-decoration: none;
-  transition: color var(--anim-duration) var(--anim-ease);
+/* Custom Scrollbar for SaaS UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-a:hover {
-  color: var(--brand-primary-light);
+::-webkit-scrollbar-track {
+  background: var(--bg-midnight);
 }
-
-.btn-primary {
-  background: var(--brand-primary);
-  border: none;
-  color: #fff;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background var(--anim-duration) var(--anim-ease),
-    box-shadow var(--anim-duration) var(--anim-ease);
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
 }
-.btn-primary:hover {
-  background: var(--brand-primary-dark);
-  box-shadow: var(--shadow-sm);
-}
-
-.glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: var(--spacing-md);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dark);
 }

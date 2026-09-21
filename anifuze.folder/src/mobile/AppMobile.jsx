@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, ChevronRight, Heart, Home, Library, Menu, Search, Settings, UserCircle, Users, X, History, Tv, BarChart3, Info } from 'lucide-react';
+import { Bell, ChevronRight, Heart, Home, Library, Menu, Search, Settings, UserCircle, Users, X, History, BarChart3, Info } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import RequireAuth from '../components/RequireAuth';
