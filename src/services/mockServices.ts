@@ -1,0 +1,6 @@
+import {anime,providers,defaultBlocks,defaultSettings} from '../data/mock'; import {store} from './storage'; import type {Provider,Settings,BuilderBlock,Anime} from '../types';
+const delay=(ms=250)=>new Promise(r=>setTimeout(r,ms));
+export const animeService={async getAll(){await delay();return store.get<Anime[]>('anifuze_anime',anime)},async save(item:Anime){const all=store.get<Anime[]>('anifuze_anime',anime);store.set('anifuze_anime',all.some(a=>a.id===item.id)?all.map(a=>a.id===item.id?item:a):[item,...all])}};
+export const providerService={async getAll(){await delay();return store.get<Provider[]>('anifuze_providers',providers)},async save(p:Provider){const all=store.get<Provider[]>('anifuze_providers',providers);store.set('anifuze_providers',all.some(x=>x.id===p.id)?all.map(x=>x.id===p.id?p:x):[...all,p])},async test(p:Provider){await delay(650); return {status:p.enabled?'Connected':'Invalid Configuration',latency:p.enabled?`${p.latency||110} ms`:'—',authentication:p.type==='API'?'Mock API key accepted':'Not required'}}};
+export const settingsService={get:()=>store.get<Settings>('anifuze_settings',defaultSettings),save:(v:Settings)=>store.set('anifuze_settings',v)};
+export const builderService={get:()=>store.get<BuilderBlock[]>('anifuze_builder',defaultBlocks),save:(v:BuilderBlock[])=>store.set('anifuze_builder',v)};
