@@ -1,18 +1,24 @@
-# AniFuze — Build. Customize. Stream.
+# AniFuze
 
-AniFuze is a frontend-only prototype for operating an anime website as a product, not merely browsing one. It separates the customer-facing anime site, a customer management workspace, and a platform-owner console.
+**Build. Customize. Stream.** AniFuze is a frontend-only prototype for operating customer-owned anime websites. It separates a public streaming experience, a customer management workspace, and AniFuze platform administration.
 
-## Highlights
+## Included flows
 
-- Public anime experience with discovery, details, safe mock playback, and user-facing routes.
-- Role-separated customer and platform-admin routes using conceptual frontend guards.
-- Customer dashboard, anime/editor workflows, provider setup/testing, provider console, health/fallback views, marketplace, mock template installation, site builder, and appearance settings.
-- Public integration: appearance and builder configuration persist to `localStorage` and update the public experience.
-- Local-only mock services keep UI separate from sample data and are intentionally shaped for future API replacement.
+- LocalStorage-backed mock role guards for `public_user`, `customer`, and `platform_admin`.
+- Public catalog, anime detail, mock watch experience, discovery pages, and configurable navigation/appearance.
+- Customer dashboard, anime CRUD, episode visibility controls, provider management/testing/health/source management, and a mock API console.
+- Template marketplace with a simulated checkout/install/activate sequence.
+- Visual site builder with component insertion, editing, visibility, duplication, remove, save, undo/redo, and keyboard shortcuts.
+- Website, SEO, domain, community, notification, analytics, and settings control surfaces.
+- Separate platform-owner metrics and ecosystem-management tables.
 
-## Stack
+## Architecture
 
-React, TypeScript, Vite, React Router, CSS design system, and browser localStorage. There is no backend, payment provider, authentication server, provider API request, iframe, DNS verification, or real credential in this prototype.
+- `src/app`: route configuration and private-route guards.
+- `src/layouts`: deliberately distinct public, customer, and platform shells.
+- `src/pages`: page-level public, manage, and platform product surfaces.
+- `src/components/ui`: shared buttons, cards, badges, states, confirmation controls, and statistics.
+- `src/services`: mock/localStorage services designed to be replaced by backend clients later.
 
 ## Development
 
@@ -22,14 +28,4 @@ npm run dev
 npm run build
 ```
 
-## Key routes
-
-- Public: `/`, `/browse`, `/search`, `/anime/:id`, `/watch/:id`, plus library and profile routes.
-- Customer: `/manage/dashboard`, `/manage/anime`, `/manage/providers`, `/manage/providers/console`, `/manage/templates/marketplace`, `/manage/site-builder`, `/manage/appearance` and related management routes.
-- Platform: `/platform`, `/platform/customers`, `/platform/templates`, `/platform/orders`, and moderation/settings routes.
-
-The login page lets evaluators select a mock customer or platform-admin role. Public users are redirected from private paths.
-
-## Mock architecture
-
-`src/data/mock.ts` holds seed data. `src/services/mockServices.ts` exposes the data operations used by UI, and `src/services/storage.ts` centralizes defensive localStorage access. This boundary is the replacement point for a future authenticated API client.
+No API calls, credentials, payments, DNS requests, analytics collection, or embedded iframes are used. Provider responses, payment steps, connection tests, and domain states are intentionally simulated.
