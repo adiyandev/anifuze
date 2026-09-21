@@ -12,8 +12,8 @@ import {
   TrendingUp,
   Server
 } from 'lucide-react';
-import { Card, Badge, Button } from '../components/ui/UIComponents';
-import { analyticsService, providerService, animeService } from '../services/apiServices';
+import { Card, Badge, Button } from '../../components/ui/UIComponents';
+import { analyticsService, providerService, animeService } from '../../services/apiServices';
 
 export default function CustomerDashboard() {
   const [analytics, setAnalytics] = useState(null);
