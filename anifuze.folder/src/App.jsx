@@ -7,17 +7,19 @@ import { fetchSiteSettings } from './api/db';
 import { applyTheme, applyAccentColor } from './utils/appearance';
 import { storage } from './utils/storage';
 import { applyTvModeClass } from './utils/tvMode';
-import { assetPath } from './utils/assetPath';
 import { FocusableNavLink, FocusableLink, FocusableButton } from './components/FocusableWrapper';
 import RequireAuth from './components/RequireAuth';
+import { RequireCustomer, RequirePlatformAdmin } from './components/RoleGuards';
 import Footer from './components/Footer';
-import { useReminderNotifications } from './hooks/useReminderNotifications';
 
 // Customer Admin Layout & Pages
 import CustomerAdminLayout from './layouts/CustomerAdminLayout';
 import CustomerDashboard from './pages/manage/CustomerDashboard';
 import ProvidersPage from './pages/manage/ProvidersPage';
 import ProviderConsolePage from './pages/manage/ProviderConsolePage';
+import EmbedTesterPage from './pages/manage/EmbedTesterPage';
+import SourceManagerPage from './pages/manage/SourceManagerPage';
+import ProviderHealthPage from './pages/manage/ProviderHealthPage';
 import TemplateMarketplacePage from './pages/manage/TemplateMarketplacePage';
 import SiteBuilderPage from './pages/manage/SiteBuilderPage';
 import AnimeManagementPage from './pages/manage/AnimeManagementPage';
@@ -44,7 +46,6 @@ const Community = lazy(() => import('./pages/Community'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const SetNewPassword = lazy(() => import('./pages/SetNewPassword'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
-const UpdateCenter = lazy(() => import('./components/UpdateCenter'));
 const SearchModal = lazy(() => import('./components/SearchModal'));
 const SubAccountGate = lazy(() => import('./components/SubAccountGate'));
 
@@ -60,7 +61,6 @@ const primaryNav = [
 ];
 
 function App() {
-  useReminderNotifications();
   const { user, authLoading, setShowAuthModal, setAuthTab, activeSubAccount, subAccounts } = useUser();
   const activeSubAccountIndex = activeSubAccount ? subAccounts.findIndex(profile => profile.id === activeSubAccount.id) : -1;
   const activeSubAccountRouteId = activeSubAccount ? (activeSubAccountIndex >= 0 ? String(activeSubAccountIndex + 1) : encodeURIComponent(activeSubAccount.id)) : null;
@@ -119,43 +119,49 @@ function App() {
 
   const openLogin = () => { setAuthTab('login'); setShowAuthModal(true); setIsMobileMenuOpen(false); };
 
-  // Separate Layout Guard: Admin & Platform layout routes should render independently from public shell
   const isCustomerAdmin = location.pathname.startsWith('/manage');
   const isPlatformAdmin = location.pathname.startsWith('/platform');
 
   if (isPlatformAdmin) {
-    return <PlatformAdminLayout />;
+    return (
+      <RequirePlatformAdmin>
+        <PlatformAdminLayout />
+      </RequirePlatformAdmin>
+    );
   }
 
   return <Suspense fallback={<RouteFallback />}><SubAccountGate>
     {isCustomerAdmin ? (
-      <Routes>
-        <Route path="/manage" element={<CustomerAdminLayout />}>
-          <Route path="dashboard" element={<CustomerDashboard />} />
-          <Route path="anime" element={<AnimeManagementPage />} />
-          <Route path="episodes" element={<AnimeManagementPage />} />
-          <Route path="schedule" element={<AnimeManagementPage />} />
-          <Route path="providers" element={<ProvidersPage />} />
-          <Route path="providers/console" element={<ProviderConsolePage />} />
-          <Route path="providers/health" element={<ProvidersPage />} />
-          <Route path="providers/sources" element={<ProvidersPage />} />
-          <Route path="templates/marketplace" element={<TemplateMarketplacePage />} />
-          <Route path="purchases" element={<TemplateMarketplacePage />} />
-          <Route path="site-builder" element={<SiteBuilderPage />} />
-          <Route path="appearance" element={<SiteBuilderPage />} />
-          <Route path="navigation" element={<SiteBuilderPage />} />
-          <Route path="pages" element={<SiteBuilderPage />} />
-          <Route path="users" element={<GeneralSettingsPage />} />
-          <Route path="comments" element={<GeneralSettingsPage />} />
-          <Route path="reports" element={<GeneralSettingsPage />} />
-          <Route path="seo" element={<GeneralSettingsPage />} />
-          <Route path="domains" element={<GeneralSettingsPage />} />
-          <Route path="analytics" element={<CustomerDashboard />} />
-          <Route path="notifications" element={<GeneralSettingsPage />} />
-          <Route path="settings" element={<GeneralSettingsPage />} />
-          <Route path="*" element={<CustomerDashboard />} />
-        </Route>
-      </Routes>
+      <RequireCustomer>
+        <Routes>
+          <Route path="/manage" element={<CustomerAdminLayout />}>
+            <Route path="dashboard" element={<CustomerDashboard />} />
+            <Route path="anime" element={<AnimeManagementPage />} />
+            <Route path="episodes" element={<AnimeManagementPage />} />
+            <Route path="schedule" element={<AnimeManagementPage />} />
+            <Route path="providers" element={<ProvidersPage />} />
+            <Route path="providers/console" element={<ProviderConsolePage />} />
+            <Route path="providers/embed-tester" element={<EmbedTesterPage />} />
+            <Route path="providers/health" element={<ProviderHealthPage />} />
+            <Route path="providers/sources" element={<SourceManagerPage />} />
+            <Route path="templates/marketplace" element={<TemplateMarketplacePage />} />
+            <Route path="purchases" element={<TemplateMarketplacePage />} />
+            <Route path="site-builder" element={<SiteBuilderPage />} />
+            <Route path="appearance" element={<SiteBuilderPage />} />
+            <Route path="navigation" element={<SiteBuilderPage />} />
+            <Route path="pages" element={<SiteBuilderPage />} />
+            <Route path="users" element={<GeneralSettingsPage />} />
+            <Route path="comments" element={<GeneralSettingsPage />} />
+            <Route path="reports" element={<GeneralSettingsPage />} />
+            <Route path="seo" element={<GeneralSettingsPage />} />
+            <Route path="domains" element={<GeneralSettingsPage />} />
+            <Route path="analytics" element={<CustomerDashboard />} />
+            <Route path="notifications" element={<GeneralSettingsPage />} />
+            <Route path="settings" element={<GeneralSettingsPage />} />
+            <Route path="*" element={<CustomerDashboard />} />
+          </Route>
+        </Routes>
+      </RequireCustomer>
     ) : (
       <div className={`app-shell ${isTvMode ? 'tv-app-shell' : ''}`}>
         {announcement && <div className="site-announcement"><span>{announcement}</span></div>}
@@ -191,7 +197,7 @@ function App() {
           <Route path="/" element={<MixedHome />} /><Route path="/search" element={<Search />} /><Route path="/anime" element={<AnimeUnavailable />} /><Route path="/anime/:id" element={<AnimeUnavailable />} /><Route path="/schedule" element={<Schedule />} /><Route path="/collections" element={<RequireAuth><Collections /></RequireAuth>} /><Route path="/community" element={<Community />} /><Route path="/stats" element={<RequireAuth><Stats /></RequireAuth>} /><Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} /><Route path="/about" element={<About />} /><Route path="/contact" element={<StaticPages page="contact" />} /><Route path="/faq" element={<StaticPages page="faq" />} /><Route path="/terms" element={<StaticPages page="terms" />} /><Route path="/privacy" element={<StaticPages page="privacy" />} /><Route path="/dmca" element={<StaticPages page="dmca" />} /><Route path="/request" element={<StaticPages page="request" />} /><Route path="/profile/:userid/*" element={<Profile />} /><Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} /><Route path="/forgot-password" element={<ForgotPassword />} /><Route path="/set-new-password" element={<SetNewPassword />} /><Route path="*" element={<NotFound />} />
         </Routes></main><Footer />
         <nav className="bottom-nav" aria-label="Mobile quick navigation"><NavLink to="/" end className={({ isActive }) => isActive ? 'bottom-nav-link active' : 'bottom-nav-link'}><HomeIcon size={20} /><span>Home</span></NavLink><NavLink to="/search" className={({ isActive }) => isActive ? 'bottom-nav-link active' : 'bottom-nav-link'}><SearchIcon size={20} /><span>Search</span></NavLink></nav>
-        <AuthModal /><UpdateCenter />{isSearchOpen && <SearchModal onClose={() => setIsSearchOpen(false)} />}
+        <AuthModal />{isSearchOpen && <SearchModal onClose={() => setIsSearchOpen(false)} />}
       </div>
     )}
   </SubAccountGate></Suspense>;
