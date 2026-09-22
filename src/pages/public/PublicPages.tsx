@@ -36,8 +36,9 @@ export function WatchPage(){
 }
 
 export function AuthPage(){
- const{setRole}=useApp();
- return <section className="auth"><span className="eyebrow">ANIFUZE DEMO ACCESS</span><h1>Enter your workspace.</h1><p>Choose a mock role. Customer and platform administration are private experiences.</p><button className="button" onClick={()=>setRole('customer')}>Sign in as customer</button><button className="button ghost" onClick={()=>setRole('platform_admin')}>Sign in as platform admin</button><Link to="/">Continue as public visitor</Link></section>;
+ const{setRole}=useApp(); const nav=useNavigate();
+ const enter=(role:'customer'|'platform_admin',to:string)=>{setRole(role);nav(to)};
+ return <section className="auth"><span className="eyebrow">ANIFUZE DEMO ACCESS</span><h1>Enter your workspace.</h1><p>Choose a mock role. Customer and platform administration are private experiences.</p><button className="button" onClick={()=>enter('customer','/manage/dashboard')}>Sign in as customer</button><button className="button ghost" onClick={()=>enter('platform_admin','/platform')}>Sign in as platform admin</button><Link to="/">Continue as public visitor</Link></section>;
 }
 
 export function CustomPage(){const{settings}=useApp();return <section className="page"><span className="eyebrow">CUSTOM PAGE</span><h1>Created with AniFuze.</h1><p>Customer-managed pages inherit the active {settings.siteName} visual system.</p></section>}
