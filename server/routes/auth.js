@@ -2,6 +2,7 @@ import {Router} from 'express';
 import crypto from 'node:crypto';
 import {promisify} from 'node:util';
 import {query} from '../db/index.js';
+import {ROLE_PERMISSIONS} from '../auth/permissions.js';
 const scrypt=promisify(crypto.scrypt);
 export const authRouter=Router();
 const COOKIE='anifuze_admin_session';
@@ -42,6 +43,7 @@ authRouter.post('/admin/2fa/recovery/verify',async(req,res)=>{const user=await s
 authRouter.post('/admin/2fa/recovery',async(req,res)=>{const user=await sessionUser(req);if(!user)return res.status(401).json({ok:false,error:'Authentication required.'});await query('DELETE FROM af_admin_recovery_codes WHERE admin_user_id=$1 AND used_at IS NULL',[user.admin_user_id]);const codes=makeRecoveryCodes();for(const code of codes)await query('INSERT INTO af_admin_recovery_codes (id,admin_user_id,code_hash,created_at) VALUES ($1,$2,$3,CURRENT_TIMESTAMP)',[crypto.randomUUID(),user.admin_user_id,await hashRecovery(code)]);res.json({ok:true,codes});});
 authRouter.post('/admin/verify-2fa',async(req,res)=>{const user=await sessionUser(req);if(!user)return res.status(401).json({ok:false,error:'Authentication required.'});if(!verificationLimiter(user.sessionId))return res.status(429).json({ok:false,error:'Too many verification attempts. Try again later.'});const code=String(req.body?.code||'').replace(/\D/g,'');if(!/^\d{6}$/.test(code))return res.status(400).json({ok:false,error:'Enter a valid 6-digit code.'});const t=await query('SELECT totp_secret FROM af_admin_2fa WHERE admin_user_id=$1 AND enabled=TRUE',[user.admin_user_id]);if(!t.rows[0]?.totp_secret||!(await verifyTotp(t.rows[0].totp_secret,code)))return res.status(401).json({ok:false,error:'Invalid verification code.'});await query('DELETE FROM af_admin_sessions WHERE id=$1',[user.sessionId]);const fresh=await makeSession(user,req,true);setCookie(res,fresh.id,Math.floor(SESSION_MS/1000));res.json({ok:true,role:user.role});});
 authRouter.get('/admin/me',async(req,res)=>{const u=await sessionUser(req);if(!u)return res.status(401).json({ok:false,error:'Not authenticated.'});res.json({ok:true,user:{id:u.admin_user_id,email:u.email,role:u.role,twoFactorVerified:Boolean(u.two_factor_verified),mustSetup2fa:Boolean(u.must_setup_2fa)}});});
+authRouter.get('/admin/permissions',async(req,res)=>{const u=await sessionUser(req);if(!u)return res.status(401).json({ok:false,error:'Not authenticated.'});if(u.must_setup_2fa||!u.two_factor_verified)return res.status(403).json({ok:false,error:'Admin 2FA verification required.'});res.json({ok:true,role:u.role,permissions:ROLE_PERMISSIONS[u.role]||[]});});
 authRouter.post('/admin/logout',async(req,res)=>{const c=parseCookies(req);if(c[COOKIE])await query('DELETE FROM af_admin_sessions WHERE id=$1',[c[COOKIE]]);clearCookie(res);res.json({ok:true});});
 export {hashPassword,verifyPassword};
 export async function requireAdmin(req,res,next){const u=await sessionUser(req);if(!u)return res.status(401).json({ok:false,error:'Authentication required.'});if(u.must_setup_2fa||!u.two_factor_verified)return res.status(403).json({ok:false,error:'Admin 2FA verification required.'});req.admin=u;next();}
