@@ -273,3 +273,129 @@ button,a{transition-duration:.2s}
   0%,100%{opacity:.45;transform:scale(.95)}
   50%{opacity:.9;transform:scale(1.05)}
 }
+
+
+/* Unified admin visual language — every manage page uses the same surface system */
+.av-admin,
+.av-admin *{--ui-bg:#0a0a0a;--ui-surface:#111;--ui-surface-2:#151515;--ui-border:#242424;--ui-text:#f3f3f3;--ui-muted:#888;--ui-brand:#22d3ee}
+.av-admin-main{background:#0a0a0a}
+.av-admin-main>.page-heading,
+.av-admin-main>section.form-page>.page-heading,
+.av-admin-main>.stats,
+.av-admin-main>.admin-grid,
+.av-admin-main>.console,
+.av-admin-main>.template-grid,
+.av-admin-main>.builderbar,
+.av-admin-main>.table-wrap,
+.av-admin-main>.filters{animation:anifuze-fade-up .42s var(--ease-out) both}
+.av-admin-main .page-heading{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.av-admin-main .page-heading p{color:#777;font-size:12px;line-height:1.5}
+.av-admin-main .page-heading .button,
+.av-admin-main .page-heading button{flex:none}
+.av-admin-main .stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.av-admin-main .stat{background:linear-gradient(145deg,#131313,#101010);border:1px solid #242424;border-radius:16px;padding:17px;box-shadow:0 10px 30px rgba(0,0,0,.16)}
+.av-admin-main .stat:hover{border-color:#333;transform:translateY(-3px)}
+.av-admin-main .stat strong{font-size:25px}
+.av-admin-main .panel{
+  background:linear-gradient(145deg,#121212,#101010);
+  border:1px solid #242424;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 38px rgba(0,0,0,.18);
+}
+.av-admin-main .panel header{margin-bottom:16px}
+.av-admin-main .panel header h3,.av-admin-main .panel header h2{font-size:14px;color:#eee}
+.av-admin-main .panel header button,
+.av-admin-main .button,
+.av-admin-main button.button{
+  border-radius:12px;
+  border:1px solid #2d2d2d;
+  background:#181818;
+  color:#ddd;
+  box-shadow:none;
+}
+.av-admin-main .button:not(.ghost),
+.av-admin-main button.button:not(.ghost){
+  background:#22d3ee;
+  border-color:#22d3ee;
+  color:#061016;
+}
+.av-admin-main .button:hover,
+.av-admin-main button.button:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(34,211,238,.12)}
+.av-admin-main .button.ghost{background:#151515;color:#bbb;border-color:#292929}
+.av-admin-main input,
+.av-admin-main textarea,
+.av-admin-main select,
+.av-admin-main .search{
+  background:#0d0d0d;
+  border:1px solid #292929;
+  color:#eee;
+  border-radius:12px;
+  min-height:40px;
+}
+.av-admin-main textarea{border-radius:13px}
+.av-admin-main input:hover,.av-admin-main textarea:hover,.av-admin-main select:hover{border-color:#3a3a3a}
+.av-admin-main input:focus,.av-admin-main textarea:focus,.av-admin-main select:focus{
+  border-color:rgba(34,211,238,.55);
+  box-shadow:0 0 0 3px rgba(34,211,238,.08);
+  outline:none;
+}
+.av-admin-main .search{margin:0 0 14px;padding:11px 13px}
+.av-admin-main .filters{gap:6px;margin:0 0 18px}
+.av-admin-main .filters button{border-radius:999px;background:#111;border-color:#292929;padding:8px 13px;color:#888}
+.av-admin-main .filters button:hover{color:#eee;border-color:#3a3a3a;transform:translateY(-1px)}
+.av-admin-main .filters .selected{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.3);color:#67e8f9}
+.av-admin-main table{border-collapse:separate;border-spacing:0;overflow:hidden}
+.av-admin-main th{background:#0d0d0d;color:#666;border-bottom:1px solid #242424;padding:12px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.av-admin-main td{background:#111;border-bottom:1px solid #1f1f1f;padding:13px 10px;color:#c7c7c7}
+.av-admin-main tbody tr{transition:transform .18s var(--ease-out),background .18s}
+.av-admin-main tbody tr:hover td{background:#151515}
+.av-admin-main .badge,.av-admin-main .notice{
+  border-radius:999px;
+}
+.av-admin-main .form-page{max-width:1100px}
+.av-admin-main .form-grid{gap:12px}
+.av-admin-main .form-grid label,
+.av-admin-main .console label,
+.av-admin-main .properties label{color:#999;font-size:11px;font-weight:600}
+.av-admin-main .form-grid label input,
+.av-admin-main .form-grid label select,
+.av-admin-main .form-grid label textarea{margin-top:7px}
+.av-admin-main .chain-item{background:#0d0d0d;border:1px solid #292929;border-radius:16px;transition:.22s var(--ease-out)}
+.av-admin-main .chain-item:hover{transform:translateY(-3px);border-color:#3a3a3a;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.av-admin-main .console{gap:14px}
+.av-admin-main .response pre{background:#080808;border:1px solid #202020;border-radius:14px}
+.av-admin-main .template-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.av-admin-main .template{background:#111;border:1px solid #252525;border-radius:18px;padding:11px}
+.av-admin-main .template>div{border-radius:13px!important}
+.av-admin-main .template:hover{transform:translateY(-4px);border-color:#383838}
+.av-admin-main .template-detail{border-radius:20px!important;border:1px solid #292929!important;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.av-admin-main .notice{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.2);color:#a5f3fc}
+.av-admin-main .link-button{border-radius:8px;padding:4px 6px;transition:.18s}
+.av-admin-main .link-button:hover{background:#191919;color:#67e8f9}
+.av-admin-main .danger{border-radius:12px;background:rgba(239,68,68,.04)}
+.av-admin-main .builderbar button{border-radius:10px;background:#111;border-color:#292929}
+.av-admin-main .builder{background:#0b0b0b;border-color:#292929;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.av-admin-main .library,.av-admin-main .properties{background:#101010}
+.av-admin-main .library button{border-radius:9px}
+.av-admin-main .canvas{background:#080808}
+.av-admin-main .canvas-head{background:#f2f2f2;border-radius:12px}
+.av-admin-main .empty{border-radius:14px}
+
+/* Make the old platform pages visually belong to the same family */
+.admin.platform{background:#0a0a0a;color:#f5f5f5}
+.admin.platform .admin-head{background:#0d0d0d;border-color:#222;border-radius:0 0 16px 16px}
+.admin.platform .content{max-width:1500px}
+.admin.platform .panel,.admin.platform .stat{border-radius:18px;background:#111;border-color:#242424}
+.admin.platform .admin-main input,.admin.platform .admin-main textarea,.admin.platform .admin-main select{border-radius:12px;background:#0d0d0d}
+.admin.platform aside a:not(.brand){transition:.2s var(--ease-out)}
+.admin.platform aside a:not(.brand):hover{transform:translateX(3px)}
+
+@media(max-width:900px){
+  .av-admin-main .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .av-admin-main .template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .av-admin-main .stats,.av-admin-main .template-grid{grid-template-columns:1fr}
+  .av-admin-main .page-heading{align-items:flex-start;flex-direction:column}
+}
