@@ -42,3 +42,18 @@ WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='login');
 INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
 SELECT 'register','register','Register',TRUE,110,'orbit',CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='register');
+INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
+SELECT 'favorites','favorites','Favorites',TRUE,120,'orbit',CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='favorites');
+INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
+SELECT 'watchlist','watchlist','Watchlist',TRUE,130,'orbit',CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='watchlist');
+INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
+SELECT 'history','history','Watch History',TRUE,140,'orbit',CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='history');
+INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
+SELECT 'continue-watching','continue-watching','Continue Watching',TRUE,150,'orbit',CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='continue-watching');
+INSERT INTO af_default_pages(id,slug,name,enabled,sort_order,template_id,updated_at)
+SELECT 'profile','profile','Profile',TRUE,160,'orbit',CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM af_default_pages WHERE id='profile');
