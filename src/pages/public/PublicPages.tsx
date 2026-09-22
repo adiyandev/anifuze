@@ -13,7 +13,7 @@ export function HomePage(){
   fetch('/api/template').then(r=>r.ok?r.json():Promise.reject(new Error('Template unavailable'))).then(x=>{if(alive)setTemplate(x.template)}).catch(()=>{});
   fetch('/api/site-builder/public').then(r=>r.ok?r.json():Promise.reject(new Error('Builder unavailable'))).then(payload=>{if(alive)setHomepageBlocks(payload.blocks||[])}).catch(()=>{});
   fetch('/api/homepage').then(r=>r.ok?r.json():Promise.reject(new Error('Homepage unavailable'))).then(payload=>{
-   if(!alive)return; const sections=payload?.data?.sections||[]; setHomepageBlocks(sections);
+   if(!alive)return; const sections=payload?.data?.sections||[]; setHomepageBlocks(prev=>prev.length?prev:sections);
    setFresh({trending:sections.find((s:any)=>s.id==='trending')?.items||[],latest:sections.find((s:any)=>s.id==='latest')?.items||[],popular:sections.find((s:any)=>s.id==='popular')?.items||[]});
   }).catch(()=>{fetchRealHomepageAnime().then(data=>{if(alive)setFresh({...data,popular:data.trending})}).catch(()=>{})});
   return()=>{alive=false};
