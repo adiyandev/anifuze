@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS af_anilist_sync (id INTEGER PRIMARY KEY,last_success_at TIMESTAMP NULL,last_attempt_at TIMESTAMP NULL,status VARCHAR(32) NOT NULL DEFAULT 'never',error_message TEXT NULL,updated_at TIMESTAMP NOT NULL);
+INSERT INTO af_anilist_sync (id,status,updated_at) SELECT 1,'never',CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM af_anilist_sync WHERE id=1);
