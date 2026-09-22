@@ -510,3 +510,48 @@ button,a{transition-duration:.2s}
   border:1px solid #3a4a62;
   color:#dce7f5;
 }
+
+
+/* Admin data surfaces — distinct slate/navy cards and table wrappers */
+.av-admin-main .admin-table,
+.av-admin-main .table-wrap,
+.av-admin-main .data-table,
+.av-admin-main .list-table,
+.av-admin-main .table-card,
+.av-admin-main .data-card,
+.av-admin-main .panel,
+.av-admin-main .card{
+  background:#111827;
+  border:1px solid #26344a;
+  box-shadow:0 8px 24px rgba(0,0,0,.16);
+}
+.av-admin-main table{
+  background:#111827;
+}
+.av-admin-main thead,
+.av-admin-main thead tr,
+.av-admin-main .table-head{
+  background:#182235;
+}
+.av-admin-main thead th{
+  background:#182235;
+  color:#aebbd0;
+  border-bottom:1px solid #304058;
+}
+.av-admin-main tbody,
+.av-admin-main tbody tr{
+  background:#111827;
+}
+.av-admin-main tbody tr:nth-child(even){
+  background:#141e30;
+}
+.av-admin-main tbody tr:hover{
+  background:#1a263b;
+}
+.av-admin-main tbody tr:last-child td{
+  border-bottom-color:transparent;
+}
+.av-admin-main tbody td{
+  color:#dce5f2;
+  border-bottom:1px solid #26344a;
+}
