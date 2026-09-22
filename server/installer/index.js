@@ -25,7 +25,9 @@ export async function executeInstallation({database,admin,domain,licenseKey}={})
   const salt=crypto.randomBytes(16).toString('hex');
   const passwordHash=await new Promise((resolve,reject)=>crypto.scrypt(admin.password,salt,64,(e,k)=>e?reject(e):resolve(salt+':'+k.toString('hex'))));
   const now=new Date().toISOString().slice(0,19).replace('T',' ');
-  await query('INSERT INTO af_admin_users (id,email,password_hash,role,enabled,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$6)',[crypto.randomUUID(),admin.email.toLowerCase(),passwordHash,'owner',true,now]);
+  const ownerId=crypto.randomUUID();
+  await query('INSERT INTO af_admin_users (id,email,password_hash,role,enabled,must_setup_2fa,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$7)',[ownerId,admin.email.toLowerCase(),hash,'owner',true,true,now]);
+  await query('INSERT INTO af_admin_2fa (admin_user_id,email_enabled,recovery_enabled,enabled,updated_at) VALUES ($1,$2,$3,$4,$5)',[ownerId,true,true,false,now]);
   await fs.writeFile(LOCK_FILE,new Date().toISOString()+'\\n',{flag:'wx',mode:0o600});
   return {ok:true,locked:true,owner:{email:admin.email.toLowerCase(),role:'owner'}};
  }catch(error){
