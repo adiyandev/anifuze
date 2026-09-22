@@ -41,7 +41,7 @@ export async function createReport(input={}){
  if(!['comment','anime','episode','user'].includes(targetType)||!targetId||targetId.length>128)throw new Error('Invalid report target.');
  if(!reason||reason.length>255||notes.length>5000)throw new Error('Invalid report content.');
  const id=crypto.randomUUID();
- await query('INSERT INTO af_reports (id,reporter_user_id,target_type,target_id,reason,notes,status,created_at) VALUES ($1,$2,$3,$4,$5,$6,\'pending\',CURRENT_TIMESTAMP)',[id,input.reporter_user_id||null,targetType,targetId,reason,notes||null]);
+ await query('INSERT INTO af_reports (id,reporter_user_id,target_type,target_id,reason,notes,status,created_at) VALUES ($1,$2,$3,$4,$5,$6,\'pending\',CURRENT_TIMESTAMP)',[id,input.null,targetType,targetId,reason,notes||null]);
  return {id};
 }
 export {COMMENT_STATUSES,REPORT_STATUSES};
