@@ -88,10 +88,9 @@ export async function deliverNotification(notificationId,userIds=[]){
  const n=(await query('SELECT * FROM af_notifications WHERE id=$1 AND enabled=true',[String(notificationId)])).rows[0];
  if(!n)throw new Error('Enabled notification not found.');
  const ids=[...new Set((userIds||[]).map(String).map(x=>x.trim()).filter(Boolean))];
- if(!ids.length)throw new Error('At least one recipient is required.');
  for(const userId of ids){
    const existing=await query('SELECT id FROM af_user_notifications WHERE notification_id=$1 AND user_id=$2 LIMIT 1',[n.id,userId]);
-   if(!existing.rows[0]) await query('INSERT INTO af_user_notifications(id,notification_id,user_id,created_at) VALUES($1,$2,$3,CURRENT_TIMESTAMP)',[id(),n.id,userId]);
+   if(!existing.rows[0])await query('INSERT INTO af_user_notifications(id,notification_id,user_id,created_at) VALUES($1,$2,$3,CURRENT_TIMESTAMP)',[id(),n.id,userId]);
  }
  await query('UPDATE af_notifications SET sent_at=CURRENT_TIMESTAMP WHERE id=$1',[n.id]);
  return {ok:true,delivered:ids.length};
@@ -102,8 +101,8 @@ export async function deliverByAudience(notificationId,audience='all'){
  if(!n)throw new Error('Enabled notification not found.');
  const target=String(audience||n.audience);
  let rows;
- if(target==='admins') rows=(await query('SELECT id FROM af_admin_users WHERE enabled=TRUE')).rows;
- else if(target==='users') rows=(await query("SELECT id FROM af_users WHERE status='active'")).rows;
+ if(target==='admins')rows=(await query('SELECT id FROM af_admin_users WHERE enabled=TRUE')).rows;
+ else if(target==='users')rows=(await query("SELECT id FROM af_users WHERE status='active'")).rows;
  else {
    const [users,admins]=await Promise.all([
      query("SELECT id FROM af_users WHERE status='active'"),
