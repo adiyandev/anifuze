@@ -3,7 +3,7 @@ import {BarChart3,Users,Film,Settings,Server,LogOut,Search,Eye,Menu} from 'lucid
 import {useApp} from '../contexts/AppContext';
 
 const tabs=[
- ['dashboard','Dashboard',BarChart3],['users','Users',Users],['anime','Content',Film],['settings','Settings',Settings],['system','System',Server]
+ {id:'dashboard',label:'Dashboard',Icon:BarChart3},{id:'users',label:'Users',Icon:Users},{id:'anime',label:'Content',Icon:Film},{id:'settings',label:'Settings',Icon:Settings},{id:'system',label:'System',Icon:Server}
 ];
 const groups=[
  ['CONTENT',[['Anime','/manage/anime'],['Episodes','/manage/episodes'],['Genres','/manage/genres'],['Collections','/manage/collections'],['Schedule','/manage/schedule']]],
@@ -19,7 +19,7 @@ export function CustomerAdminLayout(){
  return <div className="av-admin">
    <header className="av-admin-head">
     <Link className="av-admin-brand" to="/manage/dashboard"><span>✦</span><strong>AniFuze</strong><small>ADMIN PANEL</small></Link>
-    <nav className="av-admin-tabs">{tabs.map(([id,label,Icon])=><Link key={id} className={top===id?'active':''} to={id==='dashboard'?'/manage/dashboard':id==='users'?'/manage/users':id==='anime'?'/manage/anime':'/manage/settings'}><Icon size={16}/>{label}</Link>)}</nav>
+    <nav className="av-admin-tabs">{tabs.map(({id,label,Icon})=><Link key={id} className={top===id?'active':''} to={id==='dashboard'?'/manage/dashboard':id==='users'?'/manage/users':id==='anime'?'/manage/anime':'/manage/settings'}><Icon size={16}/>{label}</Link>)}</nav>
     <div className="av-admin-actions"><Link className="av-admin-search" to="/search"><Search size={15}/><span>Search</span><kbd>⌘ K</kbd></Link><Link className="av-admin-icon" to="/"><Eye size={16}/></Link><button className="av-admin-avatar" onClick={()=>setRole('public_user')}>A</button></div>
    </header>
    <div className="av-admin-body">
