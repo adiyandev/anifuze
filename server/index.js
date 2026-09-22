@@ -13,11 +13,14 @@ import {publicCatalogRouter} from './routes/publicCatalog.js';
 import {homepageRouter} from './routes/homepage.js';
 import {templateRouter} from './routes/templates.js';
 import {siteBuilderRouter} from './routes/siteBuilder.js';
+import {appearanceRouter} from './routes/appearance.js';
+import {appearanceUploadRouter} from './routes/appearanceUpload.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
 app.disable('x-powered-by');
-app.use(express.json({limit:'1mb'}));
+app.use(express.json({limit:'7mb'}));
+app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1h',index:false}));
 
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
 app.use('/api/installer',installerRouter);
@@ -31,6 +34,8 @@ app.use('/api',publicCatalogRouter);
 app.use('/api',homepageRouter);
 app.use('/api',templateRouter);
 app.use('/api',siteBuilderRouter);
+app.use('/api',appearanceRouter);
+app.use('/api',appearanceUploadRouter);
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
