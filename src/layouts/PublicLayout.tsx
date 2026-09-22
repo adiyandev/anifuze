@@ -6,6 +6,9 @@ import {useApp} from '../contexts/AppContext';
 type NavItem={id:string;label:string;path:string;icon?:string|null;visible:boolean;sort_order:number};
 
 const iconFor=(name?:string|null)=>({Compass,Bell,BarChart3,CalendarDays,Layers}[name||'Layers']||Layers);
+const isDemo=()=>typeof window!=='undefined'&&window.location.hostname.endsWith('github.io');
+
+function readIds(){try{const value=JSON.parse(localStorage.getItem('anifuze_notification_read')||'[]');return new Set(Array.isArray(value)?value.map(String):[]);}catch{return new Set<string>();}}
 
 function applyMeta(seo:any,path:string){
  const title=String(seo?.site_title||'AniFuze');
@@ -23,7 +26,18 @@ function applyMeta(seo:any,path:string){
 
 export function PublicLayout(){
  const{settings,role}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);const[unreadNotifications,setUnreadNotifications]=useState(0);
- useEffect(()=>{try{const raw=localStorage.getItem('anifuze_demo_notifications');if(raw){const items=JSON.parse(raw);if(Array.isArray(items))setUnreadNotifications(items.filter((x:any)=>!x.read).length)}}catch{}},[location.pathname]);
+ useEffect(()=>{
+  let active=true;
+  const refresh=async()=>{
+   try{
+    if(isDemo()){const raw=localStorage.getItem('anifuze_demo_notifications');const items=raw?JSON.parse(raw):[];if(active)setUnreadNotifications(Array.isArray(items)?items.filter((x:any)=>!x.read).length:0);return;}
+    const r=await fetch('/api/notifications');if(!r.ok)throw new Error();
+    const d=await r.json();const ids=readIds();const items=Array.isArray(d.notifications)?d.notifications:[];if(active)setUnreadNotifications(items.filter((x:any)=>!ids.has(String(x.id))).length);
+   }catch{if(active)setUnreadNotifications(0);}
+  };
+  refresh();
+  return()=>{active=false};
+ },[location.pathname]);
  useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));fetch('/api/footer').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setFooter(d.footer)}).catch(()=>{if(active)setFooter(null)});return()=>{active=false}},[]);
  useEffect(()=>{let active=true;fetch('/api/seo').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)applyMeta(d.seo,location.pathname)}).catch(()=>{if(active)document.title=settings.siteName||'AniFuze'});return()=>{active=false}},[location.pathname,settings.siteName]);
  const visibleNav=(nav.length?nav:[{id:'browse',label:'Browse',path:'/browse',icon:'Compass',visible:true,sort_order:10},{id:'latest',label:'Latest',path:'/latest',icon:'Bell',visible:true,sort_order:20},{id:'trending',label:'Trending',path:'/trending',icon:'BarChart3',visible:true,sort_order:30},{id:'schedule',label:'Schedule',path:'/schedule',icon:'CalendarDays',visible:true,sort_order:40}]).filter(x=>x.visible);
