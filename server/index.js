@@ -10,6 +10,7 @@ import {providersRouter} from './routes/providers.js';
 import {providerConsoleRouter} from './routes/providerConsole.js';
 import {providerHealthRouter} from './routes/providerHealth.js';
 import {publicCatalogRouter} from './routes/publicCatalog.js';
+import {homepageRouter} from './routes/homepage.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
@@ -25,6 +26,7 @@ app.use('/api',providersRouter);
 app.use('/api',providerConsoleRouter);
 app.use('/api',providerHealthRouter);
 app.use('/api',publicCatalogRouter);
+app.use('/api',homepageRouter);
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
