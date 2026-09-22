@@ -3,6 +3,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {builderService} from '../../services/mockServices';
 import {fetchRealHomepageAnime,fetchCatalog,fetchAnimeSchedule,fetchAnimeById} from '../../services/anilistService';
 import {useApp} from '../../contexts/AppContext';
+import {watchProgressService} from '../../services/watchProgressService';
 
 const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compact?'vault-card compact':'vault-card'} to={'/anime/'+a.id}><div className="vault-card-poster"><img src={a.cover} alt={a.title}/><span className="vault-card-badge">{a.status}</span><span className="vault-card-play">▶</span></div><div className="vault-card-info"><strong>{a.title}</strong><small>{a.type} · {a.episodes} Episodes</small></div></Link>;
 
@@ -80,10 +81,14 @@ export function AnimeDetailsPage(){
 
 export function WatchPage(){
  const{id}=useParams(); const[animeData,setAnimeData]=useState<any>(null); const[ep,setEp]=useState(1);
- useEffect(()=>{let alive=true;if(id)fetchAnimeById(id).then(x=>{if(alive)setAnimeData(x)}).catch(()=>{});return()=>{alive=false}},[id]);
- const save=()=>{if(!animeData)return;const s=JSON.parse(localStorage.getItem('anifuze_user_state')||'{}');localStorage.setItem('anifuze_user_state',JSON.stringify({...s,history:[animeData.id,...(s.history||[]).filter((x:string)=>x!==animeData.id)].slice(0,20)}))};
+ const[progress,setProgress]=useState(0); const[playing,setPlaying]=useState(false);
+ useEffect(()=>{let alive=true;if(id)fetchAnimeById(id).then(x=>{if(alive){setAnimeData(x);const saved=watchProgressService.get(id,1);if(saved)setProgress(saved.progressSeconds)}}).catch(()=>{});return()=>{alive=false}},[id]);
+ useEffect(()=>{if(!playing||!animeData)return;const timer=window.setInterval(()=>setProgress(x=>Math.min(x+1,1440)),1000);return()=>window.clearInterval(timer)},[playing,animeData]);
+ useEffect(()=>{if(!animeData||!id)return;watchProgressService.save({animeId:id,episode:ep,progressSeconds:progress,durationSeconds:1440})},[progress,ep,animeData,id]);
+ const changeEpisode=(next:number)=>{if(!animeData)return;watchProgressService.save({animeId:id!,episode:ep,progressSeconds:progress,durationSeconds:1440});setEp(next);const saved=watchProgressService.get(id!,next);setProgress(saved?.progressSeconds||0);setPlaying(false)};
  if(!animeData)return <section className="vault-page"><h1>Loading anime…</h1></section>;
- return <section className="vault-watch"><div className="vault-player"><span>SAFE MOCK PLAYBACK</span><button onClick={save}>▶</button><small>Mock source · 1080p · Sub</small></div><div className="vault-watch-head"><div><span className="vault-kicker">NOW PLAYING</span><h1>{animeData.title}</h1><p>Episode {ep} · {animeData.genre} · Mock stream</p></div><div className="vault-actions"><button className="vault-secondary" disabled={ep===1} onClick={()=>{setEp(ep-1);save()}}>← Previous</button><button className="vault-primary" disabled={ep>=(animeData.episodes||1)} onClick={()=>{setEp(ep+1);save()}}>Next Episode →</button></div></div><div className="source-row"><span><i/> Mock source · Available</span></div><div className="watch-episodes"><h2>Episodes</h2><div className="episode-grid">{Array.from({length:Math.min(animeData.episodes||0,12)},(_,i)=><button className={ep===i+1?'current':''} onClick={()=>setEp(i+1)} key={i}>{i+1}</button>)}</div></div></section>;
+ const percent=Math.min(100,(progress/1440)*100);
+ return <section className="vault-watch"><div className="vault-player"><span>SAFE MOCK PLAYBACK</span><button onClick={()=>setPlaying(!playing)}>{playing?'❚❚':'▶'}</button><small>Mock source · 1080p · Sub</small><div className="watch-progress"><i style={{width:percent+'%'}}/></div></div><div className="vault-watch-head"><div><span className="vault-kicker">NOW PLAYING</span><h1>{animeData.title}</h1><p>Episode {ep} · {animeData.genre} · {Math.floor(progress/60)}:{String(progress%60).padStart(2,'0')} watched</p></div><div className="vault-actions"><button className="vault-secondary" disabled={ep===1} onClick={()=>changeEpisode(ep-1)}>← Previous</button><button className="vault-primary" disabled={ep>=(animeData.episodes||1)} onClick={()=>changeEpisode(ep+1)}>Next Episode →</button></div></div><div className="source-row"><span><i/> Mock source · Available</span></div><div className="watch-episodes"><h2>Episodes</h2><div className="episode-grid">{Array.from({length:Math.min(animeData.episodes||0,12)},(_,i)=><button className={ep===i+1?'current':''} onClick={()=>changeEpisode(i+1)} key={i}>{i+1}</button>)}</div></div></section>;
 }
 
 export function AuthPage(){
