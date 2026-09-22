@@ -1,6 +1,5 @@
 import {Link,useParams,useLocation,useNavigate} from 'react-router-dom';
 import {useEffect,useMemo,useState} from 'react';
-import {providers} from '../../data/mock';
 import {builderService} from '../../services/mockServices';
 import {fetchRealHomepageAnime,fetchBrowseAnime,fetchLatestAnime,fetchAnimeSchedule,fetchAnimeById} from '../../services/anilistService';
 import {useApp} from '../../contexts/AppContext';
@@ -54,7 +53,7 @@ export function AnimeDetailsPage(){
 }
 
 export function WatchPage(){
- const{id}=useParams(); const a=useApp(); const[animeData,setAnimeData]=useState<any>(null); const[ep,setEp]=useState(1);
+ const{id}=useParams(); const[animeData,setAnimeData]=useState<any>(null); const[ep,setEp]=useState(1);
  useEffect(()=>{let alive=true;if(id)fetchAnimeById(id).then(x=>{if(alive)setAnimeData(x)}).catch(()=>{});return()=>{alive=false}},[id]);
  const save=()=>{if(!animeData)return;const s=JSON.parse(localStorage.getItem('anifuze_user_state')||'{}');localStorage.setItem('anifuze_user_state',JSON.stringify({...s,history:[animeData.id,...(s.history||[]).filter((x:string)=>x!==animeData.id)].slice(0,20)}))};
  if(!animeData)return <section className="vault-page"><h1>Loading anime…</h1></section>;
