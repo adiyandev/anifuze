@@ -5,7 +5,8 @@ import { useApp } from '../../contexts/AppContext';
 
 export function AdminLoginPage() {
   const nav = useNavigate();
-  const { refreshAuth } = useApp();
+  const { refreshAuth, toast } = useApp();
+  const isDemo = typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
   const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +19,15 @@ export function AdminLoginPage() {
     setError('');
 
     try {
+      if (step === 'credentials' && isDemo) {
+        if (!email.trim() || !password) throw new Error('Enter any email and password to continue.');
+        window.localStorage.setItem('anifuze_demo_admin', JSON.stringify({ email, role: 'owner' }));
+        await refreshAuth();
+        toast('Demo admin login successful.');
+        nav('/admin/dashboard');
+        return;
+      }
+
       if (step === 'credentials') {
         const response = await fetch('/api/auth/admin/login', {
           method: 'POST',
