@@ -31,7 +31,7 @@ const mapMedia=(m:AniListMedia):Anime=>({
  cover:m.coverImage?.extraLarge||m.coverImage?.large||'',
  banner:m.bannerImage||m.coverImage?.extraLarge||m.coverImage?.large||'',
  score:m.averageScore?m.averageScore/10:undefined,
- year:m.seasonYear
+ year:m.seasonYear||undefined
 });
 
 async function fetchAnime(sort:'TRENDING_DESC'|'POPULARITY_DESC',status?:'RELEASING'|'FINISHED'){
