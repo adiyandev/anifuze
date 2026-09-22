@@ -7,6 +7,14 @@ router.get('/admin/anilist/search',requirePermission('anime_view'),async(req,res
 router.get('/admin/anilist/anime/:id',requirePermission('anime_view'),async(req,res)=>{try{res.json({ok:true,...await getAniListAnime(req.params.id)});}catch(error){res.status(502).json({ok:false,error:error.message});}});
 router.get('/admin/anilist/catalog',requirePermission('anime_view'),async(req,res)=>{try{res.json({ok:true,items:await getCachedCatalog({limit:req.query.limit,search:req.query.q})});}catch(error){res.status(500).json({ok:false,error:error.message});}});
 router.post('/admin/anilist/sync',requirePermission('anime_manage'),async(_req,res)=>{try{res.json({ok:true,...await syncAniList()});}catch(error){res.status(502).json({ok:false,error:error.message});}});
+router.post('/admin/anilist/anime/:id/refresh',requirePermission('anime_manage'),async(req,res)=>{
+  try{
+    const row=await query('SELECT provider_external_id FROM af_anime WHERE id=$1',[String(req.params.id)]);
+    if(!row.rows[0])return res.status(404).json({ok:false,error:'Anime not found.'});
+    const result=await getAniListAnime(row.rows[0].provider_external_id);
+    res.json({ok:true,...result});
+  }catch(error){res.status(502).json({ok:false,error:error.message});}
+});
 router.patch('/admin/anilist/anime/:id',requirePermission('anime_manage'),async(req,res)=>{
   const id=String(req.params.id||'');
   const existing=await query('SELECT id FROM af_anime WHERE id=$1',[id]);
