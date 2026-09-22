@@ -22,7 +22,7 @@ const DEMO_PERMISSIONS = [
   'navigation_manage','pages_manage','seo_manage','users_view','users_manage',
   'comments_moderate','reports_moderate','analytics_view','notifications_manage',
   'settings_manage','security_manage','audit_view','system_view','backups_manage',
-  'maintenance_manage','updates_manage','license_manage','installation_manage',
+  'maintenance_manage','updates_manage','license_manage','installation_manage','email_manage',
 ];
 
 const Context = createContext<AppState>(null!);
