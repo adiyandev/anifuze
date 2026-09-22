@@ -32,25 +32,4 @@ router.delete('/admin/notifications/:id',requireAdmin,requirePermission('notific
  catch(e){res.status(400).json({ok:false,error:e.message});}
 });
 
-router.get('/user/notifications',async(req,res)=>{
- const userId=String(req.headers['x-anifuze-user-id']||'').trim();
- if(!userId)return res.status(401).json({ok:false,error:'Authenticated user required.'});
- try{res.json({ok:true,notifications:await listUserNotifications(userId,{limit:req.query.limit,unreadOnly:String(req.query.unread||'')==='true'})});}
- catch(e){res.status(400).json({ok:false,error:e.message});}
-});
-
-router.patch('/user/notifications/:id/read',async(req,res)=>{
- const userId=String(req.headers['x-anifuze-user-id']||'').trim();
- if(!userId)return res.status(401).json({ok:false,error:'Authenticated user required.'});
- try{res.json(await markNotificationRead(userId,req.params.id));}
- catch(e){res.status(400).json({ok:false,error:e.message});}
-});
-
-router.post('/user/notifications/read-all',async(req,res)=>{
- const userId=String(req.headers['x-anifuze-user-id']||'').trim();
- if(!userId)return res.status(401).json({ok:false,error:'Authenticated user required.'});
- try{res.json(await markAllNotificationsRead(userId));}
- catch(e){res.status(400).json({ok:false,error:e.message});}
-});
-
 export {router as notificationsRouter};
