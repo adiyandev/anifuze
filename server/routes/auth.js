@@ -1,16 +1,25 @@
 import {Router} from 'express';
 import crypto from 'node:crypto';
-
+import {promisify} from 'node:util';
+import {query} from '../db/index.js';
+const scrypt=promisify(crypto.scrypt);
 export const authRouter=Router();
-
-const hashPassword=(password)=>crypto.createHash('sha256').update(password).digest('hex');
-
-authRouter.post('/bootstrap-admin',async(req,res)=>{
-  const {email,password}=req.body??{};
-  if(typeof email!=='string'||!email.includes('@')||typeof password!=='string'||password.length<8){
-    return res.status(400).json({ok:false,error:'Valid email and password of at least 8 characters are required.'});
-  }
-  // This endpoint is only the installer bootstrap contract. Production auth will
-  // use a memory-hard password hash, secure sessions, CSRF protection and 2FA.
-  res.status(201).json({ok:true,email,role:'owner',passwordHash:hashPassword(password)});
-});
+const COOKIE='anifuze_admin_session';
+const SESSION_MS=1000*60*60*12;
+const ABSOLUTE_MS=1000*60*60*24;
+const attempts=new Map();
+const nowSql=()=>new Date().toISOString().slice(0,19).replace('T',' ');
+const hashPassword=async(password)=>{const salt=crypto.randomBytes(16).toString('hex');const key=await scrypt(password,salt,64,{N:16384,r:8,p:1});return salt+':'+key.toString('hex');};
+const verifyPassword=async(password,stored)=>{const [salt,hex]=String(stored).split(':');if(!salt||!hex)return false;const key=await scrypt(password,salt,64,{N:16384,r:8,p:1});const a=Buffer.from(hex,'hex');return a.length===key.length&&crypto.timingSafeEqual(a,key);};
+const parseCookies=req=>Object.fromEntries(String(req.headers.cookie||'').split(';').filter(Boolean).map(x=>{const i=x.indexOf('=');return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1).trim())]}));
+const setCookie=(res,value,maxAge)=>res.setHeader('Set-Cookie',`${COOKIE}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Strict${process.env.NODE_ENV==='production'?'; Secure':''}`);
+const clearCookie=res=>setCookie(res,'',0);
+const limiter=(key,max=8,windowMs=15*60*1000)=>{const now=Date.now();const item=attempts.get(key);if(!item||now-item.start>windowMs){attempts.set(key,{start:now,count:1});return true}item.count++;return item.count<=max};
+const makeSession=async(user,req,twoFactorVerified=false)=>{const id=crypto.randomBytes(32).toString('base64url');const created=new Date();const expires=new Date(created.getTime()+SESSION_MS);const absolute=new Date(created.getTime()+ABSOLUTE_MS);await query('INSERT INTO af_admin_sessions (id,admin_user_id,expires_at,created_at,last_seen_at,ip_address,user_agent,absolute_expires_at,two_factor_verified) VALUES ($1,$2,$3,$4,$4,$5,$6,$7,$8)',[id,user.id,expires.toISOString(),created.toISOString(),req.ip,String(req.headers['user-agent']||'').slice(0,1000),absolute.toISOString(),twoFactorVerified]);return {id,expires};};
+const sessionUser=async req=>{const c=parseCookies(req);const id=c[COOKIE];if(!id)return null;const r=await query('SELECT s.*,u.email,u.role,u.enabled,u.must_setup_2fa FROM af_admin_sessions s JOIN af_admin_users u ON u.id=s.admin_user_id WHERE s.id=$1 AND s.expires_at>CURRENT_TIMESTAMP AND u.enabled=TRUE',[id]);const s=r.rows[0];if(!s)return null;if(s.absolute_expires_at&&new Date(s.absolute_expires_at)<=new Date())return null;await query('UPDATE af_admin_sessions SET last_seen_at=CURRENT_TIMESTAMP,expires_at=$2 WHERE id=$1',[id,new Date(Date.now()+SESSION_MS).toISOString()]);return {...s,sessionId:id};};
+authRouter.post('/bootstrap-admin',async(req,res)=>{res.status(410).json({ok:false,error:'Admin accounts are created by the installer.'});});
+authRouter.post('/admin/login',async(req,res)=>{const email=String(req.body?.email||'').trim().toLowerCase();const password=String(req.body?.password||'');if(!limiter('login:'+req.ip))return res.status(429).json({ok:false,error:'Too many login attempts. Try again later.'});const r=await query('SELECT id,email,password_hash,role,enabled,must_setup_2fa FROM af_admin_users WHERE email=$1',[email]);const u=r.rows[0];if(!u||!u.enabled||!(await verifyPassword(password,u.password_hash)))return res.status(401).json({ok:false,error:'Invalid admin credentials.'});const session=await makeSession(u,req,false);setCookie(res,session.id,Math.floor(SESSION_MS/1000));res.json({ok:true,requires2fa:Boolean(u.must_setup_2fa),role:u.role});});
+authRouter.post('/admin/verify-2fa',async(req,res)=>{const user=await sessionUser(req);if(!user)return res.status(401).json({ok:false,error:'Authentication required.'});const code=String(req.body?.code||'').replace(/\D/g,'');if(!/^\d{6}$/.test(code))return res.status(400).json({ok:false,error:'Enter a valid 6-digit code.'});return res.status(400).json({ok:false,error:'2FA enrollment is required before an admin session can be verified.'});});
+authRouter.get('/admin/me',async(req,res)=>{const u=await sessionUser(req);if(!u)return res.status(401).json({ok:false,error:'Not authenticated.'});res.json({ok:true,user:{id:u.admin_user_id,email:u.email,role:u.role,twoFactorVerified:Boolean(u.two_factor_verified),mustSetup2fa:Boolean(u.must_setup_2fa)}});});
+authRouter.post('/admin/logout',async(req,res)=>{const c=parseCookies(req);if(c[COOKIE])await query('DELETE FROM af_admin_sessions WHERE id=$1',[c[COOKIE]]);clearCookie(res);res.json({ok:true});});
+export {hashPassword,verifyPassword};
