@@ -7,9 +7,24 @@ type NavItem={id:string;label:string;path:string;icon?:string|null;visible:boole
 
 const iconFor=(name?:string|null)=>({Compass,Bell,BarChart3,CalendarDays,Layers}[name||'Layers']||Layers);
 
+function applyMeta(seo:any,path:string){
+ const title=String(seo?.site_title||'AniFuze');
+ const description=String(seo?.description||'');
+ document.title=path==='/'?title:`${title} · ${path.replace(/^\//,'').replace(/-/g,' ')}`;
+ const set=(name:string,content:string)=>{let el=document.head.querySelector(`meta[name="${name}"]`) as HTMLMetaElement|null;if(!el){el=document.createElement('meta');el.name=name;document.head.appendChild(el)}el.content=content};
+ const setProperty=(property:string,content:string)=>{let el=document.head.querySelector(`meta[property="${property}"]`) as HTMLMetaElement|null;if(!el){el=document.createElement('meta');el.setAttribute('property',property);document.head.appendChild(el)}el.content=content};
+ set('description',description);set('keywords',String(seo?.keywords||''));set('robots',String(seo?.robots||'index,follow'));
+ setProperty('og:title',document.title);setProperty('og:description',description);setProperty('og:type','website');
+ if(seo?.og_image)setProperty('og:image',String(seo.og_image));
+ let link=document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement|null;
+ if(!link){link=document.createElement('link');link.rel='canonical';document.head.appendChild(link)}
+ link.href=path==='/'&&seo?.canonical_url?String(seo.canonical_url):window.location.origin+(path||'/');
+}
+
 export function PublicLayout(){
  const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);
  useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));return()=>{active=false}},[]);
+ useEffect(()=>{let active=true;fetch('/api/seo').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)applyMeta(d.seo,location.pathname)}).catch(()=>{if(active)document.title=settings.siteName||'AniFuze'});return()=>{active=false}},[location.pathname,settings.siteName]);
  const visibleNav=(nav.length?nav:[{id:'browse',label:'Browse',path:'/browse',icon:'Compass',visible:true,sort_order:10},{id:'latest',label:'Latest',path:'/latest',icon:'Bell',visible:true,sort_order:20},{id:'trending',label:'Trending',path:'/trending',icon:'BarChart3',visible:true,sort_order:30},{id:'schedule',label:'Schedule',path:'/schedule',icon:'CalendarDays',visible:true,sort_order:40}]).filter(x=>x.visible);
  return <div className="vault-shell" style={{'--vault-primary':settings.primary,'--vault-accent':settings.accent} as CSSProperties}>
   <header className="vault-nav"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link>
