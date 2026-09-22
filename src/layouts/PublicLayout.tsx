@@ -1,28 +1,18 @@
-import type {CSSProperties} from 'react';
 import {Link,Outlet,useLocation} from 'react-router-dom';
-import {Search,Menu,X,UserCircle} from 'lucide-react';
+import {Search,Menu,X,Bell,CalendarDays,Compass,Layers,BarChart3,Download,UserCircle} from 'lucide-react';
 import {useState} from 'react';
 import {useApp} from '../contexts/AppContext';
 
 export function PublicLayout(){
-  const {settings,role,setRole}=useApp();
-  const location=useLocation();
-  const [mobileOpen,setMobileOpen]=useState(false);
-  const nav=JSON.parse(localStorage.getItem('anifuze_navigation')||'[{"label":"Home","to":"/"},{"label":"Browse","to":"/browse"},{"label":"Latest","to":"/latest"},{"label":"Trending","to":"/trending"},{"label":"Schedule","to":"/schedule"},{"label":"Genres","to":"/genres"}]');
-  return <div className="site-shell" style={{'--brand':settings.primary,'--accent':settings.accent} as CSSProperties}>
-    <header className="public-head">
-      <Link className="brand" to="/" onClick={()=>setMobileOpen(false)}><b>{settings.logo}</b><span>{settings.siteName}</span></Link>
-      <nav className="desktop-nav">{nav.filter((x:any)=>!x.hidden).map((x:any)=><Link key={x.label} className={location.pathname===x.to?'active':''} to={x.to}>{x.label}</Link>)}</nav>
-      <div className="head-actions">
-        <Link className="search-trigger" to="/search" aria-label="Search anime"><Search size={18}/><span>Search anime...</span><kbd>⌘K</kbd></Link>
-        {role==='public_user'
-          ? <Link className="button small" to="/login"><UserCircle size={16}/> Sign in</Link>
-          : <button className="avatar" aria-label="Sign out" onClick={()=>setRole('public_user')}>A</button>}
-        <button className="mobile-menu" aria-label="Toggle menu" onClick={()=>setMobileOpen(v=>!v)}>{mobileOpen?<X size={20}/>:<Menu size={20}/>}</button>
-      </div>
-    </header>
-    {mobileOpen&&<div className="mobile-nav">{nav.filter((x:any)=>!x.hidden).map((x:any)=><Link key={x.label} to={x.to} onClick={()=>setMobileOpen(false)}>{x.label}</Link>)}<Link to="/search" onClick={()=>setMobileOpen(false)}>Search</Link></div>}
-    <main><Outlet/></main>
-    <footer><div><Link className="brand footer-brand" to="/"><b>{settings.logo}</b>{settings.siteName}</Link><p>{settings.tagline}</p></div><span>© 2026 {settings.siteName} · Built with AniFuze</span></footer>
-  </div>
+ const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);
+ const nav=[['Home','/',Compass],['Browse','/browse',Layers],['Schedule','/schedule',CalendarDays],['Collections','/genres',Layers],['Stats','/trending',BarChart3],['Notifications','/latest',Bell]] as const;
+ return <div className="vault-shell">
+  <header className="vault-nav"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link>
+   <nav className="vault-main-nav">{nav.map(([label,to,Icon])=><Link key={to} className={location.pathname===to?'active':''} to={to}><Icon size={15}/>{label}</Link>)}</nav>
+   <div className="vault-nav-actions"><Link className="vault-search-trigger" to="/search"><Search size={16}/><span>Search anime...</span><kbd>⌘K</kbd></Link><Link className="vault-bell" to="/latest"><Bell size={16}/></Link>{role==='public_user'?<Link className="vault-signin" to="/login"><UserCircle size={15}/> Sign in</Link>:<button className="vault-avatar" onClick={()=>setRole('public_user')}>A</button>}<button className="vault-menu" onClick={()=>setOpen(!open)}>{open?<X size={19}/>:<Menu size={19}/>}</button></div>
+  </header>
+  {open&&<div className="vault-mobile-nav">{nav.map(([label,to])=><Link key={to} to={to} onClick={()=>setOpen(false)}>{label}</Link>)}<Link to="/search" onClick={()=>setOpen(false)}>Search</Link></div>}
+  <main><Outlet/></main>
+  <footer className="vault-footer"><div><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link><p>{settings.tagline}</p></div><div className="vault-footer-links"><Link to="/browse">Browse</Link><Link to="/schedule">Schedule</Link><Link to="/genres">Genres</Link><Link to="/login">Account</Link></div><small>© 2026 {settings.siteName} · Built with AniFuze</small></footer>
+ </div>
 }
