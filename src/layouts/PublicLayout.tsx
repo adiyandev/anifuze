@@ -5,7 +5,7 @@ import {useApp} from '../contexts/AppContext';
 import {navigationService} from '../services/mockServices';
 
 export function PublicLayout(){
- const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<any[]>(navigationService.get());
+ const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const nav=navigationService.get();
  const iconFor=(to:string)=>to==='/'?Compass:to==='/schedule'?CalendarDays:to==='/trending'?BarChart3:to==='/latest'?Bell:to==='/genres'?Layers:Layers;
  const visibleNav=nav.filter(x=>!x.hidden);
  return <div className="vault-shell" style={{'--vault-primary':settings.primary,'--vault-accent':settings.accent} as CSSProperties}>
