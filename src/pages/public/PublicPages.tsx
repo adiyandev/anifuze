@@ -7,9 +7,16 @@ import {useApp} from '../../contexts/AppContext';
 const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compact?'vault-card compact':'vault-card'} to={'/anime/'+a.id}><div className="vault-card-poster"><img src={a.cover} alt={a.title}/><span className="vault-card-badge">{a.status}</span><span className="vault-card-play">▶</span></div><div className="vault-card-info"><strong>{a.title}</strong><small>{a.type} · {a.episodes} Episodes</small></div></Link>;
 
 export function HomePage(){
- const{settings}=useApp(); const[fresh,setFresh]=useState<{trending:any[];latest:any[]}>({trending:[],latest:[]});
- useEffect(()=>{let alive=true;fetchRealHomepageAnime().then(data=>{if(alive)setFresh(data)}).catch(()=>{});return()=>{alive=false}},[]);
- const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]; const slides=liveTrending.slice(0,5); const blocks=builderService.get().filter(b=>!b.hidden);
+ const{settings}=useApp(); const[fresh,setFresh]=useState<{trending:any[];latest:any[];popular:any[]}>({trending:[],latest:[],popular:[]});
+ const[homepageBlocks,setHomepageBlocks]=useState<any[]>([]);
+ useEffect(()=>{let alive=true;
+  fetch('/api/homepage').then(r=>r.ok?r.json():Promise.reject(new Error('Homepage unavailable'))).then(payload=>{
+   if(!alive)return; const sections=payload?.data?.sections||[]; setHomepageBlocks(sections);
+   setFresh({trending:sections.find((s:any)=>s.id==='trending')?.items||[],latest:sections.find((s:any)=>s.id==='latest')?.items||[],popular:sections.find((s:any)=>s.id==='popular')?.items||[]});
+  }).catch(()=>{fetchRealHomepageAnime().then(data=>{if(alive)setFresh({...data,popular:data.trending})}).catch(()=>{})});
+  return()=>{alive=false};
+ },[]);
+ const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]||fresh.popular[0]; const slides=liveTrending.slice(0,5); const blocks=homepageBlocks.length?homepageBlocks:builderService.get().filter(b=>!b.hidden);
  if(!featured)return <section className="vault-home"><div className="vault-container"><div className="vault-builder-text"><span className="vault-kicker">ANIFUZE</span><h1>{fresh.trending.length===0?'Loading anime…':'No anime available'}</h1><p>{fresh.trending.length===0?'AniList is being queried for the latest catalog. Please try again in a moment.':'AniList returned no trending anime right now.'}</p><button className="vault-primary" onClick={()=>window.location.reload()}>Retry</button></div></div></section>;
  return <section className="vault-home">
   <div className="vault-hero"><div className="vault-hero-bg" style={{backgroundImage:`linear-gradient(90deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.78) 38%,rgba(8,8,8,.25) 72%,rgba(8,8,8,.82) 100%),linear-gradient(0deg,#080808 0%,transparent 35%),url(${featured.banner||featured.cover})`}}/>
