@@ -2,7 +2,9 @@ import {Link,Outlet,useLocation} from 'react-router-dom';
 import {BarChart3,Users,Film,Settings,Server,LogOut,Search,Eye,Menu} from 'lucide-react';
 import {useApp} from '../contexts/AppContext';
 
-const tabs=[
+type IconComponent = typeof BarChart3;
+
+const tabs: Array<{id: string; label: string; Icon: IconComponent}>=[
  {id:'dashboard',label:'Dashboard',Icon:BarChart3},{id:'users',label:'Users',Icon:Users},{id:'anime',label:'Content',Icon:Film},{id:'settings',label:'Settings',Icon:Settings},{id:'system',label:'System',Icon:Server}
 ];
 const groups=[
