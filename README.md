@@ -1,1 +1,1 @@
-Customer side 
+Customer side + template
