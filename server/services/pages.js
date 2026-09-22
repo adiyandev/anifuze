@@ -1,6 +1,6 @@
 import {query} from '../db/index.js';
 
-export const DEFAULT_PAGE_SLUGS=new Set(['home','browse','latest','trending','schedule','genres','search','anime','watch','login','register']);
+export const DEFAULT_PAGE_SLUGS=new Set(['home','browse','latest','trending','schedule','genres','search','anime','watch','login','register','favorites','watchlist','history','continue-watching','profile']);
 
 export async function listPages({publicOnly=false}={}){
  const r=await query(publicOnly
