@@ -86,5 +86,30 @@ export function WatchPage(){
  return <section className="vault-watch"><div className="vault-player"><span>SAFE MOCK PLAYBACK</span><button onClick={save}>▶</button><small>Mock source · 1080p · Sub</small></div><div className="vault-watch-head"><div><span className="vault-kicker">NOW PLAYING</span><h1>{animeData.title}</h1><p>Episode {ep} · {animeData.genre} · Mock stream</p></div><div className="vault-actions"><button className="vault-secondary" disabled={ep===1} onClick={()=>{setEp(ep-1);save()}}>← Previous</button><button className="vault-primary" disabled={ep>=(animeData.episodes||1)} onClick={()=>{setEp(ep+1);save()}}>Next Episode →</button></div></div><div className="source-row"><span><i/> Mock source · Available</span></div><div className="watch-episodes"><h2>Episodes</h2><div className="episode-grid">{Array.from({length:Math.min(animeData.episodes||0,12)},(_,i)=><button className={ep===i+1?'current':''} onClick={()=>setEp(i+1)} key={i}>{i+1}</button>)}</div></div></section>;
 }
 
-export function AuthPage(){const{setRole}=useApp();const nav=useNavigate();const enter=(role:'customer'|'platform_admin',to:string)=>{setRole(role);nav(to)};return <section className="vault-auth"><div className="vault-auth-card"><span className="vault-kicker">ANIFUZE ACCOUNT</span><h1>Welcome back.</h1><p>Choose a safe mock role to explore the AniFuze platform.</p><button className="vault-primary" onClick={()=>enter('customer','/manage/dashboard')}>Sign in as customer</button><button className="vault-secondary" onClick={()=>enter('platform_admin','/platform')}>Sign in as platform admin</button><Link to="/">Continue as visitor</Link></div></section>}
+export function AuthPage(){
+ const{setRole}=useApp(); const nav=useNavigate(); const location=useLocation();
+ const isRegister=location.pathname==='/register';
+ const [name,setName]=useState(''); const [email,setEmail]=useState(''); const [password,setPassword]=useState('');
+ const submit=(event:React.FormEvent)=>{event.preventDefault(); if(!email||!password||(isRegister&&!name))return; setRole('customer'); nav('/');};
+ return <section className="auth-page">
+   <div className="auth-shell">
+    <div className="auth-brand"><span>✦</span><strong>AniFuze</strong></div>
+    <div className="auth-card">
+     <div className="auth-copy"><span className="vault-kicker">ANIFUZE ACCOUNT</span><h1>{isRegister?'Create your account':'Welcome back'}</h1><p>{isRegister?'Create an account to keep your anime, watchlist, and history in sync.':'Sign in to continue to your AniFuze account.'}</p></div>
+     <form onSubmit={submit} className="auth-form">
+      {isRegister&&<label>Name<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" autoComplete="name" required/></label>}
+      <label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required/></label>
+      <label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder={isRegister?'At least 8 characters':'Your password'} autoComplete={isRegister?'new-password':'current-password'} minLength={isRegister?8:1} required/></label>
+      {!isRegister&&<div className="auth-row"><label className="auth-check"><input type="checkbox"/> Remember me</label><button type="button" className="auth-link">Forgot password?</button></div>}
+      <button className="auth-submit" type="submit">{isRegister?'Create account':'Sign in'}</button>
+     </form>
+     <div className="auth-divider"><span>or</span></div>
+     <button className="auth-google" type="button" onClick={()=>{setRole('customer');nav('/')}}><span>G</span> Continue with Google</button>
+     <p className="auth-switch">{isRegister?'Already have an account?':'Don’t have an account?'} <Link to={isRegister?'/login':'/register'}>{isRegister?'Sign in':'Create one'}</Link></p>
+    </div>
+    <Link className="auth-back" to="/">← Back to AniFuze</Link>
+   </div>
+ </section>;
+}
+
 export function CustomPage(){const{settings}=useApp();return <section className="vault-page"><span className="vault-kicker">CUSTOM PAGE</span><h1>Created with AniFuze.</h1><p>Customer-managed pages inherit the active {settings.siteName} visual system.</p></section>}
