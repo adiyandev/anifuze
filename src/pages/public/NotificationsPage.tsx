@@ -18,7 +18,8 @@ export function NotificationsPage(){
  const[items,setItems]=useState<Notice[]>([]);
  const[prefs,setPrefs]=useState(()=>{try{return JSON.parse(localStorage.getItem(PREF_KEY)||'{"releases":true,"system":true,"account":true}')}catch{return {releases:true,system:true,account:true}}});
  useEffect(()=>setItems(read()),[]);
- const unread=useMemo(()=>items.filter(x=>!x.read).length,[items]);
+ const visible=useMemo(()=>items.filter(x=>x.type==='release'?prefs.releases:x.type==='system'?prefs.system:prefs.account),[items,prefs]);
+ const unread=useMemo(()=>visible.filter(x=>!x.read).length,[visible]);
  const mark=(id:string)=>setItems(current=>{const next=current.map(x=>x.id===id?{...x,read:true}:x);save(next);return next;});
  const updatePref=(key:string)=>setPrefs((p:any)=>{const next={...p,[key]:!p[key]};localStorage.setItem(PREF_KEY,JSON.stringify(next));return next;});
  const markAll=()=>setItems(current=>{const next=current.map(x=>({...x,read:true}));save(next);return next;});
@@ -26,7 +27,7 @@ export function NotificationsPage(){
  return <section className="content-page notification-page">
   <div className="page-heading"><div><p>Release alerts, account updates, and AniFuze system notifications.</p></div><button className="button ghost" onClick={markAll} disabled={!unread}><CheckCheck size={15}/> Mark all read</button></div>
   <div className="notification-list">
-   {!items.length?<div className="empty-state">You're all caught up.</div>:items.map(item=><article className={'notification-card'+(item.read?' read':'')} key={item.id}>
+   {!visible.length?<div className="empty-state">You're all caught up.</div>:visible.map(item=><article className={'notification-card'+(item.read?' read':'')} key={item.id}>
     <div className="notification-icon">{icon(item.type)}</div><div className="notification-copy"><div className="notification-title"><strong>{item.title}</strong>{!item.read&&<span className="notification-dot"/>}</div><p>{item.message}</p><small>{new Date(item.createdAt).toLocaleString()}</small></div>
     {!item.read&&<button className="link-button" onClick={()=>mark(item.id)}>Mark read</button>}
    </article>)}
