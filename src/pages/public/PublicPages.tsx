@@ -1,7 +1,7 @@
 import {Link,useParams,useLocation,useNavigate} from 'react-router-dom';
 import {useEffect,useMemo,useState} from 'react';
 import {builderService} from '../../services/mockServices';
-import {fetchRealHomepageAnime,fetchBrowseAnime,fetchLatestAnime,fetchAnimeSchedule,fetchAnimeById} from '../../services/anilistService';
+import {fetchRealHomepageAnime,fetchCatalog,fetchAnimeSchedule,fetchAnimeById} from '../../services/anilistService';
 import {useApp} from '../../contexts/AppContext';
 
 const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compact?'vault-card compact':'vault-card'} to={'/anime/'+a.id}><div className="vault-card-poster"><img src={a.cover} alt={a.title}/><span className="vault-card-badge">{a.status}</span><span className="vault-card-play">▶</span></div><div className="vault-card-info"><strong>{a.title}</strong><small>{a.type} · {a.episodes} Episodes</small></div></Link>;
@@ -25,15 +25,31 @@ function BuilderSection({block,liveAnime,latestAnime}:{block:any;liveAnime:any[]
 function Shelf({title,subtitle,items,episode=false}:{title:string;subtitle:string;items:any[];episode?:boolean}){return <section className="vault-shelf"><div className="vault-section-head"><div><h2>{title}</h2><p>{subtitle}</p></div><Link to={episode?'/latest':'/trending'}>View all ›</Link></div><div className="vault-card-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div></section>}
 
 export function CatalogPage(){
- const loc=useLocation(); const[q,setQ]=useState(''); const path=loc.pathname;
- const [items,setItems]=useState<any[]>([]); const [loading,setLoading]=useState(true);
+ const loc=useLocation(); const path=loc.pathname;
+ const isSearch=path==='/search'; const [q,setQ]=useState('');
+ const [type,setType]=useState(''); const [status,setStatus]=useState(''); const [sort,setSort]=useState('popularity');
+ const [items,setItems]=useState<any[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState('');
  const title=path==='/search'?'Search Anime':path==='/genres'?'Genres':path==='/latest'?'Latest Episodes':path==='/trending'?'Trending Anime':path==='/movies'?'Movies':path==='/ongoing'?'Ongoing Anime':path==='/completed'?'Completed Anime':path==='/favorites'?'Your Favorites':path==='/watchlist'?'Your Watchlist':path==='/history'?'Watch History':path==='/continue-watching'?'Continue Watching':'Browse Anime';
- useEffect(()=>{if(path==='/schedule')return;let alive=true;setLoading(true);const load=path==='/latest'?fetchLatestAnime():fetchBrowseAnime();load.then(x=>{if(alive)setItems(x)}).catch(()=>{if(alive)setItems([])}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false}},[path]);
- const filtered=useMemo(()=>items.filter(a=>a.title.toLowerCase().includes(q.toLowerCase())||a.genre.toLowerCase().includes(q.toLowerCase())),[items,q]);
- if(path==='/schedule') return <SchedulePage/>;
- return <section className="vault-page"><div className="vault-page-head"><div><span className="vault-kicker">DISCOVER</span><h1>{title}</h1><p>{path==='/latest'?'Freshly updated anime from AniList.':'Explore real anime data from AniList and find your next series.'}</p></div></div>
- {path==='/search'&&<div className="vault-search"><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search anime, genres, studios..."/><kbd>⌘ K</kbd></div>}
- {path==='/genres'?<div className="vault-genre-grid">{['Action','Adventure','Comedy','Drama','Fantasy','Mystery','Romance','Sci-Fi','Sports','Supernatural','Thriller','Slice of Life'].map(g=><Link to="/browse" key={g}><span>GENRE</span><strong>{g}</strong><b>→</b></Link>)}</div>:<><div className="vault-filter-row"><button className="active">All</button><button>Series</button><button>Movies</button><button>Ongoing</button><button>Completed</button></div>{loading?<div className="vault-builder-text"><h2>Loading AniList…</h2><p>Fetching the latest catalog.</p></div>:<div className="vault-library-grid">{filtered.map(a=><Card a={a} key={a.id}/>)}</div>}</>}
+ useEffect(()=>{if(path==='/schedule'||path==='/genres')return;let alive=true;setLoading(true);setError('');
+  const options:any={q:isSearch?q:'',sort,type,status};
+  if(path==='/latest'){options.sort='updated';options.status='RELEASING';}
+  if(path==='/trending')options.sort='trending';
+  if(path==='/movies')options.type='MOVIE';
+  if(path==='/ongoing')options.status='RELEASING';
+  if(path==='/completed')options.status='FINISHED';
+  fetchCatalog(options).then(x=>{if(alive)setItems(x)}).catch(e=>{if(alive){setItems([]);setError(e.message||'Could not load catalog.')}}).finally(()=>{if(alive)setLoading(false)});
+  return()=>{alive=false};
+ },[path,q,type,status,sort,isSearch]);
+ if(path==='/schedule')return <SchedulePage/>;
+ if(path==='/genres')return <section className="vault-page"><div className="vault-page-head"><div><span className="vault-kicker">DISCOVER</span><h1>Genres</h1><p>Provider-controlled AniList genres.</p></div></div><div className="vault-genre-grid">{['Action','Adventure','Comedy','Drama','Fantasy','Mystery','Romance','Sci-Fi','Sports','Supernatural','Thriller','Slice of Life'].map(g=><Link to="/browse" key={g}><span>GENRE</span><strong>{g}</strong><b>→</b></Link>)}</div></section>;
+ return <section className="vault-page"><div className="vault-page-head"><div><span className="vault-kicker">DISCOVER · ANILIST</span><h1>{title}</h1><p>{isSearch?'Search the live AniList catalog.':'Browse anime with provider-controlled metadata.'}</p></div></div>
+  {isSearch&&<div className="vault-search"><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search anime, genres, studios..."/><kbd>⌘ K</kbd></div>}
+  <div className="vault-filter-row">
+   <select value={type} onChange={e=>setType(e.target.value)}><option value="">All types</option><option value="TV">TV</option><option value="MOVIE">Movies</option><option value="SPECIAL">Special</option><option value="OVA">OVA</option><option value="ONA">ONA</option></select>
+   <select value={status} onChange={e=>setStatus(e.target.value)}><option value="">All statuses</option><option value="RELEASING">Ongoing</option><option value="FINISHED">Completed</option><option value="NOT_YET_RELEASED">Upcoming</option><option value="HIATUS">Hiatus</option></select>
+   <select value={sort} onChange={e=>setSort(e.target.value)}><option value="popularity">Most popular</option><option value="trending">Trending</option><option value="score">Highest rated</option><option value="updated">Recently updated</option><option value="newest">Newest</option><option value="title">Title A–Z</option></select>
+  </div>
+  {loading?<div className="vault-builder-text"><h2>Loading AniList…</h2><p>Fetching the latest catalog.</p></div>:error?<div className="vault-builder-text"><h2>Catalog unavailable</h2><p>{error}</p><button className="vault-primary" onClick={()=>setQ(x=>x)}>Retry</button></div>:<div className="vault-library-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div>}
  </section>;
 }
 
