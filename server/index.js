@@ -22,6 +22,7 @@ import {seoRouter} from './routes/seo.js';
 import {usersRouter} from './routes/users.js';
 import {communityRouter} from './routes/community.js';
 import {notificationsRouter} from './routes/notifications.js';
+import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
@@ -50,6 +51,11 @@ app.use('/api',seoRouter);
 app.use('/api',usersRouter);
 app.use('/api',communityRouter);
 app.use('/api',notificationsRouter);
+
+// Process scheduled customer notifications without requiring a separate worker.
+const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});},60000);
+notificationScheduler.unref?.();
+processDueNotifications().catch(()=>{});
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
