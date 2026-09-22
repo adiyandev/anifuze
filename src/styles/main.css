@@ -555,3 +555,91 @@ button,a{transition-duration:.2s}
   color:#dce5f2;
   border-bottom:1px solid #26344a;
 }
+
+
+/* Unified admin surface hierarchy — apply consistently across all management modules */
+.av-admin-main{
+  --admin-page:#0b0f17;
+  --admin-surface:#111827;
+  --admin-surface-2:#151f31;
+  --admin-surface-3:#1b2639;
+  --admin-border:#2a3950;
+  --admin-border-soft:#253247;
+}
+.av-admin-main > *{
+  --surface:#111827;
+}
+.av-admin-main .panel,
+.av-admin-main .card,
+.av-admin-main .surface,
+.av-admin-main .section,
+.av-admin-main .stat-card,
+.av-admin-main .metric-card,
+.av-admin-main .chart-card,
+.av-admin-main .form-card,
+.av-admin-main .settings-card,
+.av-admin-main .provider-card,
+.av-admin-main .health-card,
+.av-admin-main .activity-card,
+.av-admin-main .content-card,
+.av-admin-main .list-card,
+.av-admin-main .table-card,
+.av-admin-main .table-wrap,
+.av-admin-main .data-table,
+.av-admin-main .data-card,
+.av-admin-main .admin-table,
+.av-admin-main .list-table,
+.av-admin-main .empty-state,
+.av-admin-main .detail-card{
+  background:#111827;
+  border-color:#2a3950;
+}
+.av-admin-main .panel-header,
+.av-admin-main .card-header,
+.av-admin-main .section-header,
+.av-admin-main .table-header,
+.av-admin-main .table-head{
+  background:#151f31;
+  border-bottom:1px solid #2a3950;
+}
+.av-admin-main input,
+.av-admin-main select,
+.av-admin-main textarea{
+  background:#0f1725;
+  border-color:#2a3950;
+}
+.av-admin-main .admin-table table,
+.av-admin-main .table-wrap table,
+.av-admin-main .data-table table,
+.av-admin-main table{
+  background:#111827;
+}
+.av-admin-main table thead,
+.av-admin-main table thead tr{
+  background:#182235;
+}
+.av-admin-main table tbody tr{
+  background:#111827;
+  border-bottom:1px solid #26344a;
+}
+.av-admin-main table tbody tr:hover{
+  background:#1a263b;
+}
+.av-admin-main table td{
+  border-bottom-color:#26344a;
+}
+.av-admin-main .list-item,
+.av-admin-main .row,
+.av-admin-main .provider-row,
+.av-admin-main .health-row,
+.av-admin-main .activity-row{
+  background:#111827;
+  border-color:#26344a;
+}
+.av-admin-main .list-item:hover,
+.av-admin-main .row:hover,
+.av-admin-main .provider-row:hover,
+.av-admin-main .health-row:hover,
+.av-admin-main .activity-row:hover{
+  background:#1a263b;
+}
