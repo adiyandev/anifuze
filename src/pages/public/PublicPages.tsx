@@ -1,4 +1,4 @@
-import {Link,useParams,useLocation} from 'react-router-dom';
+import {Link,useParams,useLocation,useNavigate} from 'react-router-dom';
 import {useMemo,useState} from 'react';
 import {anime} from '../../data/mock';
 import {useApp} from '../../contexts/AppContext';
