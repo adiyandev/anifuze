@@ -5,7 +5,7 @@ export const ADMIN_PERMISSIONS=Object.freeze({
   providers_view:['owner','admin'], providers_manage:['owner','admin'], providers_console:['owner','admin'], providers_health:['owner','admin'], sources_view:['owner','admin'],
   templates_view:['owner','admin'], templates_manage:['owner','admin'], site_builder_manage:['owner','admin'], appearance_manage:['owner','admin'], navigation_manage:['owner','admin'], pages_manage:['owner','admin'], seo_manage:['owner','admin'],
   users_view:['owner','admin'], users_manage:['owner','admin'], comments_moderate:['owner','admin','moderator'], reports_moderate:['owner','admin','moderator'],
-  analytics_view:['owner','admin'], notifications_manage:['owner','admin'], settings_manage:['owner','admin'], security_manage:['owner','admin'], audit_view:['owner','admin'], system_view:['owner','admin'],
+  analytics_view:['owner','admin'], notifications_manage:['owner','admin'], email_manage:['owner','admin'], settings_manage:['owner','admin'], security_manage:['owner','admin'], audit_view:['owner','admin'], system_view:['owner','admin'],
   backups_manage:['owner'], maintenance_manage:['owner','admin'], updates_manage:['owner'], license_manage:['owner'], installation_manage:['owner']
 });
 export const ROLE_PERMISSIONS=Object.freeze(Object.fromEntries(['owner','admin','moderator'].map(role=>[role,Object.freeze(Object.entries(ADMIN_PERMISSIONS).filter(([,roles])=>roles.includes(role)).map(([permission])=>permission))])));
