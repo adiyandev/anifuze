@@ -1,5 +1,5 @@
 import {Link,Outlet,useLocation} from 'react-router-dom';
-import {BarChart3,Users,Film,Settings,Server,LogOut,Search,Eye,Menu,PlaySquare,Layers,CalendarDays,Radio,TerminalSquare,HeartPulse,Database,Palette,PanelLeft,FileText,Globe,ChartNoAxesCombined,Bell,Shield,ShoppingBag,MessageSquare} from 'lucide-react';
+import {BarChart3,Users,Film,Settings,Server,LogOut,Search,Eye,Menu,PlaySquare,Layers,CalendarDays,Radio,TerminalSquare,HeartPulse,Database,Palette,PanelLeft,FileText,Globe,ChartNoAxesCombined,Bell,Shield,ShoppingBag,MessageSquare,Mail,ScrollText} from 'lucide-react';
 import {useApp} from '../contexts/AppContext';
 
 const tabs=[['dashboard','Dashboard',BarChart3,'/admin/dashboard'],['users','Users',Users,'/admin/users'],['content','Content',Film,'/admin/anime'],['settings','Settings',Settings,'/admin/settings']] as const;
@@ -8,13 +8,13 @@ const groups=[
  ['STREAMING',[['Providers','/admin/providers',Radio],['Provider Console','/admin/providers/console',TerminalSquare],['Health','/admin/providers/health',HeartPulse],['Sources','/admin/providers/sources',Database]]],
  ['DESIGN',[['Marketplace','/admin/templates/marketplace',ShoppingBag],['My Templates','/admin/templates',Layers],['Site Builder','/admin/site-builder',Palette],['Appearance','/admin/appearance',Palette],['Navigation','/admin/navigation',PanelLeft],['Pages','/admin/pages',FileText]]],
  ['COMMUNITY',[['Users','/admin/users',Users],['Comments','/admin/comments',MessageSquare],['Reports','/admin/reports',Shield]]],
- ['SYSTEM',[['SEO','/admin/seo',Globe],['Domains','/admin/domains',Globe],['Analytics','/admin/analytics',ChartNoAxesCombined],['Notifications','/admin/notifications',Bell],['Settings','/admin/settings',Settings],['Security','/admin/security',Shield]]],
+ ['SYSTEM',[['SEO','/admin/seo',Globe],['Domains','/admin/domains',Globe],['Analytics','/admin/analytics',ChartNoAxesCombined],['Notifications','/admin/notifications',Bell],['Email','/admin/email',Mail],['Settings','/admin/settings',Settings],['Security','/admin/security',Shield]]],
 ] as const;
 
 export function CustomerAdminLayout(){
  const loc=useLocation(); const {setRole}=useApp();
  const path=loc.pathname;
- const activeTop=path==='/admin/dashboard'?'dashboard':path.startsWith('/admin/users')?'users':path.startsWith('/admin/anime')||path.startsWith('/admin/episodes')||path.startsWith('/admin/genres')||path.startsWith('/admin/schedule')?'content':'settings';
+ const activeTop=path==='/admin/dashboard'?'dashboard':path.startsWith('/admin/users')?'users':path.startsWith('/admin/anime')||path.startsWith('/admin/episodes')||path.startsWith('/admin/genres')||path.startsWith('/admin/schedule')?'content':path.startsWith('/admin/settings')?'settings':'settings';
  const title=path==='/admin/dashboard'?'Admin Dashboard':path.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')||'Dashboard';
  return <div className="av-admin apple-admin-shell">
   <header className="av-admin-head">
