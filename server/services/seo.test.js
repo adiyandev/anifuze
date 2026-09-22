@@ -4,7 +4,7 @@ import {buildRobots,buildSitemap} from './seo.js';
 
 test('SEO robots output contains sitemap and configured directives',()=>{
  const text=buildRobots({robots:'index,follow'});
- assert.match(text,/^index,follow/);
+ assert.match(text,/^User-agent: \*\nindex,follow/);
  assert.match(text,/Sitemap:/);
 });
 
