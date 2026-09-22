@@ -73,3 +73,13 @@ export async function fetchRealHomepageAnime(){
  ]);
  return {trending,latest};
 }
+
+export async function fetchAnimeById(id:string){
+ const detailQuery=`query($id:Int){Media(id:$id,type:ANIME){id title{romaji english} description episodes status genres averageScore popularity coverImage{large extraLarge} bannerImage format seasonYear}}`;
+ const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query:detailQuery,variables:{id:Number(id)}})});
+ if(!res.ok) throw new Error('AniList detail request failed');
+ const json=await res.json();
+ const media=json?.data?.Media;
+ if(!media) throw new Error('Anime not found');
+ return mapMedia(media) as Anime;
+}
