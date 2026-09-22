@@ -19,6 +19,7 @@ import {navigationRouter} from './routes/navigation.js';
 import {pagesRouter} from './routes/pages.js';
 import {seoRouter} from './routes/seo.js';
 import {usersRouter} from './routes/users.js';
+import {communityRouter} from './routes/community.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
@@ -44,6 +45,7 @@ app.use('/api',navigationRouter);
 app.use('/api',pagesRouter);
 app.use('/api',seoRouter);
 app.use('/api',usersRouter);
+app.use('/api',communityRouter);
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
