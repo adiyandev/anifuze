@@ -1,7 +1,7 @@
 import {createBrowserRouter,Navigate} from 'react-router-dom';
 import {RequirePermission} from './App';
 import {PublicLayout} from '../layouts/PublicLayout'; import {CustomerAdminLayout} from '../layouts/CustomerAdminLayout'; import {RequireCustomer} from './App';
-import {HomePage,CatalogPage,AnimeDetailsPage,WatchPage,AuthPage,CustomPage} from '../pages/public/PublicPages';
+import {HomePage,CatalogPage,AnimeDetailsPage,WatchPage,AuthPage} from '../pages/public/PublicPages';
 import {AdminLoginPage} from '../pages/admin/AdminLoginPage'; import {InstallerPage} from '../pages/installer/InstallerPage'; import {DashboardPage,AnimeManagementPage,AnimeEditorPage,EpisodesPage,ProviderManagementPage,ProviderEditorPage,ProviderConsolePage,ProviderHealthPage,SourcesPage,MarketplacePage,TemplateDetailsPage,MyTemplatesPage,BuilderPage,AppearancePage,NavigationPage,PagesPage,SecurityPage,ConfigPage} from '../pages/manage/ManagePages';
 const catalog=['browse','search','schedule','genres','latest','trending','movies','ongoing','completed','favorites','watchlist','history','continue-watching','profile'];const configPermissions={genres:'anime_view',schedule:'episodes_view',users:'users_view',comments:'comments_moderate',reports:'reports_moderate',purchases:'users_view',seo:'seo_manage',domains:'settings_manage',analytics:'analytics_view',notifications:'notifications_manage',settings:'settings_manage'};
 const publicRoutes=[{index:true,element:<HomePage/>},...catalog.map(path=>({path,element:<CatalogPage/>})),{path:'anime/:id',element:<AnimeDetailsPage/>},{path:'watch/:id',element:<WatchPage/>},{path:'login',element:<AuthPage/>},{path:'register',element:<AuthPage/>}];
