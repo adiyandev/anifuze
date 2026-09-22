@@ -8,13 +8,13 @@ const groups=[
  ['STREAMING',[['Providers','/admin/providers',Radio],['Provider Console','/admin/providers/console',TerminalSquare],['Health','/admin/providers/health',HeartPulse],['Sources','/admin/providers/sources',Database]]],
  ['DESIGN',[['Marketplace','/admin/templates/marketplace',ShoppingBag],['My Templates','/admin/templates',Layers],['Site Builder','/admin/site-builder',Palette],['Appearance','/admin/appearance',Palette],['Navigation','/admin/navigation',PanelLeft],['Pages','/admin/pages',FileText]]],
  ['COMMUNITY',[['Users','/admin/users',Users],['Comments','/admin/comments',MessageSquare],['Reports','/admin/reports',Shield]]],
- ['SYSTEM',[['SEO','/admin/seo',Globe],['Domains','/admin/domains',Globe],['Analytics','/admin/analytics',ChartNoAxesCombined],['Notifications','/admin/notifications',Bell],['Settings','/admin/settings',Settings]]],
+ ['SYSTEM',[['SEO','/admin/seo',Globe],['Domains','/admin/domains',Globe],['Analytics','/admin/analytics',ChartNoAxesCombined],['Notifications','/admin/notifications',Bell],['Settings','/admin/settings',Settings],['Security','/admin/security',Shield]]],
 ] as const;
 
 export function CustomerAdminLayout(){
  const loc=useLocation(); const {setRole}=useApp();
  const path=loc.pathname;
- const activeTop=path==='/admin/dashboard'?'dashboard':path.startsWith('/admin/users')?'users':path.startsWith('/admin/anime')||path.startsWith('/admin/episodes')||path.startsWith('/admin/genres')||path.startsWith('/admin/collections')||path.startsWith('/admin/schedule')?'content':'settings';
+ const activeTop=path==='/admin/dashboard'?'dashboard':path.startsWith('/admin/users')?'users':path.startsWith('/admin/anime')||path.startsWith('/admin/episodes')||path.startsWith('/admin/genres')||path.startsWith('/admin/schedule')?'content':'settings';
  const title=path==='/admin/dashboard'?'Admin Dashboard':path.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')||'Dashboard';
  return <div className="av-admin apple-admin-shell">
   <header className="av-admin-head">
