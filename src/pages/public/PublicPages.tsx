@@ -13,7 +13,7 @@ export function HomePage(){
  return <section className="vault-home">
   <div className="vault-hero"><div className="vault-hero-bg" style={{backgroundImage:`linear-gradient(90deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.78) 38%,rgba(8,8,8,.25) 72%,rgba(8,8,8,.82) 100%),linear-gradient(0deg,#080808 0%,transparent 35%),url(${featured.banner||featured.cover})`}}/>
    <div className="vault-hero-content"><span className="vault-kicker">✦ FEATURED ANIME</span><h1>{featured.title}</h1><div className="vault-meta"><span>{featured.type}</span><i>•</i><span>{featured.status}</span><i>•</i><span>{featured.episodes||'?'} Episodes</span><i>•</i><b>★ {(featured.score||8.8).toFixed(1)}</b></div><p>{featured.description}</p><div className="vault-actions"><Link className="vault-primary" to={'/watch/'+featured.id}>▶ Watch Now</Link><Link className="vault-secondary" to={'/anime/'+featured.id}>ⓘ Details</Link></div></div>
-   <div className="vault-dots">{slides.map((x,i)=><span className={i===0?'active':''} key={x.id}/>)}</div>
+   <div className="vault-dots">{slides.map((x:any,i)=><span className={i===0?'active':''} key={x.id}/>)}</div>
   </div>
   <div className="vault-container">{blocks.length?blocks.map((b:any)=><BuilderSection key={b.id} block={b} liveAnime={liveTrending} latestAnime={liveLatest}/>):<><Shelf title="Trending Anime" subtitle="What everyone is watching right now." items={liveTrending.slice(0,6)}/><Shelf title="Latest Episodes" subtitle="Fresh releases from AniList." items={liveLatest.slice(0,6)} episode/></>}
   <div className="vault-cta"><div><span>ANIFUZE</span><h2>{settings.tagline}</h2><p>Build and run your own anime streaming experience.</p></div><Link className="vault-secondary" to="/manage">Open Admin Panel ↗</Link></div></div>
