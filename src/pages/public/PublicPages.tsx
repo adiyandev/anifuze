@@ -1,22 +1,23 @@
 import {Link,useParams,useLocation,useNavigate} from 'react-router-dom';
 import {useMemo,useState} from 'react';
 import {anime,providers} from '../../data/mock';
+import {builderService} from '../../services/mockServices';
 import {useApp} from '../../contexts/AppContext';
 
 const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compact?'vault-card compact':'vault-card'} to={'/anime/'+a.id}><div className="vault-card-poster"><img src={a.cover} alt={a.title}/><span className="vault-card-badge">{a.status}</span><span className="vault-card-play">▶</span></div><div className="vault-card-info"><strong>{a.title}</strong><small>{a.type} · {a.episodes} Episodes</small></div></Link>;
 
 export function HomePage(){
- const{settings}=useApp(); const featured=anime[0]; const slides=anime.slice(0,5);
+ const{settings}=useApp(); const featured=anime[0]; const slides=anime.slice(0,5); const blocks=builderService.get().filter(b=>!b.hidden);
  return <section className="vault-home">
   <div className="vault-hero"><div className="vault-hero-bg" style={{backgroundImage:`linear-gradient(90deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.78) 38%,rgba(8,8,8,.25) 72%,rgba(8,8,8,.82) 100%),linear-gradient(0deg,#080808 0%,transparent 35%),url(${featured.cover})`}}/>
    <div className="vault-hero-content"><span className="vault-kicker">✦ FEATURED ANIME</span><h1>{featured.title}</h1><div className="vault-meta"><span>{featured.type}</span><i>•</i><span>{featured.status}</span><i>•</i><span>{featured.episodes} Episodes</span><i>•</i><b>★ 8.8</b></div><p>{featured.description}</p><div className="vault-actions"><Link className="vault-primary" to={'/watch/'+featured.id}>▶ Watch Now</Link><Link className="vault-secondary" to={'/anime/'+featured.id}>ⓘ Details</Link></div></div>
    <div className="vault-dots">{slides.map((x,i)=><span className={i===0?'active':''} key={x.id}/>)}</div>
   </div>
-  <div className="vault-container"><Shelf title="Trending Anime" subtitle="What everyone is watching right now." items={anime.slice(0,6)}/><Shelf title="Latest Episodes" subtitle="Fresh releases from your catalog." items={anime.slice(2,8)} episode/>
+  <div className="vault-container">{blocks.length?blocks.map((b:any)=><BuilderSection key={b.id} block={b}/>):<><Shelf title="Trending Anime" subtitle="What everyone is watching right now." items={anime.slice(0,6)}/><Shelf title="Latest Episodes" subtitle="Fresh releases from your catalog." items={anime.slice(2,8)} episode/></>}
   <div className="vault-cta"><div><span>ANIFUZE</span><h2>{settings.tagline}</h2><p>Build and run your own anime streaming experience.</p></div><Link className="vault-secondary" to="/manage">Open Admin Panel ↗</Link></div></div>
  </section>;
 }
-function Shelf({title,subtitle,items,episode=false}:{title:string;subtitle:string;items:any[];episode?:boolean}){return <section className="vault-shelf"><div className="vault-section-head"><div><h2>{title}</h2><p>{subtitle}</p></div><Link to={episode?'/latest':'/trending'}>View all ›</Link></div><div className="vault-card-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div></section>}
+function BuilderSection({block}:{block:any}){const t=String(block.type||'').toLowerCase();if(t==='hero')return <div className="vault-builder-section vault-builder-hero"><span className="vault-kicker">CUSTOM HERO</span><h2>{block.title}</h2><p>{block.content}</p><Link className="vault-primary" to="/browse">Browse anime</Link></div>;if(['anime grid','anime carousel','anime card','collection','stats'].includes(t))return <Shelf title={block.title} subtitle={block.content} items={anime.slice(0,6)} episode={t==='anime card'}/>;if(t==='episode list'||t==='schedule')return <Shelf title={block.title} subtitle={block.content} items={anime.slice(2,8)} episode/>;if(t==='cta'||t==='banner')return <div className="vault-cta"><div><span>ANIFUZE</span><h2>{block.title}</h2><p>{block.content}</p></div><Link className="vault-secondary" to="/browse">Explore library ↗</Link></div>;if(t==='navbar'||t==='footer')return null;return <section className="vault-builder-text"><span className="vault-kicker">{block.type}</span><h2>{block.title}</h2><p>{block.content}</p></section>}\n\nfunction Shelf({title,subtitle,items,episode=false}:{title:string;subtitle:string;items:any[];episode?:boolean}){return <section className="vault-shelf"><div className="vault-section-head"><div><h2>{title}</h2><p>{subtitle}</p></div><Link to={episode?'/latest':'/trending'}>View all ›</Link></div><div className="vault-card-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div></section>}
 
 export function CatalogPage(){
  const loc=useLocation(); const[q,setQ]=useState('');
