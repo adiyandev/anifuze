@@ -68,7 +68,7 @@ function xmlEscape(value){
 
 export function buildRobots(seo){
  const origin=getOrigin();
- return `${seo.robots}\nSitemap: ${origin}/sitemap.xml\n`;
+ return `User-agent: *\n${seo.robots}\nSitemap: ${origin}/sitemap.xml\n`;
 }
 
 export function buildSitemap(seo){
