@@ -446,3 +446,67 @@ button,a{transition-duration:.2s}
 .admin.platform aside>a:not(.brand){color:#9aa8bb}
 .admin.platform aside>a.active,.admin.platform aside>a:hover{background:#1a2636;color:#f4f7fb}
 .admin.platform .admin-head{background:#111a27;border-color:#29374b}
+
+
+/* Admin surface hierarchy — tables and data lists */
+.av-admin-main .admin-table,
+.av-admin-main table,
+.av-admin-main .table-wrap,
+.av-admin-main .data-table,
+.av-admin-main .list-table{
+  background:#151d2d;
+  border:1px solid #2d3a50;
+  border-radius:14px;
+  overflow:hidden;
+}
+.av-admin-main table{
+  border-collapse:separate;
+  border-spacing:0;
+}
+.av-admin-main thead,
+.av-admin-main .table-head{
+  background:#1b2639;
+}
+.av-admin-main thead th{
+  background:#1b2639;
+  color:#aebbd0;
+  border-bottom:1px solid #34435a;
+}
+.av-admin-main tbody{
+  background:#151d2d;
+}
+.av-admin-main tbody tr{
+  background:#151d2d;
+  border-bottom:1px solid #29364b;
+}
+.av-admin-main tbody tr:nth-child(even){
+  background:#182236;
+}
+.av-admin-main tbody tr:hover{
+  background:#202c42;
+}
+.av-admin-main td{
+  color:#dce5f2;
+  border-bottom:1px solid #29364b;
+}
+.av-admin-main td:first-child{
+  color:#f1f5fb;
+}
+.av-admin-main .admin-table button,
+.av-admin-main table button{
+  background:#202c40;
+  border-color:#3a4a62;
+  color:#e8eef7;
+}
+.av-admin-main .admin-table button:hover,
+.av-admin-main table button:hover{
+  background:#293851;
+  border-color:#536987;
+}
+.av-admin-main .badge,
+.av-admin-main .status,
+.av-admin-main .chip{
+  background:#202c40;
+  border:1px solid #3a4a62;
+  color:#dce7f5;
+}
