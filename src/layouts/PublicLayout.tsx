@@ -10,7 +10,7 @@ const iconFor=(name?:string|null)=>({Compass,Bell,BarChart3,CalendarDays,Layers}
 export function PublicLayout(){
  const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);
  useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));return()=>{active=false}},[]);
- const visibleNav=nav.filter(x=>x.visible);
+ const visibleNav=(nav.length?nav:[{id:'browse',label:'Browse',path:'/browse',icon:'Compass',visible:true,sort_order:10},{id:'latest',label:'Latest',path:'/latest',icon:'Bell',visible:true,sort_order:20},{id:'trending',label:'Trending',path:'/trending',icon:'BarChart3',visible:true,sort_order:30},{id:'schedule',label:'Schedule',path:'/schedule',icon:'CalendarDays',visible:true,sort_order:40}]).filter(x=>x.visible);
  return <div className="vault-shell" style={{'--vault-primary':settings.primary,'--vault-accent':settings.accent} as CSSProperties}>
   <header className="vault-nav"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link>
    <nav className="vault-main-nav">{visibleNav.map(item=>{const Icon=iconFor(item.icon);return <Link key={item.id} className={location.pathname===item.path?'active':''} to={item.path}><Icon size={15}/>{item.label}</Link>})}</nav>
