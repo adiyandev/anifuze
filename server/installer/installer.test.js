@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {checkRequirements} from './installer/requirements.js';
+import {checkRequirements} from './requirements.js';
 
 test('requirements checks do not accumulate between calls',async()=>{
  const a=await checkRequirements();
