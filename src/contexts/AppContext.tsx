@@ -1,8 +1,8 @@
-import {createContext,useContext,useState,type ReactNode} from 'react';
+import {createContext,useContext,useState,useEffect,type ReactNode} from 'react';
 import type {Role,Settings} from '../types';
 import {settingsService} from '../services/mockServices';
 type Toast={message:string;kind?:'success'|'error'|'info'};
 type AppState={role:Role;setRole:(r:Role)=>void;settings:Settings;refresh:()=>void;toast:(m:string,k?:Toast['kind'])=>void};
 const Context=createContext<AppState>(null!);
 export const useApp=()=>useContext(Context);
-export function AppProvider({children}:{children:ReactNode}){const[role,setRole]=useState<Role>('public_user');const[settings,setSettings]=useState(settingsService.get());useState(()=>{fetch('/api/auth/admin/me').then(r=>{if(r.ok)return r.json()}).then(d=>{if(d?.user?.role)setRole(d.user.role)}).catch(()=>{})});const[note,setNote]=useState<Toast|null>(null);const updateRole=(r:Role)=>setRole(r);const refresh=()=>setSettings(settingsService.get());const toast=(message:string,kind:Toast['kind']='success')=>{setNote({message,kind});window.setTimeout(()=>setNote(null),3000)};return <Context.Provider value={{role,setRole:updateRole,settings,refresh,toast}}>{children}{note&&<div className={`toast ${note.kind}`}>{note.message}</div>}</Context.Provider>}
+export function AppProvider({children}:{children:ReactNode}){const[role,setRole]=useState<Role>('public_user');const[settings,setSettings]=useState(settingsService.get());useEffect(()=>{fetch('/api/auth/admin/me').then(r=>r.ok?r.json():null).then(d=>{if(d?.user?.role)setRole(d.user.role)}).catch(()=>{})},[]);const[note,setNote]=useState<Toast|null>(null);const updateRole=(r:Role)=>setRole(r);const refresh=()=>setSettings(settingsService.get());const toast=(message:string,kind:Toast['kind']='success')=>{setNote({message,kind});window.setTimeout(()=>setNote(null),3000)};return <Context.Provider value={{role,setRole:updateRole,settings,refresh,toast}}>{children}{note&&<div className={`toast ${note.kind}`}>{note.message}</div>}</Context.Provider>}
