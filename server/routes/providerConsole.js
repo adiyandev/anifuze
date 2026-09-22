@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+import {executeProviderRequest,listProviderHistory,clearProviderHistory,getProviderHistory} from '../services/providerConsole.js';
+const router=Router();router.use('/admin/providers/console',requireAdmin);
+router.post('/admin/providers/console/request',requirePermission('providers_console'),async(req,res)=>{try{res.json({ok:true,item:await executeProviderRequest(req.body||{})})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.get('/admin/providers/console/history/:providerId',requirePermission('providers_console'),async(req,res)=>{try{res.json({ok:true,items:await listProviderHistory(req.params.providerId,req.query.limit)})}catch(e){res.status(500).json({ok:false,error:e.message})}});
+router.get('/admin/providers/console/history/item/:id',requirePermission('providers_console'),async(req,res)=>{try{const item=await getProviderHistory(req.params.id);if(!item)return res.status(404).json({ok:false,error:'History item not found.'});res.json({ok:true,item})}catch(e){res.status(500).json({ok:false,error:e.message})}});
+router.delete('/admin/providers/console/history/:providerId',requirePermission('providers_console'),async(req,res)=>{try{await clearProviderHistory(req.params.providerId);res.json({ok:true})}catch(e){res.status(500).json({ok:false,error:e.message})}});
+export {router as providerConsoleRouter};
