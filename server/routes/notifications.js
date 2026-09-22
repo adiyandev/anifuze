@@ -5,13 +5,6 @@ import {listNotifications,createNotification,updateNotification,deleteNotificati
 
 const router=Router();
 
-router.get('/notifications',async(req,res)=>{
- try{
-  const items=await listNotifications({limit:req.query.limit,search:req.query.search,enabled:'true'});
-  res.json({ok:true,notifications:items.filter(n=>n.audience!=='admins')});
- }catch(e){res.status(503).json({ok:false,error:e.message});}
-});
-
 router.get('/admin/notifications',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{
  try{res.json({ok:true,notifications:await listNotifications(req.query)});}
  catch(e){res.status(400).json({ok:false,error:e.message});}
