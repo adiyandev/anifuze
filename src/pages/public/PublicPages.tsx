@@ -42,7 +42,7 @@ export function CatalogPage(){
  const title=path==='/search'?'Search Anime':path==='/genres'?'Genres':path==='/latest'?'Latest Episodes':path==='/trending'?'Trending Anime':path==='/movies'?'Movies':path==='/ongoing'?'Ongoing Anime':path==='/completed'?'Completed Anime':path==='/favorites'?'Your Favorites':path==='/watchlist'?'Your Watchlist':path==='/history'?'Watch History':path==='/continue-watching'?'Continue Watching':'Browse Anime';
  useEffect(()=>{if(path==='/schedule'||path==='/genres')return;let alive=true;setLoading(true);setError('');
   if(path==='/history'||path==='/continue-watching'){
-   const entries=watchProgressService.list();
+   const entries=watchProgressService.list().filter(e=>path==='/history'||e.progressSeconds>0);
    Promise.all(entries.map(e=>fetchAnimeById(e.animeId).then(a=>({...a,_watch:e})).catch(()=>null))).then(x=>{if(alive)setItems(x.filter(Boolean) as any[])}).catch(()=>{if(alive)setItems([])}).finally(()=>{if(alive)setLoading(false)});
    return()=>{alive=false};
   }
@@ -64,7 +64,7 @@ export function CatalogPage(){
    <select value={status} onChange={e=>setStatus(e.target.value)}><option value="">All statuses</option><option value="RELEASING">Ongoing</option><option value="FINISHED">Completed</option><option value="NOT_YET_RELEASED">Upcoming</option><option value="HIATUS">Hiatus</option></select>
    <select value={sort} onChange={e=>setSort(e.target.value)}><option value="popularity">Most popular</option><option value="trending">Trending</option><option value="score">Highest rated</option><option value="updated">Recently updated</option><option value="newest">Newest</option><option value="title">Title A–Z</option></select>
   </div>
-  {loading?<div className="vault-builder-text"><h2>Loading AniList…</h2><p>Fetching the latest catalog.</p></div>:error?<div className="vault-builder-text"><h2>Catalog unavailable</h2><p>{error}</p><button className="vault-primary" onClick={()=>setQ(x=>x)}>Retry</button></div>:<div className="vault-library-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div>}
+  {loading?<div className="vault-builder-text"><h2>Loading AniList…</h2><p>Fetching the latest catalog.</p></div>:error?<div className="vault-builder-text"><h2>Catalog unavailable</h2><p>{error}</p><button className="vault-primary" onClick={()=>setQ(x=>x)}>Retry</button></div>:<div className="vault-library-grid">{items.map(a=><div className="watch-library-item" key={a.id}><Card a={a}/>{a._watch&&<div className="watch-library-progress"><span>Episode {a._watch.episode}</span><b>{Math.round((a._watch.progressSeconds/a._watch.durationSeconds)*100)}%</b><i><em style={{width:Math.min(100,(a._watch.progressSeconds/a._watch.durationSeconds)*100)+'%'}}/></i></div>}</div>)}</div>}
  </section>;
 }
 
