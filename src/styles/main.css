@@ -675,3 +675,5 @@ button,a{transition-duration:.2s}
 @media(max-width:520px){.auth-card,.admin-login-card{padding:28px 22px}.auth-page,.admin-login-page{padding:20px 14px}}
 
 .watch-progress{position:absolute;left:16px;right:16px;bottom:14px;height:3px;background:rgba(255,255,255,.15);overflow:hidden}.watch-progress i{display:block;height:100%;background:#ff2b7a;transition:width .4s linear}.vault-player{position:relative}
+
+.watch-library-item{min-width:0}.watch-library-progress{padding:9px 2px 0;color:#8f929b;font-size:11px}.watch-library-progress span{float:left}.watch-library-progress b{float:right;color:#cfd1d8;font-weight:500}.watch-library-progress i{display:block;clear:both;height:3px;margin-top:7px;border-radius:99px;background:#25272d;overflow:hidden}.watch-library-progress em{display:block;height:100%;background:#ff2b7a;border-radius:inherit}
