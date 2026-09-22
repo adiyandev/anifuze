@@ -20,7 +20,12 @@ router.patch('/admin/notifications/:id',requireAdmin,requirePermission('notifica
  catch(e){res.status(400).json({ok:false,error:e.message});}
 });
 
-router.post('/admin/notifications/:id/deliver',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{\n try{res.json(await deliverByAudience(req.params.id));}\n catch(e){res.status(400).json({ok:false,error:e.message});}\n});\n\nrouter.delete('/admin/notifications/:id',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{
+router.post('/admin/notifications/:id/deliver',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{
+ try{res.json(await deliverByAudience(req.params.id));}
+ catch(e){res.status(400).json({ok:false,error:e.message});}
+});
+
+router.delete('/admin/notifications/:id',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{
  try{res.json(await deleteNotification(req.params.id));}
  catch(e){res.status(400).json({ok:false,error:e.message});}
 });
