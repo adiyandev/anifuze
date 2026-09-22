@@ -1,31 +1,58 @@
 # AniFuze
 
-**Build. Customize. Stream.** AniFuze is a frontend-only prototype for operating customer-owned anime websites. It separates a public streaming experience, a customer management workspace, and AniFuze platform administration.
+**Build. Customize. Stream.**
 
-## Included flows
+AniFuze is a frontend-first SaaS prototype for creating, customizing, and managing anime streaming websites.
 
-- LocalStorage-backed mock role guards for `public_user`, `customer`, and `platform_admin`.
-- Public catalog, anime detail, mock watch experience, discovery pages, and configurable navigation/appearance.
-- Customer dashboard, anime CRUD, episode visibility controls, provider management/testing/health/source management, and a mock API console.
-- Template marketplace with a simulated checkout/install/activate sequence.
-- Visual site builder with component insertion, editing, visibility, duplication, remove, save, undo/redo, and keyboard shortcuts.
-- Website, SEO, domain, community, notification, analytics, and settings control surfaces.
-- Separate platform-owner metrics and ecosystem-management tables.
+## Implemented
+
+- Premium public anime experience
+- Private customer workspace
+- Private platform administration
+- Anime and episode management
+- Provider management and fallback priority
+- Mock provider health and connection tests
+- Safe embed URL tester
+- Mock API/provider console
+- Source manager
+- Template marketplace and mock checkout
+- Template installation and activation
+- Visual site builder with undo/redo
+- Appearance editor
+- Navigation and page management
+- SEO and domain configuration UI
+- Users, comments and reports
+- Analytics and notifications
+- Local persistence through a storage abstraction
+- Responsive UI and application error boundary
 
 ## Architecture
 
-- `src/app`: route configuration and private-route guards.
-- `src/layouts`: deliberately distinct public, customer, and platform shells.
-- `src/pages`: page-level public, manage, and platform product surfaces.
-- `src/components/ui`: shared buttons, cards, badges, states, confirmation controls, and statistics.
-- `src/services`: mock/localStorage services designed to be replaced by backend clients later.
+The app is intentionally frontend-only. UI code talks to mock service modules, which persist demo state through localStorage. The service boundary is designed so a future API/backend can replace the mocks without rewriting the page layer.
 
-## Development
+### Stack
+
+React, Vite, TypeScript, React Router, CSS, lucide-react.
+
+### Run
 
 ```bash
 npm install
 npm run dev
+```
+
+Build:
+
+```bash
 npm run build
 ```
 
-No API calls, credentials, payments, DNS requests, analytics collection, or embedded iframes are used. Provider responses, payment steps, connection tests, and domain states are intentionally simulated.
+## Demo access
+
+Open **/login** and choose either the customer workspace or platform administration. Authentication is deliberately simulated and is not production security.
+
+## Safety boundaries
+
+No real provider credentials are used. Provider requests and playback are mocked. AniFuze does not use iframes or execute custom JavaScript from the builder.
+
+See `ANIFUZE_MASTER_BUILD_PROMPT.md` for the complete A–Z product specification.
