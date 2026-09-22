@@ -1,0 +1,2 @@
+import {query} from '../db/index.js';
+export async function getProviderHealth(){const r=await query('SELECT id,name,type,enabled,status,latency_ms,request_count,error_count,last_checked_at FROM af_providers ORDER BY priority ASC,name ASC');return r.rows.map(p=>{const requests=Number(p.request_count||0),errors=Number(p.error_count||0);return {...p,error_rate:requests?Number(((errors/requests)*100).toFixed(2)):0}})}
