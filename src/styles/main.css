@@ -399,3 +399,13 @@ button,a{transition-duration:.2s}
   .av-admin-main .stats,.av-admin-main .template-grid{grid-template-columns:1fr}
   .av-admin-main .page-heading{align-items:flex-start;flex-direction:column}
 }
+
+/* Customer configuration bridge: public theme tokens */
+.vault-shell{--vault-primary:#ff1a75;--vault-accent:#8b5cf6}
+.vault-shell .vault-primary,.vault-shell .vault-filter-row button.active,.vault-shell .vault-nav a.active{background:var(--vault-primary);border-color:var(--vault-primary);color:#fff}
+.vault-shell .vault-brand span,.vault-shell .vault-kicker,.vault-shell .vault-section-head a,.vault-shell .vault-nav a:hover,.vault-shell .vault-footer a:hover{color:var(--vault-primary)}
+.vault-shell .vault-card:hover{border-color:color-mix(in srgb,var(--vault-primary) 55%,transparent);box-shadow:0 18px 48px color-mix(in srgb,var(--vault-primary) 14%,transparent)}
+.vault-shell .vault-secondary:hover{border-color:var(--vault-primary);color:var(--vault-primary)}
+.vault-builder-section,.vault-builder-text{margin:0 0 2rem;padding:1.5rem;border:1px solid rgba(255,255,255,.07);border-radius:22px;background:rgba(255,255,255,.025)}
+.vault-builder-hero{min-height:220px;display:flex;flex-direction:column;justify-content:center}
+.vault-builder-text p,.vault-builder-section p{max-width:720px;color:#aeb6c7}
