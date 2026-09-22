@@ -1,14 +1,14 @@
 import {Router} from 'express';
 import {requireAdmin} from './auth.js';
 import {requirePermission} from '../auth/permissions.js';
-import {listNotifications,createNotification,updateNotification,deleteNotification,listUserNotifications,markNotificationRead,markAllNotificationsRead} from '../services/notifications.js';
+import {listNotifications,createNotification,updateNotification,deleteNotification} from '../services/notifications.js';
 
 const router=Router();
 
 router.get('/notifications',async(req,res)=>{
  try{
-  const items=await listNotifications({limit:req.query.limit,search:req.query.search,enabled:req.query.enabled});
-  res.json({ok:true,notifications:items});
+  const items=await listNotifications({limit:req.query.limit,search:req.query.search,enabled:'true'});
+  res.json({ok:true,notifications:items.filter(n=>n.audience!=='admins')});
  }catch(e){res.status(503).json({ok:false,error:e.message});}
 });
 
