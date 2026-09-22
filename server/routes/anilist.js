@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js'; import {requirePermission} from '../auth/permissions.js';
+import {searchAniList,getAniListAnime,syncAniList,getSyncStatus,getCachedCatalog} from '../services/anilist.js';
+const router=Router();router.use('/admin/anilist',requireAdmin);
+router.get('/admin/anilist/status',async(_req,res)=>{try{res.json({ok:true,...await getSyncStatus()});}catch(error){res.status(500).json({ok:false,error:error.message});}});
+router.get('/admin/anilist/search',requirePermission('anime_view'),async(req,res)=>{try{res.json({ok:true,...await searchAniList(req.query.q,{page:req.query.page,perPage:req.query.perPage})});}catch(error){res.status(502).json({ok:false,error:error.message});}});
+router.get('/admin/anilist/anime/:id',requirePermission('anime_view'),async(req,res)=>{try{res.json({ok:true,...await getAniListAnime(req.params.id)});}catch(error){res.status(502).json({ok:false,error:error.message});}});
+router.get('/admin/anilist/catalog',requirePermission('anime_view'),async(req,res)=>{try{res.json({ok:true,items:await getCachedCatalog({limit:req.query.limit,search:req.query.q})});}catch(error){res.status(500).json({ok:false,error:error.message});}});
+router.post('/admin/anilist/sync',requirePermission('anime_manage'),async(_req,res)=>{try{res.json({ok:true,...await syncAniList()});}catch(error){res.status(502).json({ok:false,error:error.message});}});
+export {router as anilistRouter};
