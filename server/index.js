@@ -7,6 +7,7 @@ import {authRouter} from './routes/auth.js';
 import {anilistRouter} from './routes/anilist.js';
 import {episodesRouter} from './routes/episodes.js';
 import {providersRouter} from './routes/providers.js';
+import {providerConsoleRouter} from './routes/providerConsole.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
@@ -19,6 +20,7 @@ app.use('/api/auth',authRouter);
 app.use('/api',anilistRouter);
 app.use('/api',episodesRouter);
 app.use('/api',providersRouter);
+app.use('/api',providerConsoleRouter);
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
