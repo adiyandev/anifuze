@@ -15,6 +15,7 @@ import {templateRouter} from './routes/templates.js';
 import {siteBuilderRouter} from './routes/siteBuilder.js';
 import {appearanceRouter} from './routes/appearance.js';
 import {appearanceUploadRouter} from './routes/appearanceUpload.js';
+import {navigationRouter} from './routes/navigation.js';
 import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
@@ -36,6 +37,7 @@ app.use('/api',templateRouter);
 app.use('/api',siteBuilderRouter);
 app.use('/api',appearanceRouter);
 app.use('/api',appearanceUploadRouter);
+app.use('/api',navigationRouter);
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
 const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
