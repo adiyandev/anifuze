@@ -8,11 +8,25 @@ const Card=({a}:{a:any})=><Link className="anime-card" to={'/anime/'+a.id}><img 
 export function HomePage(){
  const{settings}=useApp();
  const blocks=JSON.parse(localStorage.getItem('anifuze_builder')||'[]');
- const hero=blocks.find((x:any)=>x.type==='Hero');
- const grid=blocks.find((x:any)=>x.type==='Anime Grid');
- return <><section className="hero"><div><span className="eyebrow">ANIFUZE · YOUR ANIME PLATFORM</span><h1>{hero?.title||'Build your next watchlist.'}</h1><p>{hero?.content||settings.tagline}</p><div className="actions"><Link className="button" to="/browse">Start exploring →</Link><Link className="button ghost" to="/manage">Manage site</Link></div></div><div className="hero-art"><div><span>LIVE CATALOG</span><b>{anime.length * 120}+</b><small>curated episodes</small></div></div></section><Shelf title={grid?.title||'Trending now'}/><Shelf title="Latest episodes"/><section className="callout"><span>POWERED BY ANIFUZE</span><h2>{settings.tagline}</h2><Link className="button" to="/continue-watching">Continue watching</Link></section></>;
+ const hero=blocks.find((x:any)=>x.type==='Hero'); const featured=anime[0]; const slides=anime.slice(0,5);
+ return <section className="av-home">
+  <div className="av-hero">
+   <div className="av-hero-backdrop" style={{backgroundImage:'linear-gradient(90deg,rgba(7,7,7,.98) 0%,rgba(7,7,7,.84) 38%,rgba(7,7,7,.3) 70%,#070707 100%),linear-gradient(0deg,#070707 0%,transparent 30%),url('+featured.cover+')'}}/>
+   <div className="av-hero-content">
+    <span className="av-featured">✦ FEATURED ON {settings.siteName.toUpperCase()}</span>
+    <h1>{hero?.title||featured.title}</h1>
+    <div className="av-hero-meta"><span>{featured.type}</span><i>•</i><span>{featured.status}</span><i>•</i><span>2026</span><i>•</i><b>★ 4.8</b></div>
+    <p>{hero?.content||featured.description}</p>
+    <div className="actions"><Link className="av-play-btn" to={'/watch/'+featured.id}>▶ Watch Now</Link><Link className="av-info-btn" to={'/anime/'+featured.id}>ⓘ Details</Link></div>
+   </div><div className="av-dots">{slides.map((x:any,i:number)=><span key={x.id} className={i===0?'active':''}/>)}</div>
+  </div>
+  <div className="av-home-content">
+   <section className="av-section"><div className="av-section-head"><div><h2>🔥 Trending Anime</h2><p>What everyone is watching right now.</p></div><Link to="/trending">View all ›</Link></div><div className="av-cards">{anime.slice(0,6).map(a=><Link className="av-card" to={'/anime/'+a.id} key={a.id}><div className="av-card-media"><img src={a.cover} alt={a.title}/><div className="av-card-play">▶</div></div><h3>{a.title}</h3><small>{a.type} <b>•</b> {a.episodes} Episodes</small></Link>)}</div></section>
+   <section className="av-section"><div className="av-section-head"><div><h2>🆕 Latest Episodes</h2><p>Fresh releases from your catalog.</p></div><Link to="/latest">View all ›</Link></div><div className="av-cards">{anime.slice(2,8).map(a=><Link className="av-card" to={'/anime/'+a.id} key={a.id}><div className="av-card-media"><img src={a.cover} alt={a.title}/><div className="av-card-play">▶</div></div><h3>{a.title}</h3><small>Episode {Math.min(a.episodes,12)} <b>•</b> 1080p</small></Link>)}</div></section>
+   <section className="av-strip"><div><span>ANIFUZE PLATFORM</span><h2>{settings.tagline}</h2><p>Build and run your own anime streaming experience.</p></div><Link className="av-info-btn" to="/manage">Open Admin Panel</Link></section>
+  </div>
+ </section>;
 }
-
 export function Shelf({title}:{title:string}){return <section className="shelf"><div className="section-title"><div><span className="eyebrow">DISCOVER</span><h2>{title}</h2></div><Link to="/browse">View all →</Link></div><div className="poster-grid">{anime.slice(0,4).map(a=><Card a={a} key={a.id}/>)}</div></section>}
 
 export function CatalogPage(){
