@@ -1,9 +1,14 @@
 import {Router} from 'express';
 import {requireAdmin} from './auth.js';
 import {requirePermission} from '../auth/permissions.js';
-import {listNotifications,createNotification,updateNotification,deleteNotification,deliverByAudience} from '../services/notifications.js';
+import {listNotifications,listPublicNotifications,createNotification,updateNotification,deleteNotification,deliverByAudience} from '../services/notifications.js';
 
 const router=Router();
+
+router.get('/notifications',async(req,res)=>{
+ try{res.json({ok:true,notifications:await listPublicNotifications(req.query)});}
+ catch(e){res.status(503).json({ok:false,error:'Notifications unavailable.'});}
+});
 
 router.get('/admin/notifications',requireAdmin,requirePermission('notifications_manage'),async(req,res)=>{
  try{res.json({ok:true,notifications:await listNotifications(req.query)});}
