@@ -22,10 +22,11 @@ function applyMeta(seo:any,path:string){
 }
 
 export function PublicLayout(){
- const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);
- useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));return()=>{active=false}},[]);
+ const{settings,role,setRole}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);
+ useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));fetch('/api/footer').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setFooter(d.footer)}).catch(()=>{if(active)setFooter(null)});return()=>{active=false}},[]);
  useEffect(()=>{let active=true;fetch('/api/seo').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)applyMeta(d.seo,location.pathname)}).catch(()=>{if(active)document.title=settings.siteName||'AniFuze'});return()=>{active=false}},[location.pathname,settings.siteName]);
  const visibleNav=(nav.length?nav:[{id:'browse',label:'Browse',path:'/browse',icon:'Compass',visible:true,sort_order:10},{id:'latest',label:'Latest',path:'/latest',icon:'Bell',visible:true,sort_order:20},{id:'trending',label:'Trending',path:'/trending',icon:'BarChart3',visible:true,sort_order:30},{id:'schedule',label:'Schedule',path:'/schedule',icon:'CalendarDays',visible:true,sort_order:40}]).filter(x=>x.visible);
+ const f=footer||{enabled:true,description:settings.tagline||'Your anime streaming destination.',copyright_text:'',show_brand:true,show_navigation:true,show_account:true,show_powered_by:true};
  return <div className="vault-shell" style={{'--vault-primary':settings.primary,'--vault-accent':settings.accent} as CSSProperties}>
   <header className="vault-nav"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link>
    <nav className="vault-main-nav">{visibleNav.map(item=>{const Icon=iconFor(item.icon);return <Link key={item.id} className={location.pathname===item.path?'active':''} to={item.path}><Icon size={15}/>{item.label}</Link>})}</nav>
@@ -33,6 +34,11 @@ export function PublicLayout(){
   </header>
   {open&&<div className="vault-mobile-nav">{visibleNav.map(item=><Link key={item.id} to={item.path} onClick={()=>setOpen(false)}>{item.label}</Link>)}<Link to="/search" onClick={()=>setOpen(false)}>Search</Link></div>}
   <main><Outlet/></main>
-  <footer className="vault-footer"><div><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link><p>{settings.tagline}</p></div><div className="vault-footer-links">{visibleNav.slice(0,4).map(item=><Link key={item.id} to={item.path}>{item.label}</Link>)}<Link to="/login">Account</Link></div><small>© 2026 {settings.siteName} · Built with AniFuze</small></footer>
+  {f.enabled&&<footer className="vault-footer">
+   {f.show_brand&&<div className="vault-footer-brand"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link><p>{f.description||settings.tagline}</p></div>}
+   {f.show_navigation&&<div className="vault-footer-column"><span>Explore</span>{visibleNav.slice(0,5).map(item=><Link key={item.id} to={item.path}>{item.label}</Link>)}</div>}
+   {f.show_account&&<div className="vault-footer-column"><span>Account</span><Link to="/login">Sign in</Link><Link to="/register">Create account</Link></div>}
+   <div className="vault-footer-bottom"><small>© {new Date().getFullYear()} {f.copyright_text||settings.siteName}</small>{f.show_powered_by&&<small>Built with AniFuze</small>}</div>
+  </footer>}
  </div>
 }
