@@ -30,7 +30,7 @@ const mapMedia=(m:AniListMedia):Anime=>({
  description:(m.description||'').replace(/<[^>]+>/g,'').replace(/\\s+/g,' ').trim(),
  cover:m.coverImage?.extraLarge||m.coverImage?.large||'',
  banner:m.bannerImage||m.coverImage?.extraLarge||m.coverImage?.large||'',
- score:m.averageScore?m.averageScore/10:undefined,
+ score:m.averageScore!=null?m.averageScore/10:undefined,ratingSource:'anilist',ratingScale:10,
  year:m.seasonYear||undefined
 });
 
