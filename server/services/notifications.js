@@ -88,9 +88,15 @@ export async function deliverByAudience(notificationId,audience='all'){
  if(!n)throw new Error('Enabled notification not found.');
  const target=String(audience||n.audience);
  let rows;
- if(target==='admins') rows=(await query("SELECT id FROM af_users WHERE status='active' AND username LIKE 'admin%'")).rows;
- else if(target==='users') rows=(await query("SELECT id FROM af_users WHERE status='active' AND username NOT LIKE 'admin%'")).rows;
- else rows=(await query("SELECT id FROM af_users WHERE status='active'")).rows;
+ if(target==='admins') rows=(await query("SELECT id FROM af_admin_users WHERE enabled=TRUE")).rows;
+ else if(target==='users') rows=(await query("SELECT id FROM af_users WHERE status='active'")).rows;
+ else {
+   const [users,admins]=await Promise.all([
+     query("SELECT id FROM af_users WHERE status='active'"),
+     query("SELECT id FROM af_admin_users WHERE enabled=TRUE")
+   ]);
+   rows=[...users.rows,...admins.rows];
+ }
  return deliverNotification(notificationId,rows.map(x=>x.id));
 }
 
