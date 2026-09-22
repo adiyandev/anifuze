@@ -5,7 +5,7 @@ import { useApp } from '../../contexts/AppContext';
 
 export function AdminLoginPage() {
   const nav = useNavigate();
-  const { setRole } = useApp();
+  const { refreshAuth } = useApp();
   const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,6 @@ export function AdminLoginPage() {
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Login failed.');
-        setRole(data.role);
         setStep(data.requires2fa ? 'setup' : '2fa');
         return;
       }
@@ -42,6 +41,7 @@ export function AdminLoginPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Verification failed.');
+      await refreshAuth();
       nav('/admin/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed.');
