@@ -34,7 +34,7 @@ export function AdminLoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         });
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || 'Login failed.');
         setStep(data.requires2fa ? 'setup' : '2fa');
         return;
@@ -107,7 +107,7 @@ export function AdminLoginPage() {
               </label>
               <label>
                 Password
-                <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} minLength={12} required />
+                <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} minLength={isDemo ? 1 : 12} required />
               </label>
               <button className="button" type="submit">Continue</button>
             </form>
