@@ -23,8 +23,8 @@ export async function listNavigation({publicOnly=false}={}){
  return r.rows.length?r.rows:defaults.filter(x=>!publicOnly||x.visible);
 }
 
-export async function saveNavigation(items){
- if(!Array.isArray(items)||items.length>0&&items.length>50)throw new Error('Navigation must contain 0 to 50 items.');
+export function validateNavigationItems(items){
+ if(!Array.isArray(items)||items.length>50)throw new Error('Navigation must contain 0 to 50 items.');
  const normalized=items.map(clean);
  const seen=new Set();
  for(const item of normalized){
@@ -35,6 +35,11 @@ export async function saveNavigation(items){
   if(item.path.startsWith('//'))throw new Error('Invalid navigation path.');
   if(item.sort_order<-100000||item.sort_order>100000)throw new Error('Invalid navigation order.');
  }
+ return normalized;
+}
+
+export async function saveNavigation(items){
+ const normalized=validateNavigationItems(items);
  await query('DELETE FROM af_navigation_items');
  for(const item of normalized){
   await query('INSERT INTO af_navigation_items(id,label,path,icon,visible,sort_order,updated_at) VALUES($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP)',
