@@ -4,7 +4,6 @@ import {promisify} from 'node:util';
 import {query} from '../db/index.js';
 const scrypt=promisify(crypto.scrypt);
 export const authRouter=Router();
-authRouter.use(originGuard);
 const COOKIE='anifuze_admin_session';
 const SESSION_MS=1000*60*60*12;
 const ABSOLUTE_MS=1000*60*60*24;
@@ -27,6 +26,7 @@ const makeRecoveryCodes=()=>Array.from({length:10},()=>crypto.randomBytes(6).toS
 const hashRecovery=async(code)=>{const salt=crypto.randomBytes(16).toString('hex');const key=await scrypt(code,salt,32,{N:16384,r:8,p:1});return salt+':'+key.toString('hex');};
 const verifyRecovery=async(code,stored)=>{const [salt,hex]=String(stored).split(':');if(!salt||!hex)return false;const key=await scrypt(code,salt,32,{N:16384,r:8,p:1});const a=Buffer.from(hex,'hex');return a.length===key.length&&crypto.timingSafeEqual(a,key);};
 const originGuard=(req,res,next)=>{if(!['POST','PUT','PATCH','DELETE'].includes(req.method))return next();const origin=req.headers.origin;if(origin){try{if(new URL(origin).host!==req.headers.host)return res.status(403).json({ok:false,error:'Origin rejected.'})}catch{return res.status(403).json({ok:false,error:'Origin rejected.'})}}return next();};
+authRouter.use(originGuard);
 const makeSession=async(user,req,twoFactorVerified=false)=>{const id=crypto.randomBytes(32).toString('base64url');const created=new Date();const expires=new Date(created.getTime()+SESSION_MS);const absolute=new Date(created.getTime()+ABSOLUTE_MS);await query('INSERT INTO af_admin_sessions (id,admin_user_id,expires_at,created_at,last_seen_at,ip_address,user_agent,absolute_expires_at,two_factor_verified) VALUES ($1,$2,$3,$4,$4,$5,$6,$7,$8)',[id,user.id,expires.toISOString(),created.toISOString(),req.ip,String(req.headers['user-agent']||'').slice(0,1000),absolute.toISOString(),twoFactorVerified]);return {id,expires};};
 const sessionUser=async req=>{const c=parseCookies(req);const id=c[COOKIE];if(!id)return null;const r=await query('SELECT s.*,u.email,u.role,u.enabled,u.must_setup_2fa FROM af_admin_sessions s JOIN af_admin_users u ON u.id=s.admin_user_id WHERE s.id=$1 AND s.expires_at>CURRENT_TIMESTAMP AND u.enabled=TRUE',[id]);const s=r.rows[0];if(!s)return null;if(s.absolute_expires_at&&new Date(s.absolute_expires_at)<=new Date())return null;await query('UPDATE af_admin_sessions SET last_seen_at=CURRENT_TIMESTAMP,expires_at=$2 WHERE id=$1',[id,new Date(Date.now()+SESSION_MS).toISOString()]);return {...s,sessionId:id};};
 authRouter.post('/bootstrap-admin',async(req,res)=>{res.status(410).json({ok:false,error:'Admin accounts are created by the installer.'});});
