@@ -31,7 +31,10 @@ async function smtpSend(to,subject,html,textBody=''){
  let ehlo=await command(socket,[250],'EHLO anifuze.local');
  if(!s.secure&&s.port===587&&ehlo){
    await command(socket,[250],'STARTTLS');
-   await new Promise((resolve,reject)=>{socket.once('secureConnect',resolve);socket.once('error',reject);socket._anifuzeTls=true;});
+   const secureSocket=tls.connect({socket,host:s.host,rejectUnauthorized:true});
+   await new Promise((resolve,reject)=>{secureSocket.once('secureConnect',resolve);secureSocket.once('error',reject);});
+   socket=secureSocket;
+   await command(socket,[250],'EHLO anifuze.local');
  }
  if(s.username){await command(socket,[235,334],'AUTH LOGIN');await command(socket,[334],encodeBody(s.username));await command(socket,[235],encodeBody(s.password));}
  await command(socket,[250],'MAIL FROM:<'+escapeHeader(s.from_email)+'>');
