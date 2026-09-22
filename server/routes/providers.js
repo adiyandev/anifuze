@@ -1,0 +1,11 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';import {requirePermission} from '../auth/permissions.js';
+import {listProviders,getProvider,saveProvider,deleteProvider,testProvider} from '../services/providers.js';
+const router=Router();router.use('/admin/providers',requireAdmin);
+router.get('/admin/providers',requirePermission('providers_view'),async(_req,res)=>{try{res.json({ok:true,items:await listProviders()});}catch(e){res.status(500).json({ok:false,error:e.message});}});
+router.get('/admin/providers/:id',requirePermission('providers_view'),async(req,res)=>{try{const item=await getProvider(req.params.id);if(!item)return res.status(404).json({ok:false,error:'Provider not found.'});res.json({ok:true,item});}catch(e){res.status(500).json({ok:false,error:e.message});}});
+router.post('/admin/providers',requirePermission('providers_manage'),async(req,res)=>{try{res.status(201).json({ok:true,item:await saveProvider(null,req.body||{})});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.patch('/admin/providers/:id',requirePermission('providers_manage'),async(req,res)=>{try{res.json({ok:true,item:await saveProvider(req.params.id,req.body||{})});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.delete('/admin/providers/:id',requirePermission('providers_manage'),async(req,res)=>{try{await deleteProvider(req.params.id);res.json({ok:true});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.post('/admin/providers/:id/test',requirePermission('providers_manage'),async(req,res)=>{try{res.json({ok:true,...await testProvider(req.params.id)});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+export {router as providersRouter};
