@@ -38,7 +38,7 @@ export async function updateNotification(notificationId,input={}){
  if(!r.rows[0])throw new Error('Notification not found.');
  const cur=r.rows[0],n=normalize({...cur,...input});
  await query('UPDATE af_notifications SET title=$2,message=$3,type=$4,audience=$5,scheduled_at=$6,enabled=$7 WHERE id=$1',[cur.id,n.title,n.message,n.type,n.audience,n.scheduled_at,n.enabled]);
- return (await listNotifications({search:cur.id}))[0]||null;
+ const updated=await query('SELECT id,title,message,type,audience,scheduled_at,sent_at,enabled,created_at FROM af_notifications WHERE id=$1',[cur.id]);\n return updated.rows[0]||null;
 }
 
 export async function deleteNotification(notificationId){
