@@ -1,36 +1,43 @@
 import {Link,Outlet,useLocation} from 'react-router-dom';
-import {BarChart3,Users,Film,Settings,Server,LogOut,Search,Eye,Menu} from 'lucide-react';
+import {BarChart3,Users,Film,Settings,Server,LogOut,Eye,LayoutDashboard,PlaySquare,Layers,CalendarDays,Radio,TerminalSquare,HeartPulse,Database,Palette,PanelLeft,FileText,Search,Globe,ChartNoAxesCombined,Bell,Shield,Menu,ShoppingBag,MessageSquareWarning} from 'lucide-react';
 import {useApp} from '../contexts/AppContext';
 
-type IconComponent = typeof BarChart3;
-
-const tabs: Array<{id: string; label: string; Icon: IconComponent}>=[
- {id:'dashboard',label:'Dashboard',Icon:BarChart3},{id:'users',label:'Users',Icon:Users},{id:'anime',label:'Content',Icon:Film},{id:'settings',label:'Settings',Icon:Settings},{id:'system',label:'System',Icon:Server}
-];
 const groups=[
- ['CONTENT',[['Anime','/manage/anime'],['Episodes','/manage/episodes'],['Genres','/manage/genres'],['Collections','/manage/collections'],['Schedule','/manage/schedule']]],
- ['STREAMING',[['Providers','/manage/providers'],['Console','/manage/providers/console'],['Health','/manage/providers/health'],['Sources','/manage/providers/sources']]],
- ['DESIGN',[['Marketplace','/manage/templates/marketplace'],['My Templates','/manage/templates'],['Site Builder','/manage/site-builder'],['Appearance','/manage/appearance'],['Navigation','/manage/navigation'],['Pages','/manage/pages']]],
- ['SYSTEM',[['SEO','/manage/seo'],['Domains','/manage/domains'],['Analytics','/manage/analytics'],['Notifications','/manage/notifications'],['Settings','/manage/settings']]]
+ ['OVERVIEW',[
+  ['Dashboard','/manage/dashboard',LayoutDashboard],
+  ['Analytics','/manage/analytics',ChartNoAxesCombined],
+ ]],
+ ['CONTENT',[
+  ['Anime','/manage/anime',Film],['Episodes','/manage/episodes',PlaySquare],['Genres','/manage/genres',Layers],['Collections','/manage/collections',Layers],['Schedule','/manage/schedule',CalendarDays],
+ ]],
+ ['STREAMING',[
+  ['Providers','/manage/providers',Radio],['Provider Console','/manage/providers/console',TerminalSquare],['Health','/manage/providers/health',HeartPulse],['Sources','/manage/providers/sources',Database],
+ ]],
+ ['DESIGN',[
+  ['Marketplace','/manage/templates/marketplace',ShoppingBag],['My Templates','/manage/templates',Layers],['Site Builder','/manage/site-builder',Palette],['Appearance','/manage/appearance',Palette],['Navigation','/manage/navigation',PanelLeft],['Pages','/manage/pages',FileText],
+ ]],
+ ['COMMUNITY',[
+  ['Users','/manage/users',Users],['Comments','/manage/comments',MessageSquareWarning],['Reports','/manage/reports',Shield],
+ ]],
+ ['SITE',[
+  ['SEO','/manage/seo',Globe],['Domains','/manage/domains',Globe],['Notifications','/manage/notifications',Bell],['Settings','/manage/settings',Settings],
+ ]],
 ];
 
 export function CustomerAdminLayout(){
  const loc=useLocation(); const {setRole}=useApp();
- const current=loc.pathname.split('/').filter(Boolean)[1]||'dashboard';
- const top=current==='dashboard'?'dashboard':current==='users'?'users':current==='anime'?'anime':current==='settings'?'settings':'system';
- return <div className="av-admin">
-   <header className="av-admin-head">
-    <Link className="av-admin-brand" to="/manage/dashboard"><span>✦</span><strong>AniFuze</strong><small>ADMIN PANEL</small></Link>
-    <nav className="av-admin-tabs">{tabs.map(({id,label,Icon})=><Link key={id} className={top===id?'active':''} to={id==='dashboard'?'/manage/dashboard':id==='users'?'/manage/users':id==='anime'?'/manage/anime':'/manage/settings'}><Icon size={16}/>{label}</Link>)}</nav>
-    <div className="av-admin-actions"><Link className="av-admin-search" to="/search"><Search size={15}/><span>Search</span><kbd>⌘ K</kbd></Link><Link className="av-admin-icon" to="/"><Eye size={16}/></Link><button className="av-admin-avatar" onClick={()=>setRole('public_user')}>A</button></div>
-   </header>
-   <div className="av-admin-body">
-    <aside className="av-admin-subnav">
-      <div className="av-admin-subnav-title"><Menu size={14}/> MANAGEMENT</div>
-      {groups.map(([heading,items])=><div className="av-admin-group" key={heading as string}><small>{heading as string}</small>{(items as any[]).map(([label,to])=><Link key={to} className={loc.pathname===to?'active':''} to={to}>{label}</Link>)}</div>)}
-      <button className="av-admin-signout" onClick={()=>setRole('public_user')}><LogOut size={14}/> Sign out</button>
-    </aside>
-    <main className="av-admin-main"><div className="av-admin-titlebar"><div><span>ADMINISTRATION</span><h1>{loc.pathname==='/manage/dashboard'?'Admin Dashboard':loc.pathname.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')}</h1></div><Link className="av-admin-preview" to="/">↗ Preview site</Link></div><Outlet/></main>
+ const title=loc.pathname==='/manage/dashboard'?'Dashboard':loc.pathname.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')||'Dashboard';
+ return <div className="apple-admin">
+  <aside className="apple-sidebar">
+   <Link className="apple-brand" to="/manage/dashboard"><span>✦</span><div><strong>AniFuze</strong><small>Site Management</small></div></Link>
+   <div className="apple-sidebar-scroll">
+    {groups.map(([heading,items])=><div className="apple-nav-group" key={heading as string}><small>{heading as string}</small>{(items as any[]).map(([label,to,Icon])=><Link key={to} className={loc.pathname===to?'active':''} to={to}><Icon size={15}/><span>{label}</span></Link>)}</div>)}
    </div>
+   <div className="apple-sidebar-bottom"><Link to="/"><Eye size={15}/> Preview site</Link><button onClick={()=>setRole('public_user')}><LogOut size={15}/> Sign out</button></div>
+  </aside>
+  <main className="apple-admin-main">
+   <header className="apple-topbar"><div><small>ANIFUZE ADMIN</small><h1>{title}</h1></div><div className="apple-top-actions"><Link to="/search" className="apple-search"><Search size={14}/>Search</Link><button className="apple-avatar" onClick={()=>setRole('public_user')}>A</button></div></header>
+   <div className="apple-content"><Outlet/></div>
+  </main>
  </div>;
 }
