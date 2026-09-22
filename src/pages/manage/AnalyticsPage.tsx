@@ -8,9 +8,10 @@ const devices:Array<[string,number,ComponentType<{size?:number}>]>=[['Desktop',5
 function Metric({icon:Icon,label,value,change,sub}:{icon:any;label:string;value:string;change:string;sub:string}){return <article className="an-metric"><div className="an-metric-top"><span className="an-icon"><Icon size={16}/></span><small>{label}</small><span className="an-change"><ArrowUpRight size={11}/>{change}</span></div><strong>{value}</strong><p>{sub}</p></article>}
 export function AnalyticsPage(){
  const [range,setRange]=useState<Range>('7d'); const [tab,setTab]=useState<'traffic'|'providers'>('traffic'); const [refreshing,setRefreshing]=useState(false);
- const max=Math.max(...points); const pointX=(i:number)=>`${(i/(spark.length-1))*100}%`; const pointY=(p:number)=>`${100-(p/max)*78}%`; const svgPoint=(p:number,i:number)=>`${(i/(spark.length-1))*1000},${300-(p/max)*234}`; const areaClip=`polygon(${spark.map((p,i)=>`${pointX(i)} ${pointY(p)}`).join(',')},100% 100%,0 100%)`; const scale=range==='24h'?1:range==='7d'?1.8:range==='30d'?3.6:6.4;
- const totalViews=Math.round(68240*scale).toLocaleString(),streamStarts=Math.round(38920*scale).toLocaleString(),visitors=Math.round(24810*scale).toLocaleString(),users=Math.round(8340*scale).toLocaleString();
+ const scale=range==='24h'?1:range==='7d'?1.8:range==='30d'?3.6:6.4;
  const spark=useMemo(()=>points.map(v=>v*(range==='24h'?1:range==='7d'?1:range==='30d'?1.35:1.7)),[range]);
+ const max=Math.max(...spark); const pointX=(i:number)=>`${(i/(spark.length-1))*100}%`; const pointY=(p:number)=>`${100-(p/max)*78}%`; const svgPoint=(p:number,i:number)=>`${(i/(spark.length-1))*1000},${300-(p/max)*234}`; const areaClip=`polygon(${spark.map((p,i)=>`${pointX(i)} ${pointY(p)}`).join(',')},100% 100%,0 100%)`;
+ const totalViews=Math.round(68240*scale).toLocaleString(),streamStarts=Math.round(38920*scale).toLocaleString(),visitors=Math.round(24810*scale).toLocaleString(),users=Math.round(8340*scale).toLocaleString();
  const refresh=()=>{setRefreshing(true);setTimeout(()=>setRefreshing(false),650)};
  return <section className="analytics-page">
   <div className="an-hero"><div><div className="an-kicker"><ChartNoAxesCombined size={13}/> PLATFORM INSIGHTS</div><h1>Analytics</h1><p>Understand traffic, viewing activity, and streaming performance across AniFuze.</p></div><div className="an-actions"><button className="an-btn ghost" onClick={refresh}><RefreshCw className={refreshing?'an-spin':''} size={14}/>Refresh</button><button className="an-btn"><Download size={14}/>Export report</button></div></div>
