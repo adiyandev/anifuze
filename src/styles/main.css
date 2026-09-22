@@ -409,3 +409,40 @@ button,a{transition-duration:.2s}
 .vault-builder-section,.vault-builder-text{margin:0 0 2rem;padding:1.5rem;border:1px solid rgba(255,255,255,.07);border-radius:22px;background:rgba(255,255,255,.025)}
 .vault-builder-hero{min-height:220px;display:flex;flex-direction:column;justify-content:center}
 .vault-builder-text p,.vault-builder-section p{max-width:720px;color:#aeb6c7}
+
+/* Admin readability pass — lift controls off the black background */
+.av-admin-main{background:#0b0f17}
+.av-admin-main .panel{background:linear-gradient(145deg,#151b27,#121824);border-color:#2a3548;box-shadow:0 14px 38px rgba(0,0,0,.22)}
+.av-admin-main .stat{background:linear-gradient(145deg,#171e2b,#131a26);border-color:#2a3548}
+.av-admin-main .button,.av-admin-main button.button{background:#1d2635;border-color:#39475c;color:#eef4ff}
+.av-admin-main .button:hover,.av-admin-main button.button:hover{background:#263347;border-color:#4a5d78;color:#fff}
+.av-admin-main .button.ghost{background:#182130;color:#cbd5e1;border-color:#334155}
+.av-admin-main .filters button{background:#17202d;border-color:#334155;color:#aebbd0}
+.av-admin-main .filters button:hover{background:#202c3d;color:#f1f5f9;border-color:#46566e}
+.av-admin-main .filters .selected{background:rgba(34,211,238,.15);border-color:rgba(34,211,238,.45);color:#67e8f9}
+.av-admin-main input,.av-admin-main textarea,.av-admin-main select,.av-admin-main .search{background:#121a27!important;border-color:#344258!important;color:#f1f5f9!important}
+.av-admin-main input::placeholder,.av-admin-main textarea::placeholder{color:#718096}
+.av-admin-main th{background:#151d2a;color:#8795aa;border-color:#2b374a}
+.av-admin-main td{background:#121a25;border-color:#273246!important;color:#d0d8e5}
+.av-admin-main tbody tr:hover td{background:#192333}
+.av-admin-main .link-button{background:#182130;border:1px solid #334155;color:#cbd5e1;padding:6px 9px}
+.av-admin-main .link-button:hover{background:#233148;border-color:#4b5f7b;color:#67e8f9}
+.av-admin-main .chain-item{background:#151e2b;border-color:#344258}
+.av-admin-main .chain-item:hover{background:#1a2636;border-color:#4a5d78}
+.av-admin-main .builderbar{background:#141c29;border-color:#2c394c}
+.av-admin-main .builderbar button{background:#1b2635;border-color:#3a4a60;color:#d7e0ed}
+.av-admin-main .library,.av-admin-main .properties{background:#121a27;border-color:#2d3a4e}
+.av-admin-main .library button{background:#192333;border:1px solid #334155;color:#cbd5e1}
+.av-admin-main .library button:hover{background:#233148;border-color:#4b5f7b;color:#67e8f9}
+.av-admin-main .canvas{background:#0c121c}
+.av-admin-main .block{background:#172130!important;border-color:#344258!important;color:#cbd5e1}
+.av-admin-main .block:hover{background:#1d2a3b!important;border-color:#4a5d78!important}
+.av-admin-main .block.selected{background:#172b38!important;border-color:#22d3ee!important}
+.av-admin-main .response pre{background:#0d141f;border-color:#2d3a4e}
+.av-admin-main .notice{background:rgba(34,211,238,.09);border-color:rgba(34,211,238,.28)}
+.admin.platform{background:#0b0f17}
+.admin.platform .panel,.admin.platform .stat{background:#151b27!important;border-color:#2a3548!important}
+.admin.platform aside{background:#0e1520;border-color:#263246}
+.admin.platform aside>a:not(.brand){color:#9aa8bb}
+.admin.platform aside>a.active,.admin.platform aside>a:hover{background:#1a2636;color:#f4f7fb}
+.admin.platform .admin-head{background:#111a27;border-color:#29374b}
