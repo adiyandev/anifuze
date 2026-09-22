@@ -8,8 +8,9 @@ const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compac
 
 export function HomePage(){
  const{settings}=useApp(); const[fresh,setFresh]=useState<{trending:any[];latest:any[];popular:any[]}>({trending:[],latest:[],popular:[]});
- const[homepageBlocks,setHomepageBlocks]=useState<any[]>([]);
+ const[homepageBlocks,setHomepageBlocks]=useState<any[]>([]); const[template,setTemplate]=useState<any>(null);
  useEffect(()=>{let alive=true;
+  fetch('/api/template').then(r=>r.ok?r.json():Promise.reject(new Error('Template unavailable'))).then(x=>{if(alive)setTemplate(x.template)}).catch(()=>{});
   fetch('/api/homepage').then(r=>r.ok?r.json():Promise.reject(new Error('Homepage unavailable'))).then(payload=>{
    if(!alive)return; const sections=payload?.data?.sections||[]; setHomepageBlocks(sections);
    setFresh({trending:sections.find((s:any)=>s.id==='trending')?.items||[],latest:sections.find((s:any)=>s.id==='latest')?.items||[],popular:sections.find((s:any)=>s.id==='popular')?.items||[]});
@@ -17,7 +18,7 @@ export function HomePage(){
   return()=>{alive=false};
  },[]);
  const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]||fresh.popular[0]; const slides=liveTrending.slice(0,5); const blocks=homepageBlocks.length?homepageBlocks:builderService.get().filter(b=>!b.hidden);
- if(!featured)return <section className="vault-home"><div className="vault-container"><div className="vault-builder-text"><span className="vault-kicker">ANIFUZE</span><h1>{fresh.trending.length===0?'Loading anime…':'No anime available'}</h1><p>{fresh.trending.length===0?'AniList is being queried for the latest catalog. Please try again in a moment.':'AniList returned no trending anime right now.'}</p><button className="vault-primary" onClick={()=>window.location.reload()}>Retry</button></div></div></section>;
+ if(!featured)return <section className={`vault-home template-${template?.id||'default'}`}><div className="vault-container"><div className="vault-builder-text"><span className="vault-kicker">ANIFUZE</span><h1>{fresh.trending.length===0?'Loading anime…':'No anime available'}</h1><p>{fresh.trending.length===0?'AniList is being queried for the latest catalog. Please try again in a moment.':'AniList returned no trending anime right now.'}</p><button className="vault-primary" onClick={()=>window.location.reload()}>Retry</button></div></div></section>;
  return <section className="vault-home">
   <div className="vault-hero"><div className="vault-hero-bg" style={{backgroundImage:`linear-gradient(90deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.78) 38%,rgba(8,8,8,.25) 72%,rgba(8,8,8,.82) 100%),linear-gradient(0deg,#080808 0%,transparent 35%),url(${featured.banner||featured.cover})`}}/>
    <div className="vault-hero-content"><span className="vault-kicker">✦ FEATURED ANIME</span><h1>{featured.title}</h1><div className="vault-meta"><span>{featured.type}</span><i>•</i><span>{featured.status}</span><i>•</i><span>{featured.episodes||'?'} Episodes</span><i>•</i><b>★ {(featured.score||8.8).toFixed(1)}</b></div><p>{featured.description}</p><div className="vault-actions"><Link className="vault-primary" to={'/watch/'+featured.id}>▶ Watch Now</Link><Link className="vault-secondary" to={'/anime/'+featured.id}>ⓘ Details</Link></div></div>
