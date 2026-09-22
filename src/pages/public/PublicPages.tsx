@@ -41,6 +41,11 @@ export function CatalogPage(){
  const [items,setItems]=useState<any[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState('');
  const title=path==='/search'?'Search Anime':path==='/genres'?'Genres':path==='/latest'?'Latest Episodes':path==='/trending'?'Trending Anime':path==='/movies'?'Movies':path==='/ongoing'?'Ongoing Anime':path==='/completed'?'Completed Anime':path==='/favorites'?'Your Favorites':path==='/watchlist'?'Your Watchlist':path==='/history'?'Watch History':path==='/continue-watching'?'Continue Watching':'Browse Anime';
  useEffect(()=>{if(path==='/schedule'||path==='/genres')return;let alive=true;setLoading(true);setError('');
+  if(path==='/history'||path==='/continue-watching'){
+   const entries=watchProgressService.list();
+   Promise.all(entries.map(e=>fetchAnimeById(e.animeId).then(a=>({...a,_watch:e})).catch(()=>null))).then(x=>{if(alive)setItems(x.filter(Boolean) as any[])}).catch(()=>{if(alive)setItems([])}).finally(()=>{if(alive)setLoading(false)});
+   return()=>{alive=false};
+  }
   const options:any={q:isSearch?q:'',sort,type,status};
   if(path==='/latest'){options.sort='updated';options.status='RELEASING';}
   if(path==='/trending')options.sort='trending';
