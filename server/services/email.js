@@ -69,3 +69,11 @@ export async function updateEmailTemplate(templateId,input={}){
  await query('UPDATE af_email_templates SET subject=$2,html=$3,text=$4,enabled=$5,updated_at=CURRENT_TIMESTAMP WHERE id=$1',[templateId,String(input.subject||''),String(input.html||''),String(input.text||''),input.enabled===undefined?true:Boolean(input.enabled)]);
  return (await query('SELECT id,name,subject,html,text,enabled,created_at,updated_at FROM af_email_templates WHERE id=$1',[templateId])).rows[0];
 }
+
+export async function saveInstallerEmailSettings(input={}){
+ const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:String(input.password||''),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
+ if(value.enabled&&(!value.host||!value.from_email))throw new Error('SMTP host and sender email are required.');
+ if(value.port<1||value.port>65535)throw new Error('Invalid SMTP port.');
+ await query('INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP',[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
+ return getEmailSettings();
+}
