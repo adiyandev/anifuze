@@ -111,6 +111,15 @@ export function AuthPage(){
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'Authentication failed.');
    await refreshAuth();
+   try{
+    const legacyState=JSON.parse(localStorage.getItem('anifuze_user_state')||'{}');
+    const legacyHistory=JSON.parse(localStorage.getItem('anifuze_watch_progress')||'[]');
+    const payload={favorites:Array.isArray(legacyState?.favorites)?legacyState.favorites:[],watchlist:Array.isArray(legacyState?.watchlist)?legacyState.watchlist:[],history:Array.isArray(legacyHistory)?legacyHistory:[]};
+    if(payload.favorites.length||payload.watchlist.length||payload.history.length){
+      const migrated=await fetch('/api/user/migrate-local',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(payload)});
+      if(migrated.ok){localStorage.removeItem('anifuze_user_state');localStorage.removeItem('anifuze_watch_progress');}
+    }
+   }catch{}
    navigate('/profile',{replace:true});
  }catch(err){setError(err instanceof Error?err.message:'Authentication failed.')}finally{setBusy(false)}};
  return <section className="auth-page"><div className="auth-backdrop"><div className="auth-orb auth-orb-one"/><div className="auth-orb auth-orb-two"/><div className="auth-grid"/></div>
