@@ -5,6 +5,8 @@ import {runMigrations} from './migrate.js';
 import {installerRouter} from './routes/installer.js';
 import {authRouter} from './routes/auth.js';
 import {userAuthRouter} from './routes/userAuth.js';
+import {userDataRouter} from './routes/userData.js';
+import {watchProgressRouter} from './routes/watchProgress.js';
 import {anilistRouter} from './routes/anilist.js';
 import {episodesRouter} from './routes/episodes.js';
 import {providersRouter} from './routes/providers.js';
@@ -46,6 +48,8 @@ app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',
 app.use('/api/installer',installerRouter);
 app.use('/api/auth',authRouter);
 app.use('/api/auth',userAuthRouter);
+app.use('/api',userDataRouter);
+app.use('/api',watchProgressRouter);
 app.use('/api',maintenanceGate);
 app.use('/api',anilistRouter);
 app.use('/api',episodesRouter);
