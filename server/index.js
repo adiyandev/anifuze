@@ -4,6 +4,7 @@ import {healthCheck} from './db/index.js';
 import {runMigrations} from './migrate.js';
 import {installerRouter} from './routes/installer.js';
 import {authRouter} from './routes/auth.js';
+import {userAuthRouter} from './routes/userAuth.js';
 import {anilistRouter} from './routes/anilist.js';
 import {episodesRouter} from './routes/episodes.js';
 import {providersRouter} from './routes/providers.js';
@@ -44,6 +45,7 @@ app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
 app.use('/api/installer',installerRouter);
 app.use('/api/auth',authRouter);
+app.use('/api/auth',userAuthRouter);
 app.use('/api',maintenanceGate);
 app.use('/api',anilistRouter);
 app.use('/api',episodesRouter);
