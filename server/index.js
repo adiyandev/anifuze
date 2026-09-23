@@ -35,6 +35,7 @@ import {updatesRouter} from './routes/updates.js';
 import {licenseRouter} from './routes/license.js';
 import {supportRouter} from './routes/support.js';
 import {oauthRouter} from './routes/oauth.js';
+import {siteConfigRouter} from './routes/siteConfig.js';
 import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from './installer/index.js';
@@ -79,6 +80,7 @@ app.use('/api',updatesRouter);
 app.use('/api',licenseRouter);
 app.use('/api',supportRouter);
 app.use('/api',oauthRouter);
+app.use('/api',siteConfigRouter);
 
 // Process scheduled customer notifications without requiring a separate worker.
 const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});},60000);
