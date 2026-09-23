@@ -12,7 +12,10 @@ type AppState = {
   permissions: string[];
   can: (permission: string) => boolean;
   adminVerified: boolean;
+  customerUser: { id:string; email:string; displayName:string; emailVerified:boolean } | null;
+  customerAuthLoading: boolean;
   refreshAuth: () => Promise<void>;
+  logoutCustomer: () => Promise<void>;
 };
 
 const DEMO_PERMISSIONS = [
@@ -32,10 +35,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<Role>('public_user');
   const [permissions, setPermissions] = useState<string[]>([]);
   const [adminVerified, setAdminVerified] = useState(false);
+  const [customerUser, setCustomerUser] = useState<AppState['customerUser']>(null);
+  const [customerAuthLoading, setCustomerAuthLoading] = useState(true);
   const [settings, setSettings] = useState(settingsService.get());
 
   const refreshAuth = async () => {
     try {
+      setCustomerAuthLoading(true);
+      const customer = await fetch('/api/auth/user/me',{credentials:'include'});
+      if(customer.ok){ const data=await customer.json(); setCustomerUser(data?.user||null); } else setCustomerUser(null);
       const isDemo = typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
       if (isDemo) {
         const saved = window.localStorage.getItem('anifuze_demo_admin');
@@ -77,10 +85,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setPermissions([]);
       }
     } catch {
+      setCustomerUser(null);
       setRoleState('public_user');
       setPermissions([]);
       setAdminVerified(false);
-    }
+    } finally { setCustomerAuthLoading(false); }
+  };
+
+  const logoutCustomer = async () => {
+    await fetch('/api/auth/user/logout',{method:'POST',credentials:'include'}).catch(()=>{});
+    setCustomerUser(null);
   };
 
   useEffect(() => {
@@ -121,7 +135,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <Context.Provider value={{
       role, setRole: updateRole, settings, refresh, toast,
       permissions, can: permission => permissions.includes(permission),
-      adminVerified, refreshAuth,
+      adminVerified, customerUser, customerAuthLoading, refreshAuth, logoutCustomer,
     }}>
       {children}
       {note && <div className={`toast ${note.kind}`}>{note.message}</div>}
