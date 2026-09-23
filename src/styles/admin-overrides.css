@@ -1,0 +1,381 @@
+/* AniFuze admin density + contrast pass
+   Keeps the existing visual language while improving spacing, hierarchy and readability. */
+
+.admin-shell,
+.admin {
+  --admin-bg: #070b17;
+  --admin-surface: #0f1626;
+  --admin-surface-2: #141d2f;
+  --admin-input: #182235;
+  --admin-border: #293752;
+  --admin-border-soft: rgba(148,163,184,.14);
+  --admin-text: #f8fafc;
+  --admin-muted: #94a3b8;
+  --admin-accent: #ff2b7a;
+  background: var(--admin-bg);
+}
+
+/* Sidebar: fewer cramped rows, stronger grouping and active state */
+.admin-shell .admin-sidebar {
+  width: 252px;
+  inset: 14px auto 14px 14px;
+  background: #0a0f1c;
+  border-color: rgba(148,163,184,.14);
+}
+
+.admin-shell .admin-sidebar-scroll {
+  padding: 14px 11px 16px;
+  scrollbar-width: thin;
+}
+
+.admin-shell .admin-nav-group {
+  margin: 7px 0 18px;
+}
+
+.admin-shell .admin-nav-group > small {
+  padding: 0 11px 9px;
+  color: #6f7d92;
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+
+.admin-shell .admin-nav-link {
+  min-height: 37px;
+  padding: 9px 11px;
+  margin: 3px 0;
+  border: 1px solid transparent;
+  color: #aab7c9;
+  font-size: 12px;
+  border-radius: 9px;
+}
+
+.admin-shell .admin-nav-link:hover {
+  background: #121b2c;
+  color: #f8fafc;
+  border-color: rgba(148,163,184,.09);
+}
+
+.admin-shell .admin-nav-link.active {
+  background: rgba(255,43,122,.10);
+  color: #ff6b9f;
+  border-color: rgba(255,43,122,.20);
+  box-shadow: inset 3px 0 0 #ff2b7a;
+}
+
+.admin-shell .admin-sidebar-bottom {
+  padding: 12px;
+  gap: 6px;
+  background: #090e19;
+}
+
+.admin-shell .admin-preview,
+.admin-shell .admin-signout {
+  min-height: 37px;
+  padding: 9px 11px;
+}
+
+/* Main chrome */
+.admin-shell .admin-main {
+  margin-left: 282px;
+  width: calc(100% - 282px);
+}
+
+.admin-shell .admin-topbar {
+  height: 76px;
+  padding: 0 34px;
+  background: rgba(7,11,23,.94);
+  border-color: rgba(148,163,184,.11);
+}
+
+.admin-shell .admin-content {
+  padding: 34px;
+}
+
+/* Give headings more room */
+.admin-shell .page-heading {
+  margin-bottom: 30px;
+}
+
+.admin-shell .page-heading h1,
+.admin-shell .page-heading h2 {
+  letter-spacing: -.035em;
+}
+
+.admin-shell .page-heading p {
+  margin-top: 7px;
+  color: #8796aa;
+  line-height: 1.55;
+}
+
+/* Cards/panels: distinct surfaces instead of black-on-black */
+.admin-shell .panel,
+.admin-shell .stat,
+.admin-shell .template,
+.admin-shell .builder,
+.admin-shell .library,
+.admin-shell .properties,
+.admin-shell .notification-card {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+}
+
+.admin-shell .panel {
+  padding: 22px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+
+.admin-shell .panel header {
+  margin-bottom: 21px;
+  gap: 16px;
+}
+
+.admin-shell .panel h3 {
+  font-size: 14px;
+  color: #f1f5f9;
+}
+
+.admin-shell .stat {
+  padding: 20px;
+  border-radius: 11px;
+}
+
+.admin-shell .stat span,
+.admin-shell .stat small {
+  color: #8b9ab0;
+}
+
+.admin-shell .stats {
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+/* Inputs: visibly sit above their containing cards */
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select,
+.admin-shell .search,
+.admin-shell .form-grid input,
+.admin-shell .form-grid textarea,
+.admin-shell .console textarea,
+.admin-shell .properties input,
+.admin-shell .properties textarea {
+  background: var(--admin-input);
+  border: 1px solid #34435e;
+  color: #f8fafc;
+  border-radius: 9px;
+  min-height: 40px;
+}
+
+.admin-shell textarea {
+  line-height: 1.55;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #66758b;
+}
+
+.admin-shell input:hover,
+.admin-shell textarea:hover,
+.admin-shell select:hover {
+  border-color: #435471;
+}
+
+.admin-shell input:focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  border-color: rgba(255,43,122,.65);
+  box-shadow: 0 0 0 3px rgba(255,43,122,.10);
+}
+
+/* Form rhythm */
+.admin-shell .form-grid {
+  gap: 20px;
+}
+
+.admin-shell .form-grid label,
+.admin-shell .console label,
+.admin-shell .properties label {
+  color: #c4cfdd;
+  line-height: 1.4;
+}
+
+.admin-shell .form-grid input,
+.admin-shell .form-grid textarea {
+  margin-top: 8px;
+}
+
+.admin-shell .notice {
+  margin-bottom: 20px;
+  background: rgba(34,211,238,.07);
+  border-color: rgba(34,211,238,.25);
+}
+
+/* Buttons and small controls need enough separation from surfaces */
+.admin-shell .button,
+.admin-shell .filters button,
+.admin-shell .panel header button,
+.admin-shell .builderbar button,
+.admin-shell .key {
+  min-height: 36px;
+}
+
+.admin-shell .filters {
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.admin-shell .filters button,
+.admin-shell .panel header button,
+.admin-shell .builderbar button {
+  background: #172137;
+  border-color: #34435e;
+}
+
+.admin-shell .filters button:hover,
+.admin-shell .panel header button:hover,
+.admin-shell .builderbar button:hover {
+  background: #1d2940;
+  border-color: #435471;
+}
+
+/* Tables: improve row breathing and separation */
+.admin-shell table {
+  font-size: 13px;
+}
+
+.admin-shell th {
+  padding: 11px 10px;
+  color: #8190a5;
+  background: rgba(255,255,255,.015);
+}
+
+.admin-shell td {
+  padding: 14px 10px;
+  color: #dbe4f0;
+  border-bottom-color: rgba(148,163,184,.11);
+}
+
+.admin-shell tbody tr:hover td {
+  background: rgba(255,255,255,.018);
+}
+
+/* Builder nested surfaces */
+.admin-shell .builder {
+  border-radius: 12px;
+  background: #0b1220;
+}
+
+.admin-shell .library,
+.admin-shell .properties {
+  background: #101827;
+}
+
+.admin-shell .canvas {
+  background: #080d18;
+  padding: 28px;
+}
+
+.admin-shell .block {
+  background: #131d2e;
+  border-color: #31415b;
+  padding: 25px;
+}
+
+.admin-shell .block:hover {
+  border-color: #435673;
+}
+
+.admin-shell .block.selected {
+  border-color: #ff2b7a;
+  box-shadow: 0 0 0 1px #ff2b7a, 0 8px 25px rgba(0,0,0,.18);
+}
+
+/* Provider console / JSON response */
+.admin-shell .response pre {
+  background: #0a111e;
+  border: 1px solid #293852;
+  color: #b8f3ff;
+}
+
+/* Legacy admin shell receives the same readability pass */
+.admin:not(.admin-shell) aside {
+  width: 252px;
+  padding: 24px 15px;
+  background: #090e19;
+}
+
+.admin:not(.admin-shell) aside a:not(.brand) {
+  padding: 10px 12px;
+  margin: 3px 0;
+  border-radius: 8px;
+  color: #aab7c9;
+}
+
+.admin:not(.admin-shell) aside a.active,
+.admin:not(.admin-shell) aside a:not(.brand):hover {
+  background: #141e30;
+  color: #fff;
+}
+
+.admin:not(.admin-shell) .admin-main {
+  margin-left: 252px;
+  width: calc(100% - 252px);
+}
+
+.admin:not(.admin-shell) .content {
+  padding: 34px;
+}
+
+.admin:not(.admin-shell) .panel,
+.admin:not(.admin-shell) .stat {
+  background: #0f1626;
+  border-color: #293752;
+}
+
+.admin:not(.admin-shell) input,
+.admin:not(.admin-shell) textarea,
+.admin:not(.admin-shell) select,
+.admin:not(.admin-shell) .search {
+  background: #182235;
+  border-color: #34435e;
+}
+
+@media (max-width: 900px) {
+  .admin-shell .admin-sidebar {
+    width: 220px;
+  }
+
+  .admin-shell .admin-main {
+    margin-left: 244px;
+    width: calc(100% - 244px);
+  }
+
+  .admin-shell .admin-content {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-shell .admin-sidebar {
+    width: 100%;
+    inset: 0;
+    border-radius: 0;
+  }
+
+  .admin-shell .admin-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-shell .admin-content {
+    padding: 20px 16px;
+  }
+
+  .admin-shell .panel {
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+}
