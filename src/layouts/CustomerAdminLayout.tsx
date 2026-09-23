@@ -4,6 +4,7 @@ import {useApp} from '../contexts/AppContext';
 
 const tabs=[['dashboard','Dashboard',BarChart3,'/admin/dashboard'],['users','Users',Users,'/admin/users'],['content','Content',Film,'/admin/anime'],['settings','Settings',Settings,'/admin/settings']] as const;
 const groups=[
+ ['SETUP',[['Site Setup','/admin/site-setup',Settings]]],
  ['CONTENT',[['Anime','/admin/anime',Film],['Episodes','/admin/episodes',PlaySquare],['Genres','/admin/genres',Layers],['Schedule','/admin/schedule',CalendarDays]]],
  ['STREAMING',[['Providers','/admin/providers',Radio],['Provider Console','/admin/providers/console',TerminalSquare],['Health','/admin/providers/health',HeartPulse],['Sources','/admin/providers/sources',Database]]],
  ['DESIGN',[['Marketplace','/admin/templates/marketplace',ShoppingBag],['My Templates','/admin/templates',Layers],['Site Builder','/admin/site-builder',Palette],['Appearance','/admin/appearance',Palette],['Navigation','/admin/navigation',PanelLeft],['Pages','/admin/pages',FileText]]],
