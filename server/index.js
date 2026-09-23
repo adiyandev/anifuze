@@ -30,7 +30,7 @@ import {isInstallerLocked} from './installer/index.js';
 
 const app=express();
 app.disable('x-powered-by');
-app.use(express.json({limit:'7mb'}));
+app.use(express.json({limit:'100mb'}));
 app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1h',index:false}));
 
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
