@@ -2,7 +2,7 @@ import {useCallback,useEffect,useState} from 'react';
 
 interface Entry{key:string;createdAt:number;expiresAt:number;size:number}
 interface Payload{ok:boolean;stats:{entries:number;bytes:number;hits:number;misses:number;sets:number;deletes:number;hitRate:number};entries:Entry[]}
-const fmtBytes=(n:number)=>n<1024?\`${n} B\`:n<1048576?\`${(n/1024).toFixed(1)} KB\`:\`${(n/1048576).toFixed(1)} MB\`;
+const fmtBytes=(n:number)=>{if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB';};
 const fmtTime=(n:number)=>new Date(n).toLocaleString();
 
 export function CachePage(){
