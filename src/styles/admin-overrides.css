@@ -379,3 +379,17 @@
     margin-bottom: 18px;
   }
 }
+
+
+/* Security Center */
+.security-callout{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px;border:1px solid #34435e;border-radius:14px;background:#121a2a}
+.security-callout p,.security-setup p{margin:6px 0 0;color:#94a3b8;line-height:1.55}
+.security-setup{margin-top:18px;padding:18px;border:1px solid #34435e;border-radius:14px;background:#0f1726;display:grid;gap:16px}
+.security-secret{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}
+.security-secret span{color:#94a3b8;font-size:13px}
+.security-secret code{padding:10px 12px;border:1px solid #34435e;border-radius:10px;background:#0b1220;color:#f8fafc;word-break:break-all}
+.security-uri{display:block;margin-top:6px;padding:10px;overflow:auto;border:1px solid #2b3850;border-radius:8px;background:#0b1220;color:#aebbd0;font-size:11px}
+.security-status-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.muted{color:#94a3b8!important;font-size:13px;line-height:1.55}
+.security-setup label{display:grid;gap:7px;color:#cbd5e1;font-size:13px}
+@media (max-width:720px){.security-callout{align-items:stretch;flex-direction:column}.security-secret{grid-template-columns:1fr}.security-secret .link-button{justify-self:start}}
