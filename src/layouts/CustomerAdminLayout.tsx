@@ -19,7 +19,7 @@ export function CustomerAdminLayout(){
  const title=path==='/admin/dashboard'?'Admin Dashboard':path.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')||'Dashboard';
  return <div className="av-admin apple-admin-shell">
   <header className="av-admin-head">
-   <Link className="av-admin-brand" to="/admin/dashboard"><span>✦</span><strong>AniFuze</strong><small>ADMIN PANEL</small></Link>
+   <Link className="av-admin-brand" to="/admin/dashboard"><span>✦</span><strong>{settings.siteName||'AniFuze'}</strong><small>ADMIN PANEL</small></Link>
    <nav className="av-admin-tabs">{tabs.map(([id,label,Icon,to])=><Link key={id} className={activeTop===id?'active':''} to={to}><Icon size={15}/>{label}</Link>)}</nav>
    <div className="av-admin-actions"><Link className="av-admin-search" to="/search"><Search size={14}/><span>Search</span><kbd>⌘ K</kbd></Link><Link className="av-admin-icon" to="/"><Eye size={15}/></Link><button className="av-admin-avatar" onClick={()=>setRole('public_user')}>A</button></div>
   </header>
