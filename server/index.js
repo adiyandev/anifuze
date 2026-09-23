@@ -28,6 +28,7 @@ import {backupsRouter} from './routes/backups.js';
 import {systemInfoRouter} from './routes/systemInfo.js';
 import {cacheRouter} from './routes/cache.js';
 import {maintenanceRouter} from './routes/maintenance.js';
+import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from './installer/index.js';
 
@@ -39,6 +40,7 @@ app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
 app.use('/api/installer',installerRouter);
 app.use('/api/auth',authRouter);
+app.use('/api',maintenanceGate);
 app.use('/api',anilistRouter);
 app.use('/api',episodesRouter);
 app.use('/api',providersRouter);
