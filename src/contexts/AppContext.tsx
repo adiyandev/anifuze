@@ -99,6 +99,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshAuth();
+    fetch('/api/site-config')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => {
+        const s = d.config;
+        if (!s) return;
+        setSettings(prev => ({...prev, siteName:s.siteName||prev.siteName, tagline:s.tagline||prev.tagline, primary:s.primary||prev.primary, accent:s.accent||prev.accent, logo:s.logoUrl||prev.logo}));
+        const root=document.documentElement;
+        if(s.primary) root.style.setProperty('--anifuze-primary',s.primary);
+        if(s.accent) root.style.setProperty('--anifuze-accent',s.accent);
+        if(s.background) root.style.setProperty('--anifuze-background',s.background);
+        if(s.faviconUrl){
+          let link=document.querySelector('link[rel="icon"]') as HTMLLinkElement|null;
+          if(!link){link=document.createElement('link');link.rel='icon';document.head.appendChild(link);}
+          link.href=s.faviconUrl;
+        }
+        if(s.siteName) document.title=s.siteName;
+      })
+      .catch(() => {});
+
     fetch('/api/appearance')
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => {
