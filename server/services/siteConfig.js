@@ -26,7 +26,7 @@ export async function updateSiteConfig(input={}){
  };
  if(!value.site_name)throw new Error('Site name is required.');
  if(value.support_email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value.support_email))throw new Error('Support email is invalid.');
- const r=await query('UPDATE af_site_config SET site_name=$1,tagline=$2,description=$3,logo_url=$4,favicon_url=$5,domain=$6,support_email=$7,primary_color=$8,accent_color=$9,background_color=$10,footer_text=$11,social_links=$12,setup_completed=$13,updated_at=CURRENT_TIMESTAMP WHERE id=1 RETURNING *',[value.site_name,value.tagline,value.description,value.logo_url||null,value.favicon_url||null,value.domain||null,value.support_email||null,value.primary_color,value.accent_color,value.background_color,value.footer_text,JSON.stringify(value.social_links),value.setup_completed]);
- return normalize(r.rows[0]);
+ await query('UPDATE af_site_config SET site_name=$1,tagline=$2,description=$3,logo_url=$4,favicon_url=$5,domain=$6,support_email=$7,primary_color=$8,accent_color=$9,background_color=$10,footer_text=$11,social_links=$12,setup_completed=$13,updated_at=CURRENT_TIMESTAMP WHERE id=1',[value.site_name,value.tagline,value.description,value.logo_url||null,value.favicon_url||null,value.domain||null,value.support_email||null,value.primary_color,value.accent_color,value.background_color,value.footer_text,JSON.stringify(value.social_links),value.setup_completed]);
+ return getSiteConfig();
 }
 export function toPublicSiteConfig(v){return {siteName:v.site_name,tagline:v.tagline,description:v.description,logoUrl:v.logo_url,faviconUrl:v.favicon_url,domain:v.domain,supportEmail:v.support_email,primary:v.primary_color,accent:v.accent_color,background:v.background_color,footerText:v.footer_text,socialLinks:v.social_links,setupCompleted:v.setup_completed};}
