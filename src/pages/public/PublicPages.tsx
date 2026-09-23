@@ -5,6 +5,8 @@ import {fetchRealHomepageAnime,fetchCatalog,fetchAnimeSchedule,fetchAnimeById} f
 import {useApp} from '../../contexts/AppContext';
 import {watchProgressService} from '../../services/watchProgressService';
 
+const isAnimeItem=(a:any)=>{const t=String(a?.type||a?.format||a?.mediaType||'').toUpperCase();return !t.includes('MANGA')&&!t.includes('NOVEL')&&!t.includes('LIGHT_NOVEL')&&!t.includes('MANHWA')&&!t.includes('MANHUA')};
+const animeOnly=(items:any[])=>Array.isArray(items)?items.filter(isAnimeItem):[];
 const Card=({a,compact=false}:{a:any;compact?:boolean})=><Link className={compact?'vault-card compact':'vault-card'} to={'/anime/'+a.id}><div className="vault-card-poster"><img src={a.cover} alt={a.title}/><span className="vault-card-badge">{a.status}</span><span className="vault-card-play">▶</span></div><div className="vault-card-info"><strong>{a.title}</strong><small>{a.type} · {a.episodes} Episodes</small></div></Link>;
 
 export function HomePage(){
@@ -15,8 +17,8 @@ export function HomePage(){
   fetch('/api/site-builder/public').then(r=>r.ok?r.json():Promise.reject(new Error('Builder unavailable'))).then(payload=>{if(alive)setHomepageBlocks(payload.blocks||[])}).catch(()=>{});
   fetch('/api/homepage').then(r=>r.ok?r.json():Promise.reject(new Error('Homepage unavailable'))).then(payload=>{
    if(!alive)return; const sections=payload?.data?.sections||[]; setHomepageBlocks(prev=>prev.length?prev:sections);
-   setFresh({trending:sections.find((s:any)=>s.id==='trending')?.items||[],latest:sections.find((s:any)=>s.id==='latest')?.items||[],popular:sections.find((s:any)=>s.id==='popular')?.items||[]});
-  }).catch(()=>{fetchRealHomepageAnime().then(data=>{if(alive)setFresh({...data,popular:data.trending})}).catch(()=>{})});
+   setFresh({trending:animeOnly(sections.find((s:any)=>s.id==='trending')?.items||[]),latest:animeOnly(sections.find((s:any)=>s.id==='latest')?.items||[]),popular:animeOnly(sections.find((s:any)=>s.id==='popular')?.items||[])});
+  }).catch(()=>{fetchRealHomepageAnime().then(data=>{if(alive)setFresh({trending:animeOnly(data.trending),latest:animeOnly(data.latest),popular:animeOnly(data.trending)})}).catch(()=>{})});
   return()=>{alive=false};
  },[]);
  const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]||fresh.popular[0]; const slides=liveTrending.slice(0,5); const blocks=homepageBlocks.length?homepageBlocks:builderService.get().filter(b=>!b.hidden);
@@ -30,7 +32,7 @@ export function HomePage(){
   </div>
  </section>;
 }
-function BuilderSection({block,liveAnime,latestAnime}:{block:any;liveAnime:any[];latestAnime:any[]}){const t=String(block.type||'').toLowerCase();if(t==='hero')return <div className="vault-builder-section vault-builder-hero"><span className="vault-kicker">CUSTOM HERO</span><h2>{block.title}</h2><p>{block.content}</p><Link className="vault-primary" to="/browse">Browse anime</Link></div>;if(['anime grid','anime_grid','anime carousel','anime_card','anime card','collection','stats'].includes(t))return <Shelf title={block.title} subtitle={block.content||block.description||''} items={(block.items||liveAnime).slice(0,6)} episode={t==='anime card'||t==='anime_card'}/>;if(t==='episode list'||t==='schedule')return <Shelf title={block.title} subtitle={block.content} items={latestAnime.slice(0,6)} episode/>;if(t==='cta'||t==='banner')return <div className="vault-cta"><div><span>ANIFUZE</span><h2>{block.title}</h2><p>{block.content}</p></div><Link className="vault-secondary" to="/browse">Explore library ↗</Link></div>;if(t==='navbar'||t==='footer')return null;return <section className="vault-builder-text"><span className="vault-kicker">{block.type}</span><h2>{block.title}</h2><p>{block.content}</p></section>} 
+function BuilderSection({block,liveAnime,latestAnime}:{block:any;liveAnime:any[];latestAnime:any[]}){const t=String(block.type||'').toLowerCase();if(t==='hero')return <div className="vault-builder-section vault-builder-hero"><span className="vault-kicker">CUSTOM HERO</span><h2>{block.title}</h2><p>{block.content}</p><Link className="vault-primary" to="/browse">Browse anime</Link></div>;if(['anime grid','anime_grid','anime carousel','anime_card','anime card','collection','stats'].includes(t))return <Shelf title={block.title} subtitle={block.content||block.description||''} items={animeOnly(block.items||liveAnime).slice(0,6)} episode={t==='anime card'||t==='anime_card'}/>;if(t==='episode list'||t==='schedule')return <Shelf title={block.title} subtitle={block.content} items={animeOnly(latestAnime).slice(0,6)} episode/>;if(t==='cta'||t==='banner')return <div className="vault-cta"><div><span>ANIFUZE</span><h2>{block.title}</h2><p>{block.content}</p></div><Link className="vault-secondary" to="/browse">Explore library ↗</Link></div>;if(t==='navbar'||t==='footer')return null;return <section className="vault-builder-text"><span className="vault-kicker">{block.type}</span><h2>{block.title}</h2><p>{block.content}</p></section>} 
 
 function Shelf({title,subtitle,items,episode=false}:{title:string;subtitle:string;items:any[];episode?:boolean}){return <section className="vault-shelf"><div className="vault-section-head"><div><h2>{title}</h2><p>{subtitle}</p></div><Link to={episode?'/latest':'/trending'}>View all ›</Link></div><div className="vault-card-grid">{items.map(a=><Card a={a} key={a.id}/>)}</div></section>}
 
