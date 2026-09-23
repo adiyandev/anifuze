@@ -94,7 +94,7 @@ export function InstallerPage(){
    if(admin.password.length<12||!/[A-Z]/.test(admin.password)||!/[a-z]/.test(admin.password)||!/[0-9]/.test(admin.password)){setError('Use a strong password with at least 12 characters, uppercase, lowercase and a number.');return}
    if(admin.password!==admin.confirm){setError('Passwords do not match.');return}
    setBusy(true);
-   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database,email,oauth,admin,licenseKey})});setStep(5)}
+   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,email,oauth,admin,licenseKey})});setStep(7)}
    catch(e){setError(e instanceof Error?e.message:'Installation failed.')}
    finally{setBusy(false)}
   }
