@@ -193,7 +193,7 @@ export function InstallerPage(){
 
      {error&&<div className="install-error"><AlertTriangle size={16}/><span>{error}</span></div>}
 
-     {!loading&&step<7&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===4?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
+     {!loading&&step<7&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===6?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
     </div>
    </div>
   </section>
