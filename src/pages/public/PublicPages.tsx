@@ -99,7 +99,7 @@ export function WatchPage(){
 }
 
 export function AuthPage(){
- const{settings}=useApp(); const navigate=useNavigate(); const location=useLocation();
+ const{settings,refreshAuth}=useApp(); const navigate=useNavigate(); const location=useLocation();
  const isRegister=location.pathname==='/register';
  const[name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState('');
  const[showPassword,setShowPassword]=useState(false),[showConfirm,setShowConfirm]=useState(false),[remember,setRemember]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -110,6 +110,7 @@ export function AuthPage(){
    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'Authentication failed.');
+   await refreshAuth();
    navigate('/profile',{replace:true});
  }catch(err){setError(err instanceof Error?err.message:'Authentication failed.')}finally{setBusy(false)}};
  return <section className="auth-page"><div className="auth-backdrop"><div className="auth-orb auth-orb-one"/><div className="auth-orb auth-orb-two"/><div className="auth-grid"/></div>
