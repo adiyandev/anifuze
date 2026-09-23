@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {config} from '../config.js';
 import {checkRequirements} from './requirements.js';
-import {getInstallationIdentity} from './license.js';
+import {getInstallationIdentity,verifyLicenseKey} from './license.js';
 import {verifyLicense as verifyStoredLicense} from '../services/license.js';
 import {runMigrations,migrationSnapshot} from '../migrate.js';
 import {testDatabase,toEnv} from './database.js';
@@ -22,8 +22,8 @@ export async function executeInstallation({database,admin,domain,licenseKey}={})
  if(await isInstallerLocked()) throw new Error('AniFuze installer is already locked.');
  const status=await installerStatus(licenseKey, database?.client||'postgres');
  if(!status.requirements.ok) throw new Error('Server requirements are not satisfied.');
- const license=config.nodeEnv==='development'&&licenseKey==='dev-license'?{valid:true,status:'development'}:await verifyStoredLicense(licenseKey);
- if(!['active','development'].includes(license.status)) throw new Error('License verification failed: '+(license.last_error||license.status||'invalid license')+'.');
+ const license=await verifyLicenseKey(licenseKey);
+ if(!license.valid) throw new Error('License verification failed: '+(license.error||license.status||'invalid license')+'.');
  if(!database||!admin?.email||!admin.password||admin.password.length<12||admin.password!==admin.confirm) throw new Error('Owner account details are invalid.');
  await testDatabase(database); useRuntimeDatabase(database); const beforeTables=await migrationSnapshot();
  const previous=await fs.readFile(ENV_FILE,'utf8').catch(()=>null);
@@ -31,6 +31,7 @@ export async function executeInstallation({database,admin,domain,licenseKey}={})
  try{
   await fs.writeFile(ENV_FILE,env,{mode:0o600}); await fs.chmod(ENV_FILE,0o600).catch(()=>{});
   await runMigrations();
+  await verifyStoredLicense(licenseKey);
   const salt=crypto.randomBytes(16).toString('hex');
   const passwordHash=await new Promise((resolve,reject)=>crypto.scrypt(admin.password,salt,64,(e,k)=>e?reject(e):resolve(salt+':'+k.toString('hex'))));
   const now=new Date().toISOString().slice(0,19).replace('T',' ');
