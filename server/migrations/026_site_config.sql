@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS af_site_config (
  accent_color VARCHAR(32) NOT NULL DEFAULT '#7c3aed',
  background_color VARCHAR(32) NOT NULL DEFAULT '#07070a',
  footer_text VARCHAR(500) NOT NULL DEFAULT '',
- social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
+ social_links TEXT NOT NULL DEFAULT '{}',
  setup_completed BOOLEAN NOT NULL DEFAULT FALSE,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
