@@ -1,5 +1,6 @@
 import {query} from '../db/index.js';
 import {normalizeMedia,requestForCatalog,searchAniList} from './anilist.js';
+import {withCache} from './cache.js';
 
 export const SORTS=Object.freeze({
   popularity:'POPULARITY_DESC',
@@ -31,16 +32,19 @@ async function browseAniList({page,perPage,type,status,sort}){
 }
 
 export async function publicSearchCatalog({q='',page=1,perPage=24,type='',status='',sort='popularity'}={}){
-  const clean=String(q||'').trim().slice(0,100);
-  const p=Math.max(1,Number(page)||1);
-  const pp=Math.min(50,Math.max(1,Number(perPage)||24));
-  const selectedType=TYPES.includes(String(type))?String(type):'';
-  const selectedStatus=STATUSES.includes(String(status))?String(status):'';
-  const selectedSort=SORTS[String(sort)]||SORTS.popularity;
+ const clean=String(q||'').trim().slice(0,100);
+ const p=Math.max(1,Number(page)||1);
+ const pp=Math.min(50,Math.max(1,Number(perPage)||24));
+ const selectedType=TYPES.includes(String(type))?String(type):'';
+ const selectedStatus=STATUSES.includes(String(status))?String(status):'';
+ const selectedSort=SORTS[String(sort)]||SORTS.popularity;
+ const key='catalog:'+JSON.stringify({q:clean,page:p,perPage:pp,type:selectedType,status:selectedStatus,sort:selectedSort});
+ return withCache(key,async()=>{
   const result=clean
     ? await searchAniList(clean,{page:p,perPage:pp})
     : await browseAniList({page:p,perPage:pp,type:selectedType,status:selectedStatus,sort:selectedSort});
   const visibility=await visibilityFor((result.items||[]).map(x=>String(x.externalId)));
   const items=(result.items||[]).filter(x=>!visibility.has(String(x.externalId))||visibility.get(String(x.externalId))===true);
   return {items,source:result.source||'anilist',stale:Boolean(result.stale),page:p,perPage:pp};
+ },120000);
 }
