@@ -3,7 +3,7 @@ import {config} from '../config.js';
 
 const DEFAULT_URL='https://api.github.com/repos/adiyandev/anifuze/releases/latest';
 const clean=(v,max)=>String(v??'').trim().slice(0,max);
-const semver=v=>String(v??'').replace(/^v/i,'').split('-')[0].split('.').map(n=>Number(n)||0).slice(0,3);
+const semver=v=>String(v??'').replace(/^v/i,'').split('-')[0].split('.').slice(0,3).map(n=>Number(n)||0).concat([0,0,0]).slice(0,3);
 export function compareVersions(a,b){const x=semver(a),y=semver(b);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]>y[i]?1:-1;}return 0;}
 export async function getUpdateSettings(){const r=await query('SELECT channel,manifest_url,auto_check,updated_at FROM af_update_settings WHERE id=1');return r.rows[0]||{channel:'stable',manifest_url:DEFAULT_URL,auto_check:true};}
 export async function saveUpdateSettings(input={}){
