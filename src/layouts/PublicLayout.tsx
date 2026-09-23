@@ -25,7 +25,7 @@ function applyMeta(seo:any,path:string){
 }
 
 export function PublicLayout(){
- const{settings,role}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);const[unreadNotifications,setUnreadNotifications]=useState(0);
+ const{settings,role,customerUser,logoutCustomer}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);const[unreadNotifications,setUnreadNotifications]=useState(0);
  useEffect(()=>{
   let active=true;
   const refresh=async()=>{
@@ -52,7 +52,7 @@ export function PublicLayout(){
   {f.enabled&&<footer className="vault-footer">
    {f.show_brand&&<div className="vault-footer-brand"><Link className="vault-brand" to="/"><span>{settings.logo||'✦'}</span><strong>{settings.siteName}</strong></Link><p>{f.description||settings.tagline}</p></div>}
    {f.show_navigation&&<div className="vault-footer-column"><span>Explore</span>{visibleNav.slice(0,5).map(item=><Link key={item.id} to={item.path}>{item.label}</Link>)}</div>}
-   {f.show_account&&<div className="vault-footer-column"><span>Account</span><Link to="/login">Sign in</Link><Link to="/register">Create account</Link></div>}
+   {f.show_account&&<div className="vault-footer-column"><span>Account</span>{customerUser?<><Link to="/profile">My profile</Link><button className="vault-footer-link" onClick={async()=>{await logoutCustomer();}}>Sign out</button></>:<><Link to="/login">Sign in</Link><Link to="/register">Create account</Link></>}</div>}
    <div className="vault-footer-bottom"><small>© {new Date().getFullYear()} {f.copyright_text||settings.siteName}</small>{f.show_powered_by&&<small>Built with AniFuze</small>}</div>
   </footer>}
  </div>
