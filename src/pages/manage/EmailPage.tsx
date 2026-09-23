@@ -27,7 +27,7 @@ export function EmailPage(){
   </div>
   <div className="button-row"><button className="button" onClick={save}>Save SMTP settings</button></div>
   <div className="form-grid"><label><span>Test recipient</span><input type="email" value={testTo} onChange={e=>setTestTo(e.target.value)} placeholder="you@example.com"/></label><div><span> </span><button className="button ghost" disabled={!testTo} onClick={test}>Send test email</button></div></div>
-  <div className="notification-preferences"><strong>Email templates</strong><p>Supported placeholders include <code>{{username}}</code>, <code>{{code}}</code>, <code>{{title}}</code>, and <code>{{message}}</code>.</p></div>
+  <div className="notification-preferences"><strong>Email templates</strong><p>Supported placeholders include <code>{'{{username}}'}</code>, <code>{'{{code}}'}</code>, <code>{'{{title}}'}</code>, and <code>{'{{message}}'}</code>.</p></div>
   <div className="notification-list">{templates.map(t=><article className="notification-card" key={t.id}><div className="notification-copy"><strong>{t.name}</strong><label><span>Subject</span><input value={t.subject} onChange={e=>setTemplates(x=>x.map(v=>v.id===t.id?{...v,subject:e.target.value}:v))}/></label><label><span>HTML</span><textarea rows={6} value={t.html} onChange={e=>setTemplates(x=>x.map(v=>v.id===t.id?{...v,html:e.target.value}:v))}/></label><label><span>Plain text</span><textarea rows={4} value={t.text} onChange={e=>setTemplates(x=>x.map(v=>v.id===t.id?{...v,text:e.target.value}:v))}/></label><button className="button ghost" onClick={()=>saveTemplate(t)}>Save template</button></div></article>)}</div>
  </section>;
 }
