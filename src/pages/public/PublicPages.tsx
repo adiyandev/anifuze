@@ -106,7 +106,7 @@ export function AuthPage(){
  const siteName=settings?.siteName||'AniFuze',primary=settings?.primary||'#ff2b7a';
  const submit=async(e:React.FormEvent)=>{e.preventDefault();setError('');if(isRegister&&password!==confirm){setError('Passwords do not match.');return}setBusy(true);try{
    const endpoint=isRegister?'/api/auth/user/register':'/api/auth/user/login';
-   const body=isRegister?{displayName:name,email,password}:{email,password};
+   const body=isRegister?{displayName:name,email,password,remember}:{email,password,remember};
    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'Authentication failed.');
