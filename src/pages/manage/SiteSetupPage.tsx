@@ -36,6 +36,7 @@ export function SiteSetupPage(){
    <label>Support email<input type="email" value={c.support_email} onChange={e=>set('support_email',e.target.value)} /></label>
    <label className="wide">Footer text<textarea value={c.footer_text} onChange={e=>set('footer_text',e.target.value)} /></label>
   </div></Card>
+  <Card title="Social links"><div className="form-grid"><label>Discord<input value={c.social_links.discord||''} onChange={e=>set('social_links',{...c.social_links,discord:e.target.value})} placeholder="https://discord.gg/..." /></label><label>Twitter / X<input value={c.social_links.twitter||''} onChange={e=>set('social_links',{...c.social_links,twitter:e.target.value})} placeholder="https://x.com/..." /></label><label>YouTube<input value={c.social_links.youtube||''} onChange={e=>set('social_links',{...c.social_links,youtube:e.target.value})} placeholder="https://youtube.com/..." /></label></div></Card>
   <Card title="Theme"><div className="form-grid">
    <label>Primary color<input type="text" value={c.primary_color} onChange={e=>set('primary_color',e.target.value)} /></label>
    <label>Accent color<input type="text" value={c.accent_color} onChange={e=>set('accent_color',e.target.value)} /></label>
