@@ -19,6 +19,8 @@ const steps=[
  {label:'License',icon:KeyRound},
  {label:'Requirements',icon:Server},
  {label:'Database',icon:Database},
+ {label:'Email',icon:Mail},
+ {label:'OAuth',icon:ShieldCheck},
  {label:'Owner',icon:ShieldCheck},
  {label:'Complete',icon:CheckCircle2}
 ];
@@ -31,6 +33,8 @@ export function InstallerPage(){
  const[error,setError]=useState('');
  const[licenseKey,setLicenseKey]=useState('');
  const[db,setDb]=useState({client:'postgres',host:'127.0.0.1',port:'5432',name:'anifuze',user:'',password:'',ssl:false});
+ const[email,setEmail]=useState({enabled:false,host:'',port:'587',secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'});
+ const[oauth,setOauth]=useState({google_enabled:false,google_client_id:'',google_client_secret:'',google_redirect_uri:''});
  const[admin,setAdmin]=useState({email:'',password:'',confirm:''});
  const[loading,setLoading]=useState(true);
 
@@ -78,11 +82,19 @@ export function InstallerPage(){
    return;
   }
   if(step===4){
+   if(email.enabled&&(!email.host||!email.from_email)){setError('SMTP host and sender email are required when email is enabled.');return}
+   setStep(5);return;
+  }
+  if(step===5){
+   if(oauth.google_enabled&&(!oauth.google_client_id||!oauth.google_client_secret)){setError('Google sign-in requires a Client ID and Client Secret.');return}
+   setStep(6);return;
+  }
+  if(step===6){
    if(!admin.email.includes('@')){setError('Enter a valid owner email.');return}
    if(admin.password.length<12||!/[A-Z]/.test(admin.password)||!/[a-z]/.test(admin.password)||!/[0-9]/.test(admin.password)){setError('Use a strong password with at least 12 characters, uppercase, lowercase and a number.');return}
    if(admin.password!==admin.confirm){setError('Passwords do not match.');return}
    setBusy(true);
-   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,admin,licenseKey})});setStep(5)}
+   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database,email,oauth,admin,licenseKey})});setStep(5)}
    catch(e){setError(e instanceof Error?e.message:'Installation failed.')}
    finally{setBusy(false)}
   }
@@ -141,7 +153,31 @@ export function InstallerPage(){
      </div>}
 
      {!loading&&step===4&&<div className="install-panel">
-      <div className="install-icon"><ShieldCheck size={27}/></div><div className="install-kicker">STEP 05</div><h2>Create the Owner account</h2><p>This account will control the AniFuze administration panel. Choose credentials you can keep secure.</p>
+      <div className="install-icon"><Mail size={27}/></div><div className="install-kicker">STEP 05</div><h2>Configure email</h2><p>Set up SMTP now so password resets, verification messages, notifications, and admin email features work immediately.</p>
+      <div className="install-form">
+       <label>Email delivery<select value={email.enabled?'true':'false'} onChange={e=>setEmail({...email,enabled:e.target.value==='true'})}><option value="false">Disabled</option><option value="true">Enabled</option></select></label>
+       <label>SMTP host<input value={email.host} onChange={e=>setEmail({...email,host:e.target.value})} placeholder="smtp.example.com"/></label>
+       <label>Port<input value={email.port} onChange={e=>setEmail({...email,port:e.target.value})}/></label>
+       <label>Security<select value={email.secure?'ssl':'starttls'} onChange={e=>setEmail({...email,secure:e.target.value==='ssl'})}><option value="starttls">STARTTLS</option><option value="ssl">SSL/TLS</option></select></label>
+       <label>Username<input value={email.username} onChange={e=>setEmail({...email,username:e.target.value})}/></label>
+       <label>Password<input type="password" value={email.password} onChange={e=>setEmail({...email,password:e.target.value})}/></label>
+       <label>From name<input value={email.from_name} onChange={e=>setEmail({...email,from_name:e.target.value})}/></label>
+       <label>From email<input type="email" value={email.from_email} onChange={e=>setEmail({...email,from_email:e.target.value})}/></label>
+      </div>
+     </div>}
+
+     {!loading&&step===5&&<div className="install-panel">
+      <div className="install-icon"><ShieldCheck size={27}/></div><div className="install-kicker">STEP 06</div><h2>Configure Google Sign-In</h2><p>Optional. Customers can enable Google authentication now or leave it disabled and configure it later in Admin → OAuth.</p>
+      <div className="install-form">
+       <label>Google sign-in<select value={oauth.google_enabled?'true':'false'} onChange={e=>setOauth({...oauth,google_enabled:e.target.value==='true'})}><option value="false">Disabled</option><option value="true">Enabled</option></select></label>
+       <label>Client ID<input value={oauth.google_client_id} onChange={e=>setOauth({...oauth,google_client_id:e.target.value})} placeholder="xxxx.apps.googleusercontent.com"/></label>
+       <label>Client Secret<input type="password" value={oauth.google_client_secret} onChange={e=>setOauth({...oauth,google_client_secret:e.target.value})}/></label>
+       <label className="wide">Redirect URI<input value={oauth.google_redirect_uri} onChange={e=>setOauth({...oauth,google_redirect_uri:e.target.value})} placeholder="https://your-domain.com/api/auth/google/callback"/></label>
+      </div>
+     </div>}
+
+     {!loading&&step===6&&<div className="install-panel">
+      <div className="install-icon"><ShieldCheck size={27}/></div><div className="install-kicker">STEP 07</div><h2>Create the Owner account</h2><p>This account will control the AniFuze administration panel. Choose credentials you can keep secure.</p>
       <div className="install-form install-owner-form">
        <label className="wide">Owner email<div className="install-input-wrap"><Mail size={16}/><input type="email" value={admin.email} onChange={e=>setAdmin({...admin,email:e.target.value})} placeholder="admin@example.com"/></div></label>
        <label>Password<input type="password" minLength={12} value={admin.password} onChange={e=>setAdmin({...admin,password:e.target.value})}/><small className={passwordStrength==='Strong password'?'strong':''}>{passwordStrength}</small></label>
@@ -149,7 +185,7 @@ export function InstallerPage(){
       </div>
      </div>}
 
-     {!loading&&step===5&&<div className="install-complete">
+     {!loading&&step===7&&<div className="install-complete">
       <div className="install-complete-icon"><CheckCircle2 size={48}/></div><div className="install-kicker">INSTALLATION COMPLETE</div><h1>AniFuze is ready.</h1><p>Your database was configured, the Owner account was created, and the installer has been locked.</p>
       <div className="install-complete-grid"><span><Check size={15}/> License activated</span><span><Check size={15}/> Database migrated</span><span><Check size={15}/> Installer locked</span></div>
       <button className="install-primary" onClick={()=>navigate('/admin/login')}>Open Admin Panel <ArrowRight size={16}/></button>
@@ -157,7 +193,7 @@ export function InstallerPage(){
 
      {error&&<div className="install-error"><AlertTriangle size={16}/><span>{error}</span></div>}
 
-     {!loading&&step<5&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===4?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
+     {!loading&&step<7&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===4?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
     </div>
    </div>
   </section>
