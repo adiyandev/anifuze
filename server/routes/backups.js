@@ -1,0 +1,12 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+import {createBackup,restoreBackup,listBackups,readBackup,deleteBackup} from '../services/backups.js';
+import {recordAudit} from '../services/audit.js';
+const router=Router(); const guard=[requireAdmin,requirePermission('backups_manage')];
+router.get('/admin/backups',...guard,async(_req,res)=>{try{res.json({ok:true,items:await listBackups()});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.post('/admin/backups',...guard,async(req,res)=>{try{const item=await createBackup({label:req.body?.label||'manual'});await recordAudit({adminUserId:req.admin.id,action:'backup.created',resourceType:'backup',resourceId:item.filename,details:item,ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,item});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.get('/admin/backups/:filename',...guard,async(req,res)=>{try{res.json(await readBackup(req.params.filename));}catch(e){res.status(404).json({ok:false,error:e.message});}});
+router.post('/admin/backups/restore',...guard,async(req,res)=>{try{if(req.body?.confirm!=='RESTORE')return res.status(400).json({ok:false,error:'Type RESTORE to confirm.'});const result=await restoreBackup(req.body.backup);await recordAudit({adminUserId:req.admin.id,action:'backup.restored',resourceType:'backup',details:result,ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,result});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+router.delete('/admin/backups/:filename',...guard,async(req,res)=>{try{await deleteBackup(req.params.filename);await recordAudit({adminUserId:req.admin.id,action:'backup.deleted',resourceType:'backup',resourceId:req.params.filename,ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+export {router as backupsRouter};
