@@ -22,6 +22,7 @@ export const config = Object.freeze({
   installationId: required('ANIFUZE_INSTALLATION_ID', 'dev-installation'),
   licenseKey: required('ANIFUZE_LICENSE_KEY', 'dev-license'),
   domain: required('ANIFUZE_DOMAIN', 'localhost'),
+  version: process.env.ANIFUZE_VERSION ?? '1.0.0',
 });
 
 export function assertSupportedDatabase(client) {
