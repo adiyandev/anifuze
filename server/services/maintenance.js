@@ -36,3 +36,13 @@ export async function saveMaintenance(input={}){
     [next.enabled,next.title,next.message,next.estimated_minutes]);
   return getMaintenance();
 }
+
+let gateCache={value:null,expiresAt:0};
+export async function maintenanceGate(req,res,next){
+  if(req.path==='/maintenance'||req.path.startsWith('/admin/')||req.path.startsWith('/auth/')||req.path.startsWith('/installer/'))return next();
+  try{
+    if(gateCache.expiresAt<Date.now())gateCache={value:await getMaintenance(),expiresAt:Date.now()+5000};
+    if(!gateCache.value?.enabled)return next();
+    res.status(503).json({ok:false,maintenance:true,error:gateCache.value.message,title:gateCache.value.title,estimatedMinutes:gateCache.value.estimated_minutes});
+  }catch{next();}
+}
