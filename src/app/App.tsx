@@ -1,5 +1,5 @@
-import {Outlet,Navigate} from 'react-router-dom';import {useApp} from '../contexts/AppContext';
+import {Outlet,Navigate,useLocation} from 'react-router-dom';import {useApp} from '../contexts/AppContext';
 export function RequireCustomer(){const{adminVerified}=useApp();return adminVerified?<Outlet/>:<Navigate to="/admin/login" replace/>}
 export function RequirePlatformAdmin(){return useApp().role==='platform_admin'?<Outlet/>:<Navigate to="/login" replace/>}
-export function RequireAuth(){return useApp().role!=='public_user'?<Outlet/>:<Navigate to="/login" replace/>}
+export function RequireAuth(){const{customerUser,customerAuthLoading}=useApp();const location=useLocation();if(customerAuthLoading)return <section className="vault-page"><div className="vault-builder-text"><h2>Checking your account…</h2></div></section>;return customerUser?<Outlet/>:<Navigate to="/login" replace state={{from:location.pathname}}/>}
 export function RequirePermission({permission}:{permission:string}){const{adminVerified,can}=useApp();if(!adminVerified)return <Navigate to="/admin/login" replace/>;return can(permission)?<Outlet/>:<Navigate to="/admin/dashboard" replace/>;}
