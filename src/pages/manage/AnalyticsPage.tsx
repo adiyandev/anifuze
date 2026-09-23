@@ -1,5 +1,5 @@
-import { useMemo, useState, type ComponentType } from 'react';
-import { Activity, ArrowUpRight, CalendarDays, ChartNoAxesCombined, Clock3, Download, Globe2, Monitor, Play, RefreshCw, Server, Smartphone, Tablet, TrendingUp, Users, Video } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Activity, ArrowUpRight, CalendarDays, ChartNoAxesCombined, Clock3, Download, Globe2, Monitor, Play, RefreshCw, Server, Smartphone, Tablet, TrendingUp, Users, Video, type LucideIcon } from 'lucide-react';
 
 type Range = '24h' | '7d' | '30d' | '90d';
 
@@ -7,9 +7,9 @@ const ranges: Range[] = ['24h', '7d', '30d', '90d'];
 const basePoints = [38,45,42,57,51,66,62,73,68,82,77,91,86,96,88,104,98,112,108,121,116,128,124,136];
 const popular = [['One Piece',18420,18],['Solo Leveling',15210,15],['Jujutsu Kaisen',12840,13],['Demon Slayer',10490,10],['Attack on Titan',9270,9]] as const;
 const providers = [['AniWave',72,1.8],['MegaCloud',64,2.3],['Vidstream',51,3.1],['StreamWish',43,4.2]] as const;
-const devices: Array<[string, number, ComponentType<{size?: number}>]> = [['Desktop',58,Monitor],['Mobile',31,Smartphone],['Tablet',11,Tablet]];
+const devices: Array<[string, number, LucideIcon]> = [['Desktop',58,Monitor],['Mobile',31,Smartphone],['Tablet',11,Tablet]];
 
-function Metric({icon: Icon,label,value,change,sub}:{icon:ComponentType<{size?:number}>;label:string;value:string;change:string;sub:string}) {
+function Metric({icon: Icon,label,value,change,sub}:{icon:LucideIcon;label:string;value:string;change:string;sub:string}) {
   return <article className="an-metric"><div className="an-metric-top"><span className="an-icon"><Icon size={16}/></span><small>{label}</small><span className="an-change"><ArrowUpRight size={11}/>{change}</span></div><strong>{value}</strong><p>{sub}</p></article>;
 }
 
