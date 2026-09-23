@@ -3,18 +3,27 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {config} from '../config.js';
 import {checkRequirements} from './requirements.js';
-import {verifyLicense,getInstallationIdentity} from './license.js';
+import {getInstallationIdentity} from './license.js';
+import {verifyLicense as verifyStoredLicense} from '../services/license.js';
 import {runMigrations,migrationSnapshot} from '../migrate.js';
 import {testDatabase,toEnv} from './database.js';
 import {useRuntimeDatabase,query,dropAniFuzeTables} from '../db/index.js';
 const LOCK_FILE=path.resolve('.anifuze-installed'); const ENV_FILE=path.resolve('.env');
 export async function isInstallerLocked(){return fs.access(LOCK_FILE).then(()=>true).catch(()=>false);}
-export async function installerStatus(){const r=await checkRequirements();const l=await verifyLicense();const i=getInstallationIdentity();return {locked:await isInstallerLocked(),requirements:r,license:l,identity:{installationId:i.installationId,domain:i.domain,licenseKey:i.licenseKey?'********':'missing'}};}
+export async function installerStatus(licenseKey=config.licenseKey,dbClient='postgres'){
+ const r=await checkRequirements({dbClient});
+ const i=getInstallationIdentity();
+ const locked=await isInstallerLocked();
+ let l={valid:false,status:'missing'};
+ if(licenseKey){ if(config.nodeEnv==='development'&&licenseKey==='dev-license') l={valid:true,status:'development'}; else if(licenseKey==='dev-license') l={valid:false,status:'missing'}; }
+ return {locked,requirements:r,license:l,identity:{installationId:i.installationId,domain:i.domain,licenseKey:licenseKey?'********':'missing'}};
+}
 export async function executeInstallation({database,admin,domain,licenseKey}={}){
  if(await isInstallerLocked()) throw new Error('AniFuze installer is already locked.');
- const status=await installerStatus();
+ const status=await installerStatus(licenseKey, database?.client||'postgres');
  if(!status.requirements.ok) throw new Error('Server requirements are not satisfied.');
- if(!status.license.valid) throw new Error('License verification failed.');
+ const license=config.nodeEnv==='development'&&licenseKey==='dev-license'?{valid:true,status:'development'}:await verifyStoredLicense(licenseKey);
+ if(!['active','development'].includes(license.status)) throw new Error('License verification failed: '+(license.last_error||license.status||'invalid license')+'.');
  if(!database||!admin?.email||!admin.password||admin.password.length<12||admin.password!==admin.confirm) throw new Error('Owner account details are invalid.');
  await testDatabase(database); useRuntimeDatabase(database); const beforeTables=await migrationSnapshot();
  const previous=await fs.readFile(ENV_FILE,'utf8').catch(()=>null);
