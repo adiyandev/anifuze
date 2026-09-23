@@ -99,42 +99,37 @@ export function WatchPage(){
 }
 
 export function AuthPage(){
- const{settings}=useApp(); const nav=useNavigate(); const location=useLocation();
+ const{settings}=useApp(); const navigate=useNavigate(); const location=useLocation();
  const isRegister=location.pathname==='/register';
- const [name,setName]=useState(''); const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [confirm,setConfirm]=useState('');
- const [showPassword,setShowPassword]=useState(false); const [showConfirm,setShowConfirm]=useState(false); const [busy,setBusy]=useState(false); const [error,setError]=useState('');
- const submit=(event:React.FormEvent)=>{
-  event.preventDefault(); setError('');
-  if(!email||!password||(isRegister&&!name))return;
-  if(isRegister&&password!==confirm){setError('Passwords do not match.');return}
-  setBusy(true);
-  window.setTimeout(()=>{setBusy(false);setError('User authentication is not configured yet. Connect the customer authentication service before enabling sign-in.');},350);
- };
- const siteName=settings?.siteName||'AniFuze'; const primary=settings?.primary||'#ff2b7a';
- const intro=isRegister?'Create your '+siteName+' account and keep your anime experience in sync.':'Sign in to continue to your '+siteName+' account.';
- return <section className="auth-page">
-  <div className="auth-backdrop"><div className="auth-orb auth-orb-one"/><div className="auth-orb auth-orb-two"/><div className="auth-grid"/></div>
-  <div className="auth-shell">
-   <Link className="auth-brand" to="/"><span>{settings?.logo||'✦'}</span><strong>{siteName}</strong></Link>
-   <div className="auth-card">
-    <div className="auth-card-glow" style={{'--auth-primary':primary} as React.CSSProperties}/>
-    <div className="auth-copy"><span className="vault-kicker">{isRegister?'JOIN THE COMMUNITY':'WELCOME BACK'}</span><h1>{isRegister?'Create your account':'Sign in'}</h1><p>{intro}</p></div>
-    {error&&<div className="auth-error" role="alert"><AlertTriangle size={15}/><span>{error}</span></div>}
+ const[name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState('');
+ const[showPassword,setShowPassword]=useState(false),[showConfirm,setShowConfirm]=useState(false),[remember,setRemember]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const siteName=settings?.siteName||'AniFuze',primary=settings?.primary||'#ff2b7a';
+ const submit=async(e:React.FormEvent)=>{e.preventDefault();setError('');if(isRegister&&password!==confirm){setError('Passwords do not match.');return}setBusy(true);try{
+   const endpoint=isRegister?'/api/auth/user/register':'/api/auth/user/login';
+   const body=isRegister?{displayName:name,email,password}:{email,password};
+   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||'Authentication failed.');
+   navigate('/profile',{replace:true});
+ }catch(err){setError(err instanceof Error?err.message:'Authentication failed.')}finally{setBusy(false)}};
+ return <section className="auth-page"><div className="auth-backdrop"><div className="auth-orb auth-orb-one"/><div className="auth-orb auth-orb-two"/><div className="auth-grid"/></div>
+  <div className="auth-shell"><Link className="auth-brand" to="/"><span>{settings?.logo||'✦'}</span><strong>{siteName}</strong></Link>
+   <div className="auth-card"><div className="auth-card-glow" style={{'--auth-primary':primary} as React.CSSProperties}/>
+    <div className="auth-copy"><span className="vault-kicker">{isRegister?'JOIN THE COMMUNITY':'WELCOME BACK'}</span><h1>{isRegister?'Create your account':'Sign in'}</h1><p>{isRegister?'Create your '+siteName+' account and keep your anime experience in sync.':'Sign in to continue to your '+siteName+' account.'}</p></div>
+    {error&&<div className="auth-error" role="alert">{error}</div>}
     <form onSubmit={submit} className="auth-form">
-     {isRegister&&<label><span>Display name</span><div className="auth-input-wrap"><UserCircle size={16}/><input value={name} onChange={e=>setName(e.target.value)} placeholder="What should we call you?" autoComplete="name" required/></div></label>}
-     <label><span>Email address</span><div className="auth-input-wrap"><Mail size={16}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required/></div></label>
-     <label><span>Password</span><div className="auth-input-wrap"><LockKeyhole size={16}/><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder={isRegister?'At least 8 characters':'Your password'} autoComplete={isRegister?'new-password':'current-password'} minLength={isRegister?8:1} required/><button type="button" className="auth-eye" onClick={()=>setShowPassword(v=>!v)}>{showPassword?'Hide':'Show'}</button></div></label>
-     {isRegister&&<label><span>Confirm password</span><div className="auth-input-wrap"><ShieldCheck size={16}/><input type={showConfirm?'text':'password'} value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Repeat your password" autoComplete="new-password" required/><button type="button" className="auth-eye" onClick={()=>setShowConfirm(v=>!v)}>{showConfirm?'Hide':'Show'}</button></div></label>}
-     {!isRegister&&<div className="auth-row"><label className="auth-check"><input type="checkbox"/> <span>Remember me</span></label><button type="button" className="auth-link" onClick={()=>setError('Password reset will be enabled with the customer email system.')}>Forgot password?</button></div>}
-     <button className="auth-submit" type="submit" disabled={busy}>{busy?<><Loader2 size={16} className="spin"/> Working…</>:isRegister?'Create account':'Sign in'}</button>
+     {isRegister&&<label><span>Display name</span><div className="auth-input-wrap"><input value={name} onChange={e=>setName(e.target.value)} placeholder="What should we call you?" autoComplete="name" required/></div></label>}
+     <label><span>Email address</span><div className="auth-input-wrap"><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required/></div></label>
+     <label><span>Password</span><div className="auth-input-wrap"><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder={isRegister?'At least 8 characters':'Your password'} autoComplete={isRegister?'new-password':'current-password'} minLength={isRegister?8:1} required/><button type="button" className="auth-eye" onClick={()=>setShowPassword(v=>!v)}>{showPassword?'Hide':'Show'}</button></div></label>
+     {isRegister&&<label><span>Confirm password</span><div className="auth-input-wrap"><input type={showConfirm?'text':'password'} value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Repeat your password" autoComplete="new-password" required/><button type="button" className="auth-eye" onClick={()=>setShowConfirm(v=>!v)}>{showConfirm?'Hide':'Show'}</button></div></label>}
+     {!isRegister&&<div className="auth-row"><label className="auth-check"><input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)}/><span>Remember me</span></label><button type="button" className="auth-link" onClick={()=>setError('Password reset will be available after the customer email service is configured.')}>Forgot password?</button></div>}
+     <button className="auth-submit" type="submit" disabled={busy}>{busy?'Signing in…':isRegister?'Create account':'Sign in'}</button>
     </form>
     <div className="auth-divider"><span>OR</span></div>
-    <button className="auth-google" type="button" onClick={()=>setError('Google sign-in will be enabled when the customer OAuth configuration is connected.')}><span>G</span> Continue with Google</button>
+    <button className="auth-google" type="button" onClick={()=>setError('Google sign-in is not enabled for this installation yet.')}>Continue with Google</button>
     {isRegister&&<p className="auth-terms">By creating an account, you agree to the site’s terms and privacy policy.</p>}
     <p className="auth-switch">{isRegister?'Already have an account?':'Don’t have an account?'} <Link to={isRegister?'/login':'/register'}>{isRegister?'Sign in':'Create one'}</Link></p>
-   </div>
-   <Link className="auth-back" to="/">← Back to {siteName}</Link>
-  </div>
- </section>;
+   </div><Link className="auth-back" to="/">← Back to {siteName}</Link>
+  </div></section>;
 }
 export function CustomPage(){const{settings}=useApp();return <section className="vault-page"><span className="vault-kicker">CUSTOM PAGE</span><h1>Created with AniFuze.</h1><p>Customer-managed pages inherit the active {settings.siteName} visual system.</p></section>}
