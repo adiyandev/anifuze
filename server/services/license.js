@@ -19,7 +19,7 @@ async function persist({key,status,plan,customer,domain,expiresAt,metadata,lastE
 export async function verifyLicense(inputKey=config.licenseKey){
  const key=normalizeKey(inputKey);
  if(!key||key==='dev-license')return persist({key:null,status:'unlicensed',domain:config.domain,lastError:'No production license key configured.'});
- const endpoint=String(process.env.ANIFUZE_LICENSE_SERVICE_URL||'').trim();
+ const endpoint=String(config.licenseServiceUrl||process.env.ANIFUZE_LICENSE_SERVICE_URL||'').trim();
  if(!endpoint)return persist({key,status:'unverified',domain:config.domain,lastError:'License service URL is not configured.'});
  try{
   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json','user-agent':'AniFuze-License-Client'},body:JSON.stringify({licenseKey:key,installationId:config.installationId,domain:config.domain,version:config.version}),signal:AbortSignal.timeout(10000)});
