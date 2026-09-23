@@ -27,6 +27,7 @@ import {auditRouter} from './routes/audit.js';
 import {backupsRouter} from './routes/backups.js';
 import {systemInfoRouter} from './routes/systemInfo.js';
 import {cacheRouter} from './routes/cache.js';
+import {maintenanceRouter} from './routes/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from './installer/index.js';
 
@@ -61,6 +62,7 @@ app.use('/api',auditRouter);
 app.use('/api',backupsRouter);
 app.use('/api',systemInfoRouter);
 app.use('/api',cacheRouter);
+app.use('/api',maintenanceRouter);
 
 // Process scheduled customer notifications without requiring a separate worker.
 const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});},60000);
