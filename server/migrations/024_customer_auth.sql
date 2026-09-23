@@ -1,0 +1,11 @@
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS display_name VARCHAR(80);
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS banner_url TEXT;
+ALTER TABLE af_users ADD COLUMN IF NOT EXISTS bio VARCHAR(180);
+UPDATE af_users SET display_name=COALESCE(NULLIF(display_name,''),username) WHERE display_name IS NULL OR display_name='';
+UPDATE af_users SET updated_at=COALESCE(updated_at,created_at) WHERE updated_at IS NULL;
+ALTER TABLE af_user_sessions ADD COLUMN IF NOT EXISTS remember_me BOOLEAN NOT NULL DEFAULT TRUE;
+CREATE INDEX IF NOT EXISTS af_user_sessions_user_expiry_idx ON af_user_sessions(user_id,expires_at);
