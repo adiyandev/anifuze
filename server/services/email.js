@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import net from 'node:net';
 import tls from 'node:tls';
 import {query} from '../db/index.js';
+import {config} from '../config.js';
 
 const id=()=>crypto.randomUUID();
 const defaults={enabled:false,host:'',port:587,secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'};
