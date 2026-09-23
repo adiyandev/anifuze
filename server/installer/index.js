@@ -7,6 +7,9 @@ import {getInstallationIdentity,verifyLicenseKey} from './license.js';
 import {verifyLicense as verifyStoredLicense} from '../services/license.js';
 import {runMigrations,migrationSnapshot} from '../migrate.js';
 import {testDatabase,toEnv} from './database.js';
+import {saveInstallerEmailSettings} from '../services/email.js';
+import {saveOAuthSettings} from '../services/oauth.js';
+import {deployLocalRelease} from './deploy.js';
 import {useRuntimeDatabase,query,dropAniFuzeTables} from '../db/index.js';
 const LOCK_FILE=path.resolve('.anifuze-installed'); const ENV_FILE=path.resolve('.env');
 export async function isInstallerLocked(){return fs.access(LOCK_FILE).then(()=>true).catch(()=>false);}
@@ -16,19 +19,23 @@ export async function installerStatus(licenseKey=config.licenseKey,dbClient='pos
  if(licenseKey){if(config.nodeEnv==='development'&&licenseKey==='dev-license')l={valid:true,status:'development'};else if(licenseKey==='dev-license')l={valid:false,status:'missing'};}
  return {locked,requirements:r,license:l,identity:{installationId:i.installationId,domain:i.domain,licenseKey:licenseKey?'********':'missing'}};
 }
-export async function executeInstallation({database,admin,domain,licenseKey}={}){
+export async function executeInstallation({database,email,oauth,admin,domain,licenseKey,deployment}={}){
  if(await isInstallerLocked())throw new Error('AniFuze installer is already locked.');
  const status=await installerStatus(licenseKey,database?.client||'postgres');
  if(!status.requirements.ok)throw new Error('Server requirements are not satisfied.');
  const license=await verifyLicenseKey(licenseKey);
  if(!license.valid)throw new Error('License verification failed: '+(license.error||license.status||'invalid license')+'.');
  if(!database||!admin?.email||!admin.password||admin.password.length<12||admin.password!==admin.confirm)throw new Error('Owner account details are invalid.');
- await testDatabase(database); useRuntimeDatabase(database); const beforeTables=await migrationSnapshot();
+ await testDatabase(database); useRuntimeDatabase(database);
+ const target=deployment?.targetDir||config.deploymentTarget||''; const source=deployment?.sourceDir||config.releaseDir||'';
+ if(target&&source)await deployLocalRelease({sourceDir:source,targetDir:target}); const beforeTables=await migrationSnapshot();
  const previous=await fs.readFile(ENV_FILE,'utf8').catch(()=>null);
  const env=toEnv(database,status.identity.installationId,licenseKey??config.licenseKey,domain??config.domain);
  try{
   await fs.writeFile(ENV_FILE,env,{mode:0o600}); await fs.chmod(ENV_FILE,0o600).catch(()=>{});
   await runMigrations(); await verifyStoredLicense(licenseKey);
+  if(email)await saveInstallerEmailSettings(email);
+  if(oauth)await saveOAuthSettings(oauth);
   const salt=crypto.randomBytes(16).toString('hex');
   const passwordHash=await new Promise((resolve,reject)=>crypto.scrypt(admin.password,salt,64,(e,k)=>e?reject(e):resolve(salt+':'+k.toString('hex')));
   const now=new Date().toISOString().slice(0,19).replace('T',' '); const ownerId=crypto.randomUUID();
