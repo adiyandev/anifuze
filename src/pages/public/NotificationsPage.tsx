@@ -59,7 +59,7 @@ export function NotificationsPage(){
   });
  };
  const updatePref=(key:keyof typeof defaults)=>{
-  setPrefs(p=>{const next={...p,[key]:!p[key]};localStorage.setItem(PREF_KEY,JSON.stringify(next));return next;});
+  setPrefs((p: typeof defaults)=>{const next={...p,[key]:!p[key]};localStorage.setItem(PREF_KEY,JSON.stringify(next));return next;});
  };
  const icon=(type:Notice['type'])=>type==='release'?<PlayCircle size={18}/>:type==='system'?<Sparkles size={18}/>:type==='warning'?<TriangleAlert size={18}/>:<Info size={18}/>;
 
