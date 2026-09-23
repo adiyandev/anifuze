@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+import {clearLicense,getLicense,verifyLicense} from '../services/license.js';
+import {recordAudit} from '../services/audit.js';
+export const licenseRouter=Router();
+licenseRouter.use(requireAdmin,requirePermission('license_manage'));
+licenseRouter.get('/admin/license',async(_req,res)=>{try{res.json({ok:true,license:await getLicense()});}catch(error){res.status(500).json({ok:false,error:error.message});}});
+licenseRouter.post('/admin/license/verify',async(req,res)=>{try{const license=await verifyLicense(req.body?.licenseKey);await recordAudit({adminUserId:req.admin.id,action:'license.verified',resourceType:'license',details:{status:license.status,plan:license.plan||null},ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,license});}catch(error){res.status(400).json({ok:false,error:error.message});}});
+licenseRouter.delete('/admin/license',async(req,res)=>{try{const license=await clearLicense();await recordAudit({adminUserId:req.admin.id,action:'license.cleared',resourceType:'license',ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,license});}catch(error){res.status(400).json({ok:false,error:error.message});}});
