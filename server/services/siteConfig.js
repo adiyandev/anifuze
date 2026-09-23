@@ -1,7 +1,7 @@
 import {query} from '../db/index.js';
 
 const defaults={site_name:'AniFuze',tagline:'Your anime, your way.',description:'',logo_url:'',favicon_url:'',domain:'',support_email:'',primary_color:'#ff2d8d',accent_color:'#7c3aed',background_color:'#07070a',footer_text:'',social_links:{},setup_completed:false};
-const normalize=(row={})=>({...defaults,...row,social_links:typeof row.social_links==='string'?JSON.parse(row.social_links||'{}'):row.social_links||{}});
+const normalize=(row={})=>{let links=row.social_links;try{if(typeof links==='string')links=JSON.parse(links||'{}')}catch{links={}}return {...defaults,...row,social_links:links||{}}};
 
 export async function getSiteConfig(){
  const r=await query('SELECT * FROM af_site_config WHERE id=1');
