@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+import {createSupportTicket,listSupportTickets,updateSupportTicket} from '../services/support.js';
+import {recordAudit} from '../services/audit.js';
+export const supportRouter=Router();
+supportRouter.use(requireAdmin,requirePermission('support_manage'));
+supportRouter.get('/admin/support',async(_req,res)=>{try{res.json({ok:true,tickets:await listSupportTickets()});}catch(error){res.status(500).json({ok:false,error:error.message});}});
+supportRouter.post('/admin/support',async(req,res)=>{try{const ticket=await createSupportTicket({adminUserId:req.admin.id,subject:req.body?.subject,message:req.body?.message,priority:req.body?.priority});await recordAudit({adminUserId:req.admin.id,action:'support.ticket_created',resourceType:'support_ticket',resourceId:ticket.id,details:{priority:ticket.priority},ipAddress:req.ip,userAgent:req.get('user-agent')});res.status(201).json({ok:true,ticket});}catch(error){res.status(400).json({ok:false,error:error.message});}});
+supportRouter.patch('/admin/support/:id',async(req,res)=>{try{const ticket=await updateSupportTicket(req.params.id,req.body?.status);if(!ticket)return res.status(404).json({ok:false,error:'Ticket not found.'});await recordAudit({adminUserId:req.admin.id,action:'support.ticket_updated',resourceType:'support_ticket',resourceId:ticket.id,details:{status:ticket.status},ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,ticket});}catch(error){res.status(400).json({ok:false,error:error.message});}});
