@@ -183,7 +183,8 @@ export async function installTemplatePackage(metadata,buffer){
  await fs.mkdir(tempDir,{recursive:true});
  const archive=path.join(tempDir,'package.tar');
  try{
-  await fs.writeFile(archive,buffer,{mode:0o600});
+  const manifest=await validateTemplatePackage(metadata,buffer);
+  await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions','--no-overwrite-dir'],{timeout:30000,maxBuffer:1024*1024});
   await fs.mkdir(root,{recursive:true});
   await fs.rm(finalDir,{recursive:true,force:true});
   await fs.rename(tempDir,finalDir);
