@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS af_update_settings (
   auto_check BOOLEAN NOT NULL DEFAULT TRUE,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO af_update_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO af_update_settings (id) SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM af_update_settings WHERE id=1);
