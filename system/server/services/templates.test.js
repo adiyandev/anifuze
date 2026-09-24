@@ -61,8 +61,6 @@ test('template package validator is exposed for authoring workflows',()=>{
  assert.equal(typeof validateTemplatePackage,'function');
 });
 
-
-
 test('template sandbox accepts only manifest and static presentation assets',()=>{
  assert.equal(validateTemplateSandboxEntries(['anifuze-template.json','assets/','assets/theme.css','assets/images/','assets/logo.png','assets/font.woff2']),true);
 });
@@ -74,6 +72,6 @@ test('template sandbox rejects executable content and files outside assets',()=>
 });
 
 test('template sandbox rejects unsafe asset paths',()=>{
- assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','assets/../secret.css']),/unsupported asset type|outside the presentation sandbox/);
- assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','../secret.css']),/outside the presentation sandbox/);
+ assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','assets/../secret.css']),/unsafe sandbox path/);
+ assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','../secret.css']),/unsafe sandbox path/);
 });
