@@ -2,6 +2,7 @@ import {getProvider,recordProviderResult} from './providers.js';
 import {executeProviderRequest} from './providerConsole.js';
 import {invokeProviderOperation} from './providerSdk.js';
 import {providerHealthRank,shouldAttemptProvider} from './providerHealth.js';
+import {withCache,cacheDelete} from './cache.js';
 
 const TEMPLATE=/\{(animeId|episodeId|episode|animeProviderId)\}/g;
 
@@ -53,7 +54,13 @@ async function resolveProvider(provider,vars){
  if(!sources.length)throw new Error('Provider returned no playable sources.');
  return sources;
 }
-export async function resolveStream({animeId,episode,episodeId,animeProviderId,providerId}={}){
+export async function resolveStream(options={}){
+ const id=String(options.animeId??'').trim();const ep=String(options.episode??'1').trim();if(!id)throw new Error('Anime ID is required.');
+ const providerKey=options.providerId?String(options.providerId):'auto';
+ const key='stream:'+encodeURIComponent(id)+':'+encodeURIComponent(ep)+':'+encodeURIComponent(String(options.episodeId??ep))+':'+encodeURIComponent(providerKey);
+ return withCache(key,()=>resolveStreamUncached(options),60000);
+}
+async function resolveStreamUncached({animeId,episode,episodeId,animeProviderId,providerId}={}){
  const id=String(animeId??'').trim();const ep=String(episode??'1').trim();if(!id)throw new Error('Anime ID is required.');
  const vars={animeId:id,episode:ep,episodeId:String(episodeId??ep),animeProviderId:String(animeProviderId??id)};
  const providers=await (await import('./providers.js')).listProviders();
@@ -64,8 +71,12 @@ export async function resolveStream({animeId,episode,episodeId,animeProviderId,p
    const started=Date.now();
    const sources=await resolveProvider(provider,vars);
    await recordProviderResult(provider.id,{success:true,latencyMs:Date.now()-started,error:false});
-   return {animeId:id,episode:Number(ep)||1,provider:{id:provider.id,name:provider.name,type:provider.type},sources};
+   return {animeId:id,episode:Number(ep)||1,provider:{id:provider.id,name:provider.name,type:provider.type},sources,cacheTtlMs:60000};
   }catch(error){await recordProviderResult(provider.id,{success:false,error:true}).catch(()=>{});errors.push({providerId:provider.id,providerName:provider.name,error:error?.message||'Provider failed'});}
  }
  return {animeId:id,episode:Number(ep)||1,provider:null,sources:[],errors};
+}
+export function invalidateStreamCache({animeId,episode=1,episodeId,providerId}={}){
+ const key='stream:'+encodeURIComponent(String(animeId??''))+':'+encodeURIComponent(String(episode))+':'+encodeURIComponent(String(episodeId??episode))+':'+encodeURIComponent(providerId?String(providerId):'auto');
+ return cacheDelete(key);
 }
