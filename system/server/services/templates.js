@@ -1,6 +1,6 @@
 import {query} from '../db/index.js';
 import {config} from '../config.js';
-import {fetchTemplatePackageMetadata,downloadVerifiedPackage,installTemplatePackage} from './templatePackage.js';
+import {fetchTemplatePackageMetadata,downloadVerifiedPackage,installTemplatePackage,removeStoredTemplate} from './templatePackage.js';
 
 const parse=x=>{try{return typeof x==='string'?JSON.parse(x):x||{}}catch{return {}}};
 
@@ -138,5 +138,6 @@ export async function removeTemplate(id){
  const installed=await getInstalledTemplate(id);
  if(!installed)throw new Error('Template is not installed.');
  await query('DELETE FROM af_templates WHERE id=$1',[String(id)]);
+ await removeStoredTemplate(id);
  return installed;
 }
