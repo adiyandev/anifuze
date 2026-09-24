@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import {requireAdmin} from './auth.js';
 import {requirePermission} from '../auth/permissions.js';
-import {listTemplates,listMarketplaceTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate,checkTemplateUpdate,updateTemplate,listTemplateVersions,rollbackTemplate,removeTemplate} from '../services/templates.js';
+import {listMarketplaceTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate,checkTemplateUpdate,updateTemplate,listTemplateVersions,rollbackTemplate,removeTemplate} from '../services/templates.js';
 const router=Router();
 
 router.get('/template',async(_req,res)=>{try{res.json({ok:true,template:await getActiveTemplate()});}catch(e){res.status(500).json({ok:false,error:e.message});}});
