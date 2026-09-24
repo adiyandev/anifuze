@@ -87,7 +87,6 @@ const PRESENTATION_KEYS=new Set(['primary','primaryColor','accent','accentColor'
 const MAX_MANIFEST_KEYS=64;
 const MAX_MANIFEST_DEPTH=6;
 const MAX_STRING_LENGTH=2048;
-const VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);
 const MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
 
 function validateValue(value,depth=0,seen=new Set()){
@@ -119,7 +118,6 @@ export function validateTemplateManifest(manifest,metadata={}){
  if(manifest.description!=null&&String(manifest.description).length>MAX_STRING_LENGTH)throw new Error('Template manifest description is too long.');
  if(manifest.author!=null&&(!String(manifest.author).trim()||String(manifest.author).length>255))throw new Error('Template manifest author is invalid.');
  if(manifest.category!=null&&(!String(manifest.category).trim()||String(manifest.category).length>100))throw new Error('Template manifest category is invalid.');
- if(manifest.license!=null&&(!VALID_TEMPLATE_LICENSES.has(String(manifest.license).trim())))throw new Error('Template manifest license is invalid or unsupported.');
  const configData=manifest.config;
  if(configData==null||typeof configData!=='object'||Array.isArray(configData))throw new Error('Template manifest config must be an object.');
  validateValue(configData);
@@ -178,19 +176,21 @@ export async function installTemplatePackage(metadata,buffer){
  const safeVersion=String(metadata.version||'1.0.0').replace(/[^a-zA-Z0-9._-]/g,'_');
  const root=path.join(TEMPLATE_ROOT,safeId);
  const finalDir=path.join(root,safeVersion);
- const tempDir=path.join(root,'.install-'+crypto.randomBytes(8).toString('hex'));
- await fs.mkdir(tempDir,{recursive:true});
- const archive=path.join(tempDir,'package.tar');
+ const installRoot=path.join(root,'.install-'+crypto.randomBytes(8).toString('hex'));
+ const extractDir=path.join(installRoot,'content');
+ const archive=path.join(installRoot,'package.tar');
  try{
   const manifest=await validateTemplatePackage(metadata,buffer);
+  await fs.mkdir(extractDir,{recursive:true});
   await fs.writeFile(archive,buffer,{mode:0o600});
-  await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions','--no-overwrite-dir'],{timeout:30000,maxBuffer:1024*1024});
+  await execFileAsync('tar',['-xf',archive,'-C',extractDir,'--no-same-owner','--no-same-permissions','--no-overwrite-dir'],{timeout:30000,maxBuffer:1024*1024});
   await fs.mkdir(root,{recursive:true});
   await fs.rm(finalDir,{recursive:true,force:true});
-  await fs.rename(tempDir,finalDir);
+  await fs.rename(extractDir,finalDir);
+  await fs.rm(installRoot,{recursive:true,force:true});
   return {path:finalDir,manifest};
  }catch(error){
-  await fs.rm(tempDir,{recursive:true,force:true}).catch(()=>{});
+  await fs.rm(installRoot,{recursive:true,force:true}).catch(()=>{});
   throw error;
  }
 }
