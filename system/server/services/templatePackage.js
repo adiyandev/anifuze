@@ -110,7 +110,7 @@ export function validateTemplateManifest(manifest,metadata={}){
  const configData=manifest.config;
  if(configData==null||typeof configData!=='object'||Array.isArray(configData))throw new Error('Template manifest config must be an object.');
  validateValue(configData);
- for(const key of Object.keys(configData))if(!PRESENTATION_KEYS.has(key))throw new Error(\`Unsupported template config key: \${key}. Templates may only define presentation settings.\`);
+  for(const key of Object.keys(configData))if(!PRESENTATION_KEYS.has(key))throw new Error('Unsupported template config key: '+key+'. Templates may only define presentation settings.');
  return true;
 }
 
