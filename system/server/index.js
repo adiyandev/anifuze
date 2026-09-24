@@ -12,6 +12,7 @@ import {episodesRouter} from './routes/episodes.js';
 import {providersRouter} from './routes/providers.js';
 import {providerConsoleRouter} from './routes/providerConsole.js';
 import {providerHealthRouter} from './routes/providerHealth.js';
+import {providerMarketplaceRouter} from './routes/providerMarketplace.js';
 import {publicCatalogRouter} from './routes/publicCatalog.js';
 import {homepageRouter} from './routes/homepage.js';
 import {templateRouter} from './routes/templates.js';
@@ -63,6 +64,7 @@ app.use('/api',episodesRouter);
 app.use('/api',providersRouter);
 app.use('/api',providerConsoleRouter);
 app.use('/api',providerHealthRouter);
+app.use('/api',providerMarketplaceRouter);
 app.use('/api',publicCatalogRouter);
 app.use('/api',homepageRouter);
 app.use('/api',templateRouter);
@@ -92,7 +94,6 @@ app.use('/api',providerDiagnosticsRouter);
 app.use('/api',analyticsRouter);
 app.use('/api',platformRouter);
 
-// Process scheduled customer notifications without requiring a separate worker.
 const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});},60000);
 notificationScheduler.unref?.();
 processDueNotifications().catch(()=>{});
