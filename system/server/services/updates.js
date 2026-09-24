@@ -18,7 +18,7 @@ export async function saveUpdateSettings(input={}){
 }
 function normalizeRelease(data){
  const tag=String(data.tag_name||data.version||'').trim();
- return {version:tag.replace(/^v/i,''),tag,url:data.html_url||data.url||'',name:data.name||tag,publishedAt:data.published_at||null,notes:data.body||'',assets:(data.assets||[]).map(a=>({name:a.name,size:a.size||0,url:a.browser_download_url||''})).filter(a=>a.url)};
+ return {version:tag.replace(/^v/i,''),tag,url:data.html_url||data.url||'',name:data.name||tag,publishedAt:data.published_at||null,notes:data.body||'',assets:(data.assets||[]).map(a=>({name:a.name,size:a.size||0,url:a.browser_download_url||'',sha256:a.sha256||a.digest||''})).filter(a=>a.url)};
 }
 export async function checkForUpdate(){
  const settings=await getUpdateSettings();
