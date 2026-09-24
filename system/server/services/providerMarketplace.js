@@ -4,7 +4,6 @@ import {getProvider,saveProvider} from './providers.js';
 
 const TYPES=new Set(['API','Embed','Direct','Custom']);
 const versionParts=v=>{const m=String(v||'').trim().replace(/^v/i,'').match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/);return m?[+m[1],+(m[2]||0),+(m[3]||0)]:null};
-const versionParts=v=>{const m=String(v||'').trim().replace(/^v/i,'').match(/^(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?/);return m?[+m[1],+(m[2]||0),+(m[3]||0)]:null};
 const compare=(a,b)=>{const x=versionParts(a),y=versionParts(b);if(!x||!y)return null;for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]>y[i]?1:-1;return 0};
 
 export function normalizeProviderListing(raw={}){
