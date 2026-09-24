@@ -103,7 +103,7 @@ export function validateTemplateManifest(manifest,metadata={}){
  if(!manifest||typeof manifest!=='object'||Array.isArray(manifest))throw new Error('Template package manifest must be a JSON object.');
  if(String(manifest.type||'template')!=='template')throw new Error('Unsupported template package type.');
  if(!/^[a-zA-Z0-9][a-zA-Z0-9._-]{1,127}$/.test(String(manifest.id||'')))throw new Error('Template manifest ID is invalid.');
- if(!/^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$/.test(String(manifest.version||'')))throw new Error('Template manifest version must use semantic versioning.');
+ if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(String(manifest.version||'')))throw new Error('Template manifest version must use semantic versioning.');
  if(metadata.id!=null&&String(manifest.id)!==String(metadata.id))throw new Error('Template package manifest does not match marketplace metadata.');
  if(metadata.version!=null&&String(manifest.version)!==String(metadata.version))throw new Error('Template package manifest does not match marketplace metadata.');
  if(manifest.name!=null&&(!String(manifest.name).trim()||String(manifest.name).length>255))throw new Error('Template manifest name is invalid.');
