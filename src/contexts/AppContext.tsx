@@ -17,16 +17,6 @@ type AppState = {
   logoutCustomer: () => Promise<void>;
 };
 
-const DEMO_PERMISSIONS = [
-  'dashboard_view','anime_view','anime_manage','episodes_view','episodes_manage',
-  'providers_view','providers_manage','providers_console','providers_health','sources_view',
-  'templates_view','templates_manage','site_builder_manage','appearance_manage',
-  'navigation_manage','pages_manage','seo_manage','users_view','users_manage',
-  'comments_moderate','reports_moderate','analytics_view','notifications_manage',
-  'settings_manage','security_manage','audit_view','system_view','backups_manage',
-  'maintenance_manage','updates_manage','license_manage','installation_manage','email_manage',
-];
-
 const Context = createContext<AppState>(null!);
 export const useApp = () => useContext(Context);
 
@@ -43,21 +33,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCustomerAuthLoading(true);
       const customer = await fetch('/api/auth/user/me',{credentials:'include'});
       if(customer.ok){ const data=await customer.json(); setCustomerUser(data?.user||null); } else setCustomerUser(null);
-      const isDemo = typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
-      if (isDemo) {
-        const saved = window.localStorage.getItem('anifuze_demo_admin');
-        if (saved) {
-          setRoleState('owner');
-          setPermissions([...DEMO_PERMISSIONS]);
-          setAdminVerified(true);
-          return;
-        }
-        setRoleState('public_user');
-        setPermissions([]);
-        setAdminVerified(false);
-        return;
-      }
-
       const me = await fetch('/api/auth/admin/me');
       if (!me.ok) {
         setRoleState('public_user');
