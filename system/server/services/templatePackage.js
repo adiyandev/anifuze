@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import {config} from '../config.js';
 
 const MAX_PACKAGE_BYTES=50*1024*1024;
@@ -52,4 +54,16 @@ export async function downloadVerifiedPackage(metadata){
  if(hash!==metadata.packageSha256.toLowerCase())throw new Error('Template package integrity verification failed.');
  if(!verifySignature(buffer,metadata.packageSignature))throw new Error('Template package signature verification failed.');
  return buffer;
+}
+
+export async function storeTemplatePackage(metadata,buffer){
+ const safeId=metadata.id.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const safeVersion=String(metadata.version||'1.0.0').replace(/[^a-zA-Z0-9._-]/g,'_');
+ const root=path.resolve(process.cwd(),'storage','templates',safeId);
+ await fs.mkdir(root,{recursive:true});
+ const filePath=path.join(root,safeVersion+'.package');
+ const temp=filePath+'.tmp-'+crypto.randomBytes(8).toString('hex');
+ await fs.writeFile(temp,buffer,{mode:0o600});
+ await fs.rename(temp,filePath);
+ return filePath;
 }
