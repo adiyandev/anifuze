@@ -94,7 +94,9 @@ export async function installTemplatePackage(metadata,buffer){
   const entries=stdout.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
   if(!entries.length||entries.some(x=>!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
   if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
-  await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions'],{timeout:30000,maxBuffer:1024*1024});
+  const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
+  if(/\s(?:->|link to)\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
+  await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions','--no-overwrite-dir'],{timeout:30000,maxBuffer:1024*1024});
   const manifestPath=path.join(tempDir,'anifuze-template.json');
   let manifest;
   try{manifest=JSON.parse(await fs.readFile(manifestPath,'utf8'));}catch{throw new Error('Template package manifest is missing or invalid.');}
