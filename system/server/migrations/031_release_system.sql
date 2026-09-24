@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS af_release_state (
   last_error TEXT,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO af_release_state (id,current_version) VALUES (1,'1.0.0') ON CONFLICT (id) DO NOTHING;
+INSERT INTO af_release_state (id,current_version) SELECT 1,'1.0.0' WHERE NOT EXISTS (SELECT 1 FROM af_release_state WHERE id=1);
