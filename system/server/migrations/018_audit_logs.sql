@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS af_audit_logs (
-  id UUID PRIMARY KEY,
+  id VARCHAR(128) PRIMARY KEY,
   admin_user_id VARCHAR(128) NULL,
   action VARCHAR(120) NOT NULL,
   resource_type VARCHAR(80) NULL,
   resource_id VARCHAR(255) NULL,
-  details JSONB NOT NULL DEFAULT '{}'::jsonb,
+  details TEXT NOT NULL DEFAULT '{}',
   ip_address VARCHAR(64) NULL,
   user_agent TEXT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
