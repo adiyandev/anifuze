@@ -2,7 +2,7 @@ import {query} from '../db/index.js';
 import {config} from '../config.js';
 
 const parse=x=>{try{return typeof x==='string'?JSON.parse(x):x||{}}catch{return {}}};
-const normalizeTemplate=x=>({id:String(x?.id||'').trim(),name:String(x?.name||'').trim(),version:String(x?.version||'1.0.0'),status:String(x?.status||'available'),config:parse(x?.config),description:String(x?.description||''),category:String(x?.category||'')});
+export const normalizeTemplate=x=>({id:String(x?.id||'').trim(),name:String(x?.name||'').trim(),version:String(x?.version||'1.0.0'),status:String(x?.status||'available'),config:parse(x?.config),description:String(x?.description||''),category:String(x?.category||'')});
 async function central(path){
  const base=String(config.templateServiceUrl||'').trim();
  if(!base)throw new Error('AniFuze template service is not configured.');
