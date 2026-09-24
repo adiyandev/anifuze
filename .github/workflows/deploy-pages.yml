@@ -30,12 +30,14 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: system
 
       - name: Build
         run: npm run build
+        working-directory: system
 
       - name: Add SPA fallback for direct routes
-        run: cp ./dist/index.html ./dist/404.html
+        run: cp ./system/dist/index.html ./system/dist/404.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -43,7 +45,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./system/dist
 
   deploy:
     needs: build
