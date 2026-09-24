@@ -1,7 +1,7 @@
 import {Router} from 'express';
-import {installerStatus,executeInstallation,isInstallerLocked,rollbackInstallation} from '../installer/index.js';
-import {testDatabase} from '../installer/database.js';
-import {verifyLicenseKey} from '../installer/license.js';
+import {installerStatus,executeInstallation,isInstallerLocked,rollbackInstallation} from '../../../installer/server/index.js';
+import {testDatabase} from '../../../installer/server/database.js';
+import {verifyLicenseKey} from '../../../installer/server/license.js';
 export const installerRouter=Router();
 installerRouter.get('/status',async(_req,res)=>{try{res.json(await installerStatus());}catch(error){res.status(500).json({ok:false,error:error.message});}});
 installerRouter.post('/license',async(req,res)=>{try{const result=await verifyLicenseKey(req.body?.licenseKey);if(!result.valid)return res.status(400).json({ok:false,error:result.error||'License verification failed.',license:result});res.json({ok:true,license:result});}catch(error){res.status(400).json({ok:false,error:error.message});}});
