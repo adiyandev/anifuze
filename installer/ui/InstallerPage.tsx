@@ -160,7 +160,7 @@ export function InstallerPage(){
       <div className="install-note"><ShieldCheck size={15}/><span>Production installations only accept HTTPS provider marketplace endpoints.</span></div>
      </div>
 
-     {!loading&&step===7&&<div className="install-complete">
+     {!loading&&step===8&&<div className="install-complete">
       <div className="install-complete-icon"><CheckCircle2 size={48}/></div><div className="install-kicker">INSTALLATION COMPLETE</div><h1>AniFuze is ready.</h1><p>Your database was configured, the Owner account was created, and the installer has been locked.</p>
       <div className="install-complete-grid"><span><Check size={15}/> License activated</span><span><Check size={15}/> Database migrated</span><span><Check size={15}/> Installer locked</span></div>
       <button className="install-primary" onClick={()=>navigate('/admin/login')}>Open Admin Panel <ArrowRight size={16}/></button>
