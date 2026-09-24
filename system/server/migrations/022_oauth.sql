@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS af_oauth_settings (
   google_redirect_uri TEXT,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO af_oauth_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO af_oauth_settings (id) SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM af_oauth_settings WHERE id=1);
