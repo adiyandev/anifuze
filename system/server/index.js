@@ -104,6 +104,8 @@ app.use('/api',providerDiagnosticsRouter);
 app.use('/api',analyticsRouter);
 app.use('/api',platformRouter);
 
+app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
+
 app.use((req,res,next)=>{if(req.path.startsWith('/api/'))return res.status(404).json({ok:false,error:'API route not found',requestId:req.requestId});next();});
 app.use((error,req,res,next)=>{if(res.headersSent)return next(error);console.error('AniFuze request error:',error);const status=Number(error?.status)||500;res.status(status>=400&&status<600?status:500).json({ok:false,error:config.nodeEnv==='production'?'Internal server error':String(error?.message||error),requestId:req.requestId});});
 
@@ -114,8 +116,6 @@ const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=
 setTimeout(()=>monitorProviderHealth().catch(()=>{}),30000).unref?.();},60000);
 notificationScheduler.unref?.();
 processDueNotifications().catch(()=>{});
-app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
-
 let server;
 const shutdown=async(signal)=>{console.log('AniFuze shutting down ('+signal+')');for(const timer of [providerHealthScheduler,notificationScheduler,rateLimitCleanup])clearInterval(timer);if(server)await new Promise(resolve=>server.close(resolve));process.exit(0);};
 process.once('SIGTERM',()=>shutdown('SIGTERM')); process.once('SIGINT',()=>shutdown('SIGINT'));
