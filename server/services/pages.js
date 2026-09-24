@@ -10,7 +10,7 @@ export async function listPages({publicOnly=false}={}){
 }
 
 export async function setPageEnabled(slug,enabled){
- if(!allowedSlugs.has(String(slug)))throw new Error('Unknown predefined page.');
+ if(!DEFAULT_PAGE_SLUGS.has(String(slug)))throw new Error('Unknown predefined page.');
  const r=await query('UPDATE af_default_pages SET enabled=$1,updated_at=CURRENT_TIMESTAMP WHERE slug=$2',[Boolean(enabled),String(slug)]);
  if(!r.rowCount)throw new Error('Page not found.');
  return listPages();
