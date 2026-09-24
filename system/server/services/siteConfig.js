@@ -15,27 +15,33 @@ export async function getSiteConfig(){
  const r=await query('SELECT * FROM af_site_config WHERE id=1');
  return normalize(r.rows[0]||defaults);
 }
-export async function updateSiteConfig(input={}){
- const current=await getSiteConfig();
+export function normalizeSiteConfigInput(input={},current=defaults){
+ const base={...defaults,...(current||{})};
  const value={
-  site_name:String(input.site_name??current.site_name).trim().slice(0,120)||defaults.site_name,
-  tagline:String(input.tagline??current.tagline).trim().slice(0,240),
-  description:String(input.description??current.description).trim().slice(0,4000),
-  logo_url:String(input.logo_url??current.logo_url).trim().slice(0,1000),
-  favicon_url:String(input.favicon_url??current.favicon_url).trim().slice(0,1000),
-  domain:String(input.domain??current.domain).trim().slice(0,255),
-  support_email:String(input.support_email??current.support_email).trim().slice(0,320),
-  primary_color:String(input.primary_color??current.primary_color).trim().slice(0,32),
-  accent_color:String(input.accent_color??current.accent_color).trim().slice(0,32),
-  background_color:String(input.background_color??current.background_color).trim().slice(0,32),
-  footer_text:String(input.footer_text??current.footer_text).trim().slice(0,500),
-  social_links:normalizeSocialLinks(input.social_links??current.social_links),
-  setup_completed:Boolean(input.setup_completed??current.setup_completed)
+  site_name:String(input.site_name??base.site_name).trim().slice(0,120)||defaults.site_name,
+  tagline:String(input.tagline??base.tagline).trim().slice(0,240),
+  description:String(input.description??base.description).trim().slice(0,4000),
+  logo_url:String(input.logo_url??base.logo_url).trim().slice(0,1000),
+  favicon_url:String(input.favicon_url??base.favicon_url).trim().slice(0,1000),
+  domain:String(input.domain??base.domain).trim().slice(0,255),
+  support_email:String(input.support_email??base.support_email).trim().slice(0,320),
+  primary_color:String(input.primary_color??base.primary_color).trim().slice(0,32),
+  accent_color:String(input.accent_color??base.accent_color).trim().slice(0,32),
+  background_color:String(input.background_color??base.background_color).trim().slice(0,32),
+  footer_text:String(input.footer_text??base.footer_text).trim().slice(0,500),
+  social_links:normalizeSocialLinks(input.social_links??base.social_links),
+  setup_completed:Boolean(input.setup_completed??base.setup_completed)
  };
  if(value.support_email&&!/^\S+@\S+\.\S+$/.test(value.support_email))throw new Error('Support email is invalid.');
- for(const [key,label] of [['primary_color','primary color'],['accent_color','accent color'],['background_color','background color']])if(!isHexColor(value[key]))throw new Error(`Invalid ${label}.`);
+ for(const [key,label] of [['primary_color','primary color'],['accent_color','accent color'],['background_color','background color']])if(!isHexColor(value[key]))throw new Error('Invalid '+label+'.');
  if(value.logo_url&&!isHttpUrl(value.logo_url)&&!value.logo_url.startsWith('/'))throw new Error('Logo URL must be HTTP(S) or a local path.');
  if(value.favicon_url&&!isHttpUrl(value.favicon_url)&&!value.favicon_url.startsWith('/'))throw new Error('Favicon URL must be HTTP(S) or a local path.');
+ return value;
+}
+
+export async function updateSiteConfig(input={}){
+ const current=await getSiteConfig();
+ const value=normalizeSiteConfigInput(input,current);
  await query('UPDATE af_site_config SET site_name=$1,tagline=$2,description=$3,logo_url=$4,favicon_url=$5,domain=$6,support_email=$7,primary_color=$8,accent_color=$9,background_color=$10,footer_text=$11,social_links=$12,setup_completed=$13,updated_at=CURRENT_TIMESTAMP WHERE id=1',[value.site_name,value.tagline,value.description,value.logo_url||null,value.favicon_url||null,value.domain||null,value.support_email||null,value.primary_color,value.accent_color,value.background_color,value.footer_text,JSON.stringify(value.social_links),value.setup_completed]);
  return getSiteConfig();
 }
