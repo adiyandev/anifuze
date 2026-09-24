@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeTemplate,listTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate} from './templates.js';
-import {validateTemplateManifest} from './templatePackage.js';
+import {validateTemplateManifest,validateTemplatePackage} from './templatePackage.js';
 
 test('template service exposes the central marketplace contract',()=>{
  assert.equal(typeof normalizeTemplate,'function');
@@ -54,4 +54,8 @@ test('template manifest validation rejects oversized metadata',()=>{
 test('template manifest validation rejects invalid author and category metadata',()=>{
  assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',author:'',config:{primary:'#fff'}}),/author is invalid/);
  assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',category:'x'.repeat(101),config:{primary:'#fff'}}),/category is invalid/);
+});
+
+test('template package validator is exposed for authoring workflows',()=>{
+ assert.equal(typeof validateTemplatePackage,'function');
 });
