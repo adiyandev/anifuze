@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {query} from '../db/index.js';
 import {config} from '../config.js';
-import {hashPassword,loginUser} from './userAuth.js';
+import {hashPassword,createUserSession} from './userAuth.js';
 
 const secretKey=()=>crypto.createHash('sha256').update(String(process.env.ANIFUZE_ENCRYPTION_KEY||config.installationId)).digest();
 const encrypt=v=>{if(!v)return null;const iv=crypto.randomBytes(12);const cipher=crypto.createCipheriv('aes-256-gcm',secretKey(),iv);const data=Buffer.concat([cipher.update(String(v),'utf8'),cipher.final()]);return [iv.toString('base64url'),cipher.getAuthTag().toString('base64url'),data.toString('base64url')].join('.')};
@@ -56,5 +56,5 @@ export async function loginWithGoogle({identity,req}){
  }else{
   await query('UPDATE af_user_oauth_accounts SET provider_email=$3,updated_at=CURRENT_TIMESTAMP WHERE provider=$1 AND provider_subject=$2',['google',identity.sub,identity.email]);
  }
- return loginUser({email:user.email,password:crypto.randomBytes(1).toString('hex'),req,remember:true}).catch(async()=>{throw new Error('Google account session creation requires the OAuth session helper.')});
+ return createUserSession(user,{req,remember:true});
 }
