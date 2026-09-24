@@ -22,6 +22,8 @@ function normalizeSources(raw,config,provider){
 }
 async function resolveProvider(provider,vars){
  const config=provider.config_json||{};
+ const sourceConfig=config.source||{};
+ const headers=sourceConfig.headers||config.headers||{};
  const mode=String(config.mode||provider.type||'').toLowerCase();
  if(mode==='embed'||provider.type==='Embed'){
   const template=config.urlTemplate||config.url_template||config.embedUrl;
@@ -31,11 +33,12 @@ async function resolveProvider(provider,vars){
   return [{url,type:config.playbackType||'external',quality:config.quality||'',language:config.language||'',providerId:provider.id,providerName:provider.name,index:0}];
  }
  const source=config.source||{};
- const endpoint=replaceTemplate(source.endpoint||config.sourceEndpoint||'/',vars);
- const method=String(source.method||'GET').toUpperCase();
- const query=Object.fromEntries(Object.entries(source.query||{}).map(([k,v])=>[k,replaceTemplate(v,vars)]));
- const body=source.body?JSON.parse(JSON.stringify(source.body,(k,v)=>typeof v==='string'?replaceTemplate(v,vars):v)):undefined;
- const result=await executeProviderRequest({providerId:provider.id,method,endpoint,queryParams:query,body});
+ const endpoint=replaceTemplate(sourceConfig.endpoint||config.sourceEndpoint||'/',vars);
+ const method=String(sourceConfig.method||'GET').toUpperCase();
+ const query=Object.fromEntries(Object.entries(sourceConfig.query||{}).map(([k,v])=>[k,replaceTemplate(v,vars)]));
+ const body=sourceConfig.body?JSON.parse(JSON.stringify(sourceConfig.body,(k,v)=>typeof v==='string'?replaceTemplate(v,vars):v)):undefined;
+ const resolvedHeaders=Object.fromEntries(Object.entries(headers).map(([k,v])=>[k,replaceTemplate(v,vars)]));
+ const result=await executeProviderRequest({providerId:provider.id,method,endpoint,headers:resolvedHeaders,queryParams:query,body});
  if(result.status<200||result.status>=300)throw new Error('Provider returned HTTP '+result.status+'.');
  let raw;try{raw=JSON.parse(result.body||'{}')}catch{throw new Error('Provider returned non-JSON source data.');}
  const sources=normalizeSources(raw,config,provider);
