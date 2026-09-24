@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeTemplate,listTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate} from './templates.js';
 import {validateTemplateManifest,validateTemplatePackage} from './templatePackage.js';
+import {validateTemplateSandboxEntries} from './templateSandbox.js';
 
 test('template service exposes the central marketplace contract',()=>{
  assert.equal(typeof normalizeTemplate,'function');
@@ -61,3 +62,13 @@ test('template package validator is exposed for authoring workflows',()=>{
 });
 
 
+
+test('template sandbox accepts only manifest and static presentation assets',()=>{
+ assert.equal(validateTemplateSandboxEntries(['anifuze-template.json','assets/theme.css','assets/logo.png','assets/font.woff2']),true);
+});
+
+test('template sandbox rejects executable content and files outside assets',()=>{
+ assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','assets/theme.js']),/executable content/);
+ assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','index.html']),/outside the presentation sandbox/);
+ assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','assets/data.exe']),/executable content/);
+});
