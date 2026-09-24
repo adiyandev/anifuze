@@ -4,6 +4,7 @@ import path from 'node:path';
 import {config} from '../config.js';
 import {query} from '../db/index.js';
 import {createBackup} from './backups.js';
+import {compareVersions} from './updates.js';
 
 const VERSION=/^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const clean=v=>String(v??'').trim();
@@ -30,7 +31,7 @@ export function validateRelease(release={}){
 }
 export async function stageRelease(release={}){
   const item=validateRelease(release);
-  if(!/^\d+\.\d+\.\d+/.test(config.version)||item.version===clean(config.version).replace(/^v/i,''))throw new Error('Release is not newer than the installed version.');
+  if(compareVersions(item.version,config.version)<=0)throw new Error('Release is not newer than the installed version.');
   const backup=await createBackup({label:'pre-upgrade-'+item.version});
   await fs.mkdir(await releaseDir(),{recursive:true});
   const response=await fetch(item.packageUrl,{redirect:'manual',headers:{Accept:'application/octet-stream','User-Agent':'AniFuze-Updater'},signal:AbortSignal.timeout(30000)});
