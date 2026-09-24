@@ -4,6 +4,7 @@ import path from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {config} from '../config.js';
+import {validateTemplateSandboxEntries} from './templateSandbox.js';
 
 const MAX_PACKAGE_BYTES=50*1024*1024;
 const MAX_ARCHIVE_ENTRIES=256;
@@ -148,6 +149,7 @@ export async function validateTemplatePackage(metadata,buffer){
   if(!entries.length)throw new Error('Template package is empty.');
   if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('Template package contains too many files.');
   if(entries.some(x=>x.length>MAX_PATH_LENGTH||!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
+  validateTemplateSandboxEntries(entries);
   if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
   const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
   if(/\\s(?:->|link to)\\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
