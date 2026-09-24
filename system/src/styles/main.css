@@ -747,3 +747,12 @@ button,a{transition-duration:.2s}
 
 .vault-video{display:block;width:100%;height:100%;min-height:420px;background:#000;object-fit:contain}.vault-player{position:relative;overflow:hidden;background:#000;min-height:420px}.vault-player .vault-builder-text{min-height:420px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center}.vault-player .vault-builder-text p{max-width:620px}.vault-player .vault-primary{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;text-decoration:none}.source-row{display:flex;align-items:center;gap:10px;margin-top:14px}.source-row i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--anifuze-primary,#ff2d8d);margin-right:7px}.watch-progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.12);pointer-events:none}.watch-progress i{display:block;height:100%;background:var(--anifuze-primary,#ff2d8d)}
 @media(max-width:700px){.vault-video,.vault-player{min-height:240px}}
+
+/* Marketplace templates are presentation-only. They can skin the customer-facing site without changing routes, data, auth, playback, or admin behavior. */
+.vault-shell{font-family:var(--vault-font,Inter,Arial,sans-serif);background:var(--vault-background,#070707);color:var(--vault-text,#f5f5f5)}
+.vault-shell .vault-nav,.vault-shell .vault-footer{background:var(--vault-background,#070707)}
+.vault-shell .vault-brand span,.vault-shell .vault-signin,.vault-shell .vault-search-trigger:focus-visible{color:var(--vault-primary,#22d3ee)}
+.vault-shell .vault-primary,.vault-shell .vault-nav a.active{background:var(--vault-primary,#22d3ee);border-color:var(--vault-primary,#22d3ee)}
+.vault-shell .vault-card,.vault-shell .vault-panel,.vault-shell .vault-cta,.vault-shell .vault-footer-column{border-radius:var(--vault-radius,8px)}
+.vault-shell .vault-card,.vault-shell .vault-cta{background:var(--vault-surface,#101010)}
+.vault-shell .vault-card small,.vault-shell .vault-section-head p,.vault-shell .vault-footer p{color:var(--vault-muted,#999)}
