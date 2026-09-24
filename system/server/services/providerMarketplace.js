@@ -4,6 +4,8 @@ import {getProvider,saveProvider} from './providers.js';
 
 const TYPES=new Set(['API','Embed','Direct','Custom']);
 const parse=v=>{if(v==null)return {};if(typeof v==='object')return v;try{return JSON.parse(String(v))}catch{return {}}};
+const SAFE_CONFIG_KEYS=new Set(['mode','source','response','headers','query','body','urlTemplate','url_template','embedUrl','playbackType','quality','language','health']);
+function sanitizeConfig(value){if(!value||typeof value!=='object'||Array.isArray(value))return {};const out={};for(const [k,v] of Object.entries(value)){if(!SAFE_CONFIG_KEYS.has(k))continue;if(k==='headers'||k==='query'||k==='body'){if(v&&typeof v==='object'&&!Array.isArray(v))out[k]=Object.fromEntries(Object.entries(v).filter(([key])=>!/password|secret|token|api[-_]?key|credential|authorization|cookie/i.test(key)));else continue;}else if(typeof v==='string')out[k]=v.slice(0,4000);else if(typeof v==='object')out[k]=v;}return out;}
 const versionParts=v=>{const m=String(v||'').trim().replace(/^v/i,'').match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/);return m?[+m[1],+(m[2]||0),+(m[3]||0)]:null};
 const compare=(a,b)=>{const x=versionParts(a),y=versionParts(b);if(!x||!y)return null;for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]>y[i]?1:-1;return 0};
 
@@ -15,7 +17,7 @@ export function normalizeProviderListing(raw={}){
  const description=String(raw.description||'').trim().slice(0,2000);
  const category=String(raw.category||'').trim().slice(0,100);
  const baseUrl=String(raw.baseUrl??raw.base_url??'').trim();
- const providerConfig=parse(raw.config);
+ const providerConfig=sanitizeConfig(parse(raw.config));
  const compatibility=parse(raw.compatibility);
  if(!id||!name)throw new Error('Marketplace provider is missing id or name.');
  if(!/^[a-zA-Z0-9._-]{1,128}$/.test(id))throw new Error('Marketplace provider id is invalid.');
