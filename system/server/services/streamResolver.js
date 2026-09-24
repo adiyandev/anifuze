@@ -30,7 +30,6 @@ async function resolveProvider(provider,vars){
   if(!sources.length)throw new Error('Provider returned no playable sources.');
   return sources;
  }
- const config=provider.config_json||{};
  const sourceConfig=config.source||{};
  const headers=sourceConfig.headers||config.headers||{};
  const mode=String(config.mode||provider.type||'').toLowerCase();
