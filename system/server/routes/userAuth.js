@@ -31,12 +31,12 @@ router.get('/google',async(req,res)=>{
 router.get('/google/callback',async(req,res)=>{
  try{
   const cookies=Object.fromEntries(String(req.headers.cookie||'').split(';').filter(Boolean).map(x=>{const i=x.indexOf('=');return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1).trim())]}));
-  if(!req.query?.state||!cookies.anifuze_google_oauth_state||!crypto.timingSafeEqual(Buffer.from(String(req.query.state)),Buffer.from(cookies.anifuze_google_oauth_state)))return res.status(400).send('Invalid OAuth state.');
+  const returnedState=Buffer.from(String(req.query?.state||''));const savedState=Buffer.from(String(cookies.anifuze_google_oauth_state||''));if(!returnedState.length||returnedState.length!==savedState.length||!crypto.timingSafeEqual(returnedState,savedState))return res.status(400).send('Invalid OAuth state.');
   if(!req.query?.code)return res.status(400).send('Google authorization was not completed.');
   const identity=await getGoogleIdentity(String(req.query.code));
   const session=await loginWithGoogle({identity,req});
   const maxAge=session.remember?60*60*24*30:60*60*24;
   res.setHeader('Set-Cookie',[`anifuze_google_oauth_state=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`,`anifuze_user_session=${encodeURIComponent(session.id)}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`]);
-  res.redirect('/'); 
+  res.redirect('/anifuze/'); 
  }catch(e){res.status(400).send(e.message||'Google sign-in failed.')}
 });
