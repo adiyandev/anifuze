@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {config} from '../config.js';
+import {config} from '../../system/server/config.js';
 
 export function getInstallationIdentity(){return {installationId:config.installationId,domain:config.domain,licenseKey:config.licenseKey};}
 export async function verifyLicenseKey(licenseKey){
