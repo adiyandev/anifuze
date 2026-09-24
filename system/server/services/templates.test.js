@@ -59,4 +59,12 @@ test('template manifest validation rejects invalid author and category metadata'
 test('template package validator is exposed for authoring workflows',()=>{
  assert.equal(typeof validateTemplatePackage,'function');
 });
-\n\ntest('template manifest validation accepts the ten supported SPDX licenses',()=>{\n for(const license of ['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']) assert.equal(validateTemplateManifest({id:'licensed',version:'1.0.0',license,config:{primary:'#fff'}},{id:'licensed',version:'1.0.0'}),true);\n});\n\ntest('template manifest validation rejects unsupported licenses',()=>{\n assert.throws(()=>validateTemplateManifest({id:'licensed',version:'1.0.0',license:'Unlicense',config:{primary:'#fff'}},{id:'licensed',version:'1.0.0'}),/license is invalid or unsupported/);\n});
+
+
+test('template manifest validation accepts the ten supported SPDX licenses',()=>{
+ for(const license of ['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']) assert.equal(validateTemplateManifest({id:'licensed',version:'1.0.0',license,config:{primary:'#fff'}},{id:'licensed',version:'1.0.0'}),true);
+});
+
+test('template manifest validation rejects unsupported licenses',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'licensed',version:'1.0.0',license:'Unlicense',config:{primary:'#fff'}},{id:'licensed',version:'1.0.0'}),/license is invalid or unsupported/);
+});
