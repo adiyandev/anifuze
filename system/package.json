@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "dev:server": "node --watch server/index.js",
-    "test:server": "node --test"
+    "test:server": "node --test server ../installer/server"
   },
   "dependencies": {
     "react": "^18.3.1",
