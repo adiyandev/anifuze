@@ -26,9 +26,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: system
 
       - name: Build frontend
         run: npm run build
+        working-directory: system
 
       - name: Server tests
         run: npm run test:server
+        working-directory: system
