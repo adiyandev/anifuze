@@ -1,4 +1,4 @@
-import {isInstallerLocked} from '../installer/index.js';
+import {isInstallerLocked} from '../../../installer/server/index.js';
 
 const allowedApiPrefixes=['/api/installer','/api/health'];
 const allowedWebPrefixes=['/install'];
