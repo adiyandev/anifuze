@@ -158,7 +158,7 @@ export function InstallerPage(){
       <div className="install-icon"><Sparkles size={27}/></div><div className="install-kicker">STEP 08</div><h2>Connect the provider marketplace</h2><p>Optional. Set the HTTPS endpoint for your central AniFuze provider marketplace. You can leave this blank and configure it later.</p>
       <label className="install-field"><span>Provider marketplace URL</span><div className="install-input-wrap"><Sparkles size={16}/><input autoFocus value={providerMarketplaceUrl} onChange={e=>setProviderMarketplaceUrl(e.target.value)} placeholder="https://providers.example.com" autoComplete="url"/></div></label>
       <div className="install-note"><ShieldCheck size={15}/><span>Production installations only accept HTTPS provider marketplace endpoints.</span></div>
-     </div>
+     </div>}
 
      {!loading&&step===8&&<div className="install-complete">
       <div className="install-complete-icon"><CheckCircle2 size={48}/></div><div className="install-kicker">INSTALLATION COMPLETE</div><h1>AniFuze is ready.</h1><p>Your database was configured, the Owner account was created, and the installer has been locked.</p>
