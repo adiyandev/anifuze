@@ -26,6 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --include=dev
+      - name: Ensure TypeScript React types
+        run: npm install --save-dev @types/react@18.3.12 @types/react-dom@18.3.1
+        working-directory: system
         working-directory: system
 
       - name: Build frontend
