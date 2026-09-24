@@ -1,5 +1,7 @@
 import {getProvider,recordProviderResult} from './providers.js';
 import {executeProviderRequest} from './providerConsole.js';
+import {invokeProviderOperation} from './providerSdk.js';
+import {providerHealthRank,shouldAttemptProvider} from './providerHealth.js';
 
 const TEMPLATE=/\{(animeId|episodeId|episode|animeProviderId)\}/g;
 
@@ -21,6 +23,13 @@ function normalizeSources(raw,config,provider){
  }).filter(x=>x?.url&&/^https?:\/\//i.test(x.url));
 }
 async function resolveProvider(provider,vars){
+ const config=provider.config_json||{};
+ if(config.sdk?.operations?.getSources||config.operations?.getSources){
+  const result=await invokeProviderOperation(provider.id,'getSources',vars);
+  const sources=(result.data||[]).map((x,i)=>({...x,providerId:provider.id,providerName:provider.name,index:i}));
+  if(!sources.length)throw new Error('Provider returned no playable sources.');
+  return sources;
+ }
  const config=provider.config_json||{};
  const sourceConfig=config.source||{};
  const headers=sourceConfig.headers||config.headers||{};
@@ -50,7 +59,8 @@ export async function resolveStream({animeId,episode,episodeId,animeProviderId,p
  const vars={animeId:id,episode:ep,episodeId:String(episodeId??ep),animeProviderId:String(animeProviderId??id)};
  const providers=await (await import('./providers.js')).listProviders();
  const errors=[];
- for(const provider of providers.filter(p=>p.enabled&&(!providerId||String(p.id)===String(providerId))).sort((a,b)=>Number(a.priority)-Number(b.priority))){
+ const candidates=providers.filter(p=>p.enabled&&(!providerId||String(p.id)===String(providerId))&&shouldAttemptProvider(p)).sort((a,b)=>providerHealthRank(a)-providerHealthRank(b)||Number(a.priority)-Number(b.priority));
+ for(const provider of candidates){
   try{
    const started=Date.now();
    const sources=await resolveProvider(provider,vars);
