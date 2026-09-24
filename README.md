@@ -245,6 +245,10 @@ For preorder information, licensing, pricing, and release details, contact the A
 AniFuze is being developed toward a complete production platform.
 
 Current development includes:
+* [ ] Standalone installer bootstrap
+* [ ] Installer-only customer package
+* [ ] Central signed release downloader
+* [ ] Atomic system installation and activation
 
 * [x] Admin platform foundation
 * [x] Customer authentication
