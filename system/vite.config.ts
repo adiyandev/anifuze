@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/anifuze/',
   plugins: [react()],
+  root: '.',
   server: {
+    fs: {allow: ['..']},
     proxy: {
       '/api': {
         target: 'http://localhost:8787',
