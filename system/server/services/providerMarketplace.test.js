@@ -14,3 +14,8 @@ test('provider marketplace compatibility honors version bounds',()=>{
  assert.deepEqual(providerCompatibility({compatibility:{minVersion:'2.0.0'}},'1.0.0'),{compatible:false,reason:'Requires AniFuze 2.0.0 or newer.'});
  assert.deepEqual(providerCompatibility({compatibility:{maxVersion:'1.0.0'}},'1.0.0'),{compatible:true,reason:''});
 });
+
+test('marketplace listings strip credential-like configuration fields',()=>{
+ const item=normalizeProviderListing({id:'safe',name:'Safe',type:'API',version:'1.0.0',baseUrl:'https://provider.test',config:{mode:'api',source:{endpoint:'/sources'},apiKey:'evil',headers:{Authorization:'evil',Accept:'application/json'}}});
+ assert.equal(item.config.apiKey,undefined);assert.equal(item.config.headers.Authorization,undefined);assert.equal(item.config.headers.Accept,'application/json');
+});
