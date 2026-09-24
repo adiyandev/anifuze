@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {validateRelease} from './releaseManager.js';
+test('release validation requires semver, HTTPS and sha256',()=>{assert.throws(()=>validateRelease({version:'bad',packageUrl:'https://example.com/a',sha256:'a'.repeat(64)}));assert.throws(()=>validateRelease({version:'2.0.0',packageUrl:'http://example.com/a',sha256:'a'.repeat(64)}));assert.throws(()=>validateRelease({version:'2.0.0',packageUrl:'https://example.com/a',sha256:'bad'}));const item=validateRelease({version:'2.0.0',packageUrl:'https://example.com/a',sha256:'A'.repeat(64)});assert.equal(item.version,'2.0.0');assert.equal(item.checksum,'a'.repeat(64));});
