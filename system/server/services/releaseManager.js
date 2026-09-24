@@ -30,8 +30,16 @@ export async function stageRelease(release={}){
   if(compareVersions(item.version,config.version)<=0)throw new Error('Release is not newer than the installed version.');
   const backup=await createBackup({label:'pre-upgrade-'+item.version});
   await fs.mkdir(await releaseDir(),{recursive:true});
-  const response=await fetch(item.packageUrl,{redirect:'manual',headers:{Accept:'application/octet-stream','User-Agent':'AniFuze-Updater'},signal:AbortSignal.timeout(30000)});
-  if(!response.ok||response.status>=300)throw new Error('Release package download failed with HTTP '+response.status+'.');
+  let downloadUrl=item.packageUrl; let response;
+  for(let hop=0;hop<4;hop++){
+    validHttpsUrl(downloadUrl);
+    response=await fetch(downloadUrl,{redirect:'manual',headers:{Accept:'application/octet-stream','User-Agent':'AniFuze-Updater'},signal:AbortSignal.timeout(30000)});
+    if(response.status<300||response.status>=400)break;
+    const location=response.headers.get('location');
+    if(!location)throw new Error('Release package redirect did not include a location.');
+    downloadUrl=new URL(location,downloadUrl).toString();
+  }
+  if(!response?.ok)throw new Error('Release package download failed with HTTP '+(response?.status||0)+'.');
   const data=Buffer.from(await response.arrayBuffer());
   if(data.length>100*1024*1024)throw new Error('Release package exceeds the 100 MB safety limit.');
   const actual=crypto.createHash('sha256').update(data).digest('hex');
