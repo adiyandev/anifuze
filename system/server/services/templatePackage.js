@@ -87,7 +87,7 @@ const PRESENTATION_KEYS=new Set(['primary','primaryColor','accent','accentColor'
 const MAX_MANIFEST_KEYS=64;
 const MAX_MANIFEST_DEPTH=6;
 const MAX_STRING_LENGTH=2048;
-const MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
+\nconst VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);\nconst MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
 
 function validateValue(value,depth=0,seen=new Set()){
  if(depth>MAX_MANIFEST_DEPTH)throw new Error('Template manifest config is too deeply nested.');
@@ -118,7 +118,7 @@ export function validateTemplateManifest(manifest,metadata={}){
  if(manifest.description!=null&&String(manifest.description).length>MAX_STRING_LENGTH)throw new Error('Template manifest description is too long.');
  if(manifest.author!=null&&(!String(manifest.author).trim()||String(manifest.author).length>255))throw new Error('Template manifest author is invalid.');
  if(manifest.category!=null&&(!String(manifest.category).trim()||String(manifest.category).length>100))throw new Error('Template manifest category is invalid.');
- if(manifest.license!=null&&(!String(manifest.license).trim()||String(manifest.license).length>100))throw new Error('Template manifest license is invalid.');
+ if(manifest.license!=null&&(!VALID_TEMPLATE_LICENSES.has(String(manifest.license).trim())))throw new Error('Template manifest license is invalid or unsupported.');
  const configData=manifest.config;
  if(configData==null||typeof configData!=='object'||Array.isArray(configData))throw new Error('Template manifest config must be an object.');
  validateValue(configData);
@@ -130,7 +130,7 @@ export function validateTemplateManifest(manifest,metadata={}){
 
 function safeArchivePath(entry){
  const normalized=String(entry||'').replace(/\\/g,'/');
- if(!normalized||normalized.startsWith('/')||normalized.includes('\\0'))return false;
+ if(!normalized||normalized.startsWith('/')||normalized.includes('\0'))return false;
  const clean=path.posix.normalize(normalized);
  return clean!=='.'&&!clean.startsWith('../')&&!clean.includes('/../')&&!path.posix.isAbsolute(clean);
 }
@@ -144,11 +144,33 @@ export async function validateTemplatePackage(metadata,buffer){
  try{
   await fs.mkdir(tempRoot,{recursive:true});
   await fs.writeFile(archive,buffer,{mode:0o600});
-  const manifest=await validateTemplatePackage(metadata,buffer);
-
+  const {stdout}=await execFileAsync('tar',['-tf',archive],{maxBuffer:2*1024*1024,timeout:15000});
+  const entries=stdout.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+  if(!entries.length)throw new Error('Template package is empty.');
+  if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('Template package contains too many files.');
+  if(entries.some(x=>x.length>MAX_PATH_LENGTH||!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
+  if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
+  const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
+  if(/\\s(?:->|link to)\\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
+  let unpackedBytes=0;
+  for(const line of details.split(/\\r?\\n/).filter(Boolean)){
+   const type=line[0];
+   if(type!=='-'&&type!=='d')throw new Error('Template package contains an unsupported archive entry type.');
+   if(type==='-'){
+    const size=Number(line.trim().split(/\\s+/)[2]);
+    if(!Number.isSafeInteger(size)||size<0)throw new Error('Template package contains an invalid file size.');
+    if(size>MAX_ENTRY_BYTES)throw new Error('Template package contains an oversized file.');
+    unpackedBytes+=size;
+    if(unpackedBytes>MAX_UNPACKED_BYTES)throw new Error('Template package expands beyond the allowed size.');
+   }
+  }
+  const {stdout:manifestText}=await execFileAsync('tar',['-xOf',archive,'anifuze-template.json'],{maxBuffer:MAX_STRING_LENGTH*8,timeout:15000});
+  let manifest;
+  try{manifest=JSON.parse(manifestText);}catch{throw new Error('Template package manifest is missing or invalid.');}
+  validateTemplateManifest(manifest,metadata);
+  return manifest;
  }finally{await fs.rm(tempRoot,{recursive:true,force:true}).catch(()=>{});}
 }
-
 export async function installTemplatePackage(metadata,buffer){
  if(!metadata?.id)throw new Error('Template package has no template ID.');
  const safeId=String(metadata.id).replace(/[^a-zA-Z0-9._-]/g,'_');
