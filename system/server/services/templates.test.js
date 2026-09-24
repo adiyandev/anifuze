@@ -14,7 +14,7 @@ test('template service exposes the central marketplace contract',()=>{
 
 test('template normalization provides safe marketplace defaults',()=>{
  const template=normalizeTemplate({id:'  starter ',name:' Starter ',config:'{"homepage":{"hero":true}}'});
- assert.deepEqual(template,{id:'starter',name:'Starter',version:'1.0.0',status:'available',config:{homepage:{hero:true}},description:'',category:''});
+ assert.deepEqual(template,{id:'starter',name:'Starter',version:'1.0.0',status:'available',config:{homepage:{hero:true}},description:'',category:'',packageUrl:'',packageSha256:'',packageSignature:'',packageSize:0,compatibility:{}});
 });
 
 test('template normalization safely handles malformed config',()=>{
