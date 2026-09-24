@@ -1,6 +1,5 @@
 import {Link,useParams,useLocation,useNavigate} from 'react-router-dom';
 import {useEffect,useMemo,useState} from 'react';
-import {builderService} from '../../services/mockServices';
 import {fetchRealHomepageAnime,fetchCatalog,fetchAnimeSchedule,fetchAnimeById} from '../../services/anilistService';
 import {useApp} from '../../contexts/AppContext';
 import {watchProgressService} from '../../services/watchProgressService';
@@ -21,7 +20,7 @@ export function HomePage(){
   }).catch(()=>{fetchRealHomepageAnime().then(data=>{if(alive)setFresh({trending:animeOnly(data.trending),latest:animeOnly(data.latest),popular:animeOnly(data.trending)})}).catch(()=>{})});
   return()=>{alive=false};
  },[]);
- const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]||fresh.popular[0]; const slides=liveTrending.slice(0,5); const blocks=homepageBlocks.length?homepageBlocks:builderService.get().filter(b=>!b.hidden);
+ const liveTrending=fresh.trending; const liveLatest=fresh.latest; const featured=liveTrending[0]||fresh.popular[0]; const slides=liveTrending.slice(0,5); const blocks=homepageBlocks.filter((b:any)=>!b.hidden);
  if(!featured)return <section className={`vault-home template-${template?.id||'default'}`}><div className="vault-container"><div className="vault-builder-text"><span className="vault-kicker">{settings.siteName.toUpperCase()}</span><h1>{fresh.trending.length===0?'Loading anime…':'No anime available'}</h1><p>{fresh.trending.length===0?'AniList is being queried for the latest catalog. Please try again in a moment.':'AniList returned no trending anime right now.'}</p><button className="vault-primary" onClick={()=>window.location.reload()}>Retry</button></div></div></section>;
  return <section className="vault-home">
   <div className="vault-hero"><div className="vault-hero-bg" style={{backgroundImage:`linear-gradient(90deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.78) 38%,rgba(8,8,8,.25) 72%,rgba(8,8,8,.82) 100%),linear-gradient(0deg,#080808 0%,transparent 35%),url(${featured.banner||featured.cover})`}}/>
