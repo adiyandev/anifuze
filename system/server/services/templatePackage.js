@@ -87,7 +87,7 @@ const PRESENTATION_KEYS=new Set(['primary','primaryColor','accent','accentColor'
 const MAX_MANIFEST_KEYS=64;
 const MAX_MANIFEST_DEPTH=6;
 const MAX_STRING_LENGTH=2048;
-\nconst VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);\nconst MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
+const VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);\nconst MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
 
 function validateValue(value,depth=0,seen=new Set()){
  if(depth>MAX_MANIFEST_DEPTH)throw new Error('Template manifest config is too deeply nested.');
@@ -145,7 +145,7 @@ export async function validateTemplatePackage(metadata,buffer){
   await fs.mkdir(tempRoot,{recursive:true});
   await fs.writeFile(archive,buffer,{mode:0o600});
   const {stdout}=await execFileAsync('tar',['-tf',archive],{maxBuffer:2*1024*1024,timeout:15000});
-  const entries=stdout.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+  const entries=stdout.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   if(!entries.length)throw new Error('Template package is empty.');
   if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('Template package contains too many files.');
   if(entries.some(x=>x.length>MAX_PATH_LENGTH||!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
@@ -153,7 +153,7 @@ export async function validateTemplatePackage(metadata,buffer){
   const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
   if(/\\s(?:->|link to)\\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
   let unpackedBytes=0;
-  for(const line of details.split(/\\r?\\n/).filter(Boolean)){
+  for(const line of details.split(/\r?\n/).filter(Boolean)){
    const type=line[0];
    if(type!=='-'&&type!=='d')throw new Error('Template package contains an unsupported archive entry type.');
    if(type==='-'){
