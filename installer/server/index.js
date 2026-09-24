@@ -1,16 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {config} from '../config.js';
+import {config} from '../../system/server/config.js';
 import {checkRequirements} from './requirements.js';
 import {getInstallationIdentity,verifyLicenseKey} from './license.js';
-import {verifyLicense as verifyStoredLicense} from '../services/license.js';
-import {runMigrations,migrationSnapshot} from '../migrate.js';
+import {verifyLicense as verifyStoredLicense} from '../../system/server/services/license.js';
+import {runMigrations,migrationSnapshot} from '../../system/server/migrate.js';
 import {testDatabase,toEnv} from './database.js';
-import {saveInstallerEmailSettings} from '../services/email.js';
-import {saveOAuthSettings} from '../services/oauth.js';
+import {saveInstallerEmailSettings} from '../../system/server/services/email.js';
+import {saveOAuthSettings} from '../../system/server/services/oauth.js';
 import {deployLocalRelease} from './deploy.js';
-import {useRuntimeDatabase,query,dropAniFuzeTables} from '../db/index.js';
+import {useRuntimeDatabase,query,dropAniFuzeTables} from '../../system/server/db/index.js';
 const LOCK_FILE=path.resolve('.anifuze-installed'); const ENV_FILE=path.resolve('.env');
 export async function isInstallerLocked(){return fs.access(LOCK_FILE).then(()=>true).catch(()=>false);}
 export async function installerStatus(licenseKey=config.licenseKey,dbClient='postgres'){
