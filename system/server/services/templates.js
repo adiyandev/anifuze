@@ -54,7 +54,25 @@ async function central(path){
  if(!r.ok||!data)throw new Error(data?.error||'Template service request failed.');
  return data;
 }
+export function decorateMarketplaceTemplates(templates,installedTemplates=[],currentVersion=config.version){
+ const installedById=new Map(installedTemplates.map(x=>[String(x.id),x]));
+ return templates.map(normalizeTemplate).filter(x=>x.id&&x.name).map(template=>{
+  const installed=installedById.get(template.id)||null;
+  const compatibility=templateCompatibility(template,currentVersion);
+  let updateAvailable=false;
+  if(installed){
+   const cmp=compareVersions(template.version,installed.version);
+   const packageChanged=Boolean(template.packageSha256&&installed.package_sha256&&template.packageSha256!==installed.package_sha256);
+   updateAvailable=cmp===null?template.version!==installed.version||packageChanged:cmp>0||(cmp===0&&packageChanged);
+  }
+  return {...template,installed:Boolean(installed),installedVersion:installed?.version||null,installedStatus:installed?.status||null,updateAvailable,compatibility};
+ });
+}
 export async function listTemplates(){const data=await central('/templates');return Array.isArray(data.templates)?data.templates.map(normalizeTemplate).filter(x=>x.id&&x.name):[];}
+export async function listMarketplaceTemplates(){
+ const [remote,installed]=await Promise.all([listTemplates(),listInstalledTemplates()]);
+ return decorateMarketplaceTemplates(remote,installed);
+}
 export async function getTemplate(id){const data=await central('/templates/'+encodeURIComponent(String(id)));return normalizeTemplate(data.template||data);}
 
 async function snapshotInstalled(t){
