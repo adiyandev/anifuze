@@ -5,13 +5,16 @@ import {query} from '../db/index.js';
 import {config} from '../config.js';
 
 const id=()=>crypto.randomUUID();
+const secret=()=>{const raw=process.env.ANIFUZE_ENCRYPTION_KEY;if(!raw)return null;return crypto.createHash('sha256').update(raw).digest();};
+function encryptSecret(value){if(value==null||value==='')return null;const key=secret();if(!key)throw new Error('ANIFUZE_ENCRYPTION_KEY is required to store SMTP credentials.');const iv=crypto.randomBytes(12);const cipher=crypto.createCipheriv('aes-256-gcm',key,iv);const data=Buffer.concat([cipher.update(String(value),'utf8'),cipher.final()]);return 'v1.'+[iv.toString('base64url'),cipher.getAuthTag().toString('base64url'),data.toString('base64url')].join('.');}
+function decryptSecret(value){if(!value)return '';const raw=String(value);if(!raw.startsWith('v1.'))return raw;const key=secret();if(!key)throw new Error('ANIFUZE_ENCRYPTION_KEY is required to read SMTP credentials.');const [iv,tag,data]=raw.slice(3).split('.');const decipher=crypto.createDecipheriv('aes-256-gcm',key,Buffer.from(iv,'base64url'));decipher.setAuthTag(Buffer.from(tag,'base64url'));return Buffer.concat([decipher.update(Buffer.from(data,'base64url')),decipher.final()]).toString('utf8');}
 const defaults={enabled:false,host:'',port:587,secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'};
 
 function cfgRow(r){return r.rows[0]?{...r.rows[0],enabled:Boolean(r.rows[0].enabled),secure:Boolean(r.rows[0].secure)}:defaults;}
-export async function getEmailSettings(){return cfgRow(await query('SELECT id,enabled,host,port,secure,username,from_email,from_name,updated_at FROM af_email_settings WHERE id=1'));}
+export async function getEmailSettings(){const row=await query('SELECT id,enabled,host,port,secure,username,password,from_email,from_name,updated_at FROM af_email_settings WHERE id=1');const value=cfgRow(row);return {...value,password:decryptSecret(row.rows[0]?.password||'')};}
 export async function saveEmailSettings(input={}){
- const current=await query('SELECT password FROM af_email_settings WHERE id=1'); const password=input.password!==undefined?String(input.password):String(current.rows[0]?.password||'');
- const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password,from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
+ const current=await query('SELECT password FROM af_email_settings WHERE id=1'); const password=input.password!==undefined?String(input.password):decryptSecret(current.rows[0]?.password||'');
+ const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:encryptSecret(password),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
  if(value.enabled&&(!value.host||!value.from_email))throw new Error('SMTP host and sender email are required.');
  if(value.port<1||value.port>65535)throw new Error('Invalid SMTP port.');
  await query(`INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at)
@@ -26,7 +29,7 @@ function command(socket,expected,cmd=''){return new Promise((resolve,reject)=>{l
 
 async function smtpSend(to,subject,html,textBody=''){
  const s=await getEmailSettings();if(!s.enabled)throw new Error('Email delivery is disabled.');
- const socket=s.secure?tls.connect({host:s.host,port:s.port,rejectUnauthorized:true}):net.connect({host:s.host,port:s.port});
+ let socket=s.secure?tls.connect({host:s.host,port:s.port,rejectUnauthorized:true}):net.connect({host:s.host,port:s.port});
  await new Promise((resolve,reject)=>{socket.once('connect',resolve);socket.once('secureConnect',resolve);socket.once('error',reject);});
  await command(socket,[220]);
  let ehlo=await command(socket,[250],'EHLO anifuze.local');
@@ -37,7 +40,7 @@ async function smtpSend(to,subject,html,textBody=''){
    socket=secureSocket;
    await command(socket,[250],'EHLO anifuze.local');
  }
- if(s.username){await command(socket,[235,334],'AUTH LOGIN');await command(socket,[334],encodeBody(s.username));await command(socket,[235],encodeBody(s.password));}
+ if(s.username){if(!s.password)throw new Error('SMTP password is required when a username is configured.');await command(socket,[235,334],'AUTH LOGIN');await command(socket,[334],encodeBody(s.username));await command(socket,[235],encodeBody(s.password));}
  await command(socket,[250],'MAIL FROM:<'+escapeHeader(s.from_email)+'>');
  await command(socket,[250],'RCPT TO:<'+escapeHeader(to)+'>');
  await command(socket,[354],'DATA');
@@ -72,7 +75,7 @@ export async function updateEmailTemplate(templateId,input={}){
 }
 
 export async function saveInstallerEmailSettings(input={}){
- const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:String(input.password||''),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
+ const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:encryptSecret(String(input.password||'')),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
  if(value.enabled&&(!value.host||!value.from_email))throw new Error('SMTP host and sender email are required.');
  if(value.port<1||value.port>65535)throw new Error('Invalid SMTP port.');
  await query('INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP',[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
