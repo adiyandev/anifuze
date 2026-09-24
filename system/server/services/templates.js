@@ -19,7 +19,9 @@ export async function getTemplate(id){const data=await central('/templates/'+enc
 export async function installTemplate(id){
  const remote=normalizeTemplate(await fetchTemplatePackageMetadata(id));
  const packageBuffer=await downloadVerifiedPackage(remote);
- const packagePath=await installTemplatePackage(remote,packageBuffer);
+ const installedPackage=await installTemplatePackage(remote,packageBuffer);
+ const packagePath=installedPackage.path;
+ remote.config=installedPackage.manifest.config||remote.config;
  if(!remote.id)throw new Error('Template was not found.');
  const now=new Date().toISOString();
  await query('INSERT INTO af_templates(id,name,version,status,config,installed_at,updated_at,package_url,package_sha256,package_signature,package_size,package_path,compatibility,description,category) VALUES($1,$2,$3,$4,$5,$6,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT(id) DO UPDATE SET name=$2,version=$3,status=$4,config=$5,updated_at=$6,package_url=$7,package_sha256=$8,package_signature=$9,package_size=$10,package_path=$11,compatibility=$12,description=$13,category=$14',[remote.id,remote.name,remote.version,'installed',JSON.stringify(remote.config),now,remote.packageUrl,remote.packageSha256,remote.packageSignature,packageBuffer.length,packagePath,JSON.stringify(remote.compatibility),remote.description,remote.category]);
