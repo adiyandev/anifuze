@@ -2,6 +2,7 @@ ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS package_url TEXT;
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS package_sha256 VARCHAR(64);
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS package_signature TEXT;
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS package_size BIGINT;
+ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS package_path TEXT;
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS compatibility TEXT;
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE af_templates ADD COLUMN IF NOT EXISTS category VARCHAR(100);
