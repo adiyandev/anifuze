@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS af_license (
   expires_at TIMESTAMP,
   last_checked_at TIMESTAMP,
   last_error TEXT,
-  metadata JSONB NOT NULL DEFAULT '{}',
+  metadata TEXT NOT NULL DEFAULT '{}',
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO af_license (id,status) VALUES (1,'unlicensed') ON CONFLICT (id) DO NOTHING;
+INSERT INTO af_license (id,status) SELECT 1,'unlicensed' WHERE NOT EXISTS (SELECT 1 FROM af_license WHERE id=1);
