@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {createUser,loginUser,getUserFromRequest,logoutUser,userCookie,clearUserCookie,sendVerificationEmail,verifyEmail,requestPasswordReset,resetPassword} from '../services/userAuth.js';
+import {createUser,loginUser,getUserFromRequest,logoutUser,userCookie,clearUserCookie,sendVerificationEmail,verifyEmail,requestPasswordReset,resetPassword,changeUserPassword,listUserSessions,revokeUserSession,revokeOtherUserSessions} from '../services/userAuth.js';
 import crypto from 'node:crypto';
 import {getGoogleOAuthConfig,getGoogleIdentity,loginWithGoogle} from '../services/oauth.js';
 import {createOAuthState,parseCookies,safeEqual} from '../services/oauthSecurity.js';
@@ -39,3 +39,9 @@ router.get('/google/callback',async(req,res)=>{
   res.redirect('/anifuze/'); 
  }catch(e){res.status(400).send(e.message||'Google sign-in failed.')}
 });
+
+const requireUser=async(req,res,next)=>{const user=await getUserFromRequest(req);if(!user)return res.status(401).json({ok:false,error:'Authentication required.'});req.user=user;next()};
+router.get('/user/sessions',requireUser,async(req,res)=>{try{res.json({ok:true,sessions:await listUserSessions(req.user.id,req.user.sessionId)})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.delete('/user/sessions/:id',requireUser,async(req,res)=>{try{await revokeUserSession(req.user.id,req.params.id);res.json({ok:true})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.post('/user/sessions/revoke-others',requireUser,async(req,res)=>{try{res.json({ok:true,count:await revokeOtherUserSessions(req.user.id,req.user.sessionId)})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.post('/user/password/change',requireUser,async(req,res)=>{try{await changeUserPassword(req.user.id,req.body?.currentPassword,req.body?.newPassword,req.user.sessionId);res.json({ok:true})}catch(e){res.status(400).json({ok:false,error:e.message})}});
