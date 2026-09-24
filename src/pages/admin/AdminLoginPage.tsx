@@ -12,6 +12,7 @@ export function AdminLoginPage() {
   const [code, setCode] = useState('');
   const [method, setMethod] = useState<'totp' | 'email' | 'recovery'>('totp');
   const [error, setError] = useState('');
+  const [setupData, setSetupData] = useState<{ secret: string; otpauthUri: string } | null>(null);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -59,6 +60,7 @@ export function AdminLoginPage() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || '2FA setup failed.');
     setCode('');
+    setSetupData({ secret: data.secret, otpauthUri: data.otpauthUri });
     return data;
   };
 
@@ -106,6 +108,7 @@ export function AdminLoginPage() {
             <div className="admin-login-icon"><ShieldCheck size={22} /></div>
             <h1>Set up 2FA</h1>
             <p>Your administrator account needs an authenticator before access is granted.</p>
+            {setupData && <div className="admin-login-setup"><span>Authenticator secret</span><code>{setupData.secret}</code><small>Add this secret to your authenticator app, then enter the 6-digit code below.</small></div>}
             <button
               className="button"
               type="button"
