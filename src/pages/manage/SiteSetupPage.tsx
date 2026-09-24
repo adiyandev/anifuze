@@ -15,15 +15,15 @@ const checks=(c:Config)=>[
 ] as [string,boolean][];
 
 export function SiteSetupPage(){
- const{toast}=useApp();const[c,setC]=useState<Config>(empty);const[loading,setLoading]=useState(true);const[saving,setSaving]=useState(false);
+ const{toast}=useApp();const[c,setC]=useState<Config>(empty);const[loading,setLoading]=useState(true);const[saving,setSaving]=useState(false);const[readiness,setReadiness]=useState<{setupCompleted:boolean;checks:{id:string;label:string;ready:boolean}[];complete:number;total:number}|null>(null);
  const load=async()=>{setLoading(true);try{const r=await fetch('/api/admin/site-config');const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load site configuration.');setC({...empty,...d.config,social_links:d.config.social_links||{}})}catch(e){toast(e instanceof Error?e.message:'Could not load site configuration.','error')}finally{setLoading(false)}};
- useEffect(()=>{load()},[]);
- const items=useMemo(()=>checks(c),[c]);const complete=items.filter(x=>x[1]).length;const set=(key:keyof Config,value:any)=>setC(x=>({...x,[key]:value}));
+ useEffect(()=>{load();fetch('/api/admin/site-setup/status').then(r=>r.ok?r.json():Promise.reject()).then(d=>setReadiness(d)).catch(()=>setReadiness(null))},[]);
+ const items=useMemo(()=>readiness?.checks?.map(x=>[x.label,x.ready] as [string,boolean])||checks(c),[c,readiness]);const complete=readiness?.complete??items.filter(x=>x[1]).length;const set=(key:keyof Config,value:any)=>setC(x=>({...x,[key]:value}));
  const save=async(publish=false)=>{setSaving(true);try{const r=await fetch('/api/admin/site-config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...c,setup_completed:publish||c.setup_completed})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Save failed.');setC(d.config);toast(publish?'Site setup published.':'Site configuration saved.');if(publish)window.location.href='/'}catch(e){toast(e instanceof Error?e.message:'Save failed.','error')}finally{setSaving(false)}};
  if(loading)return <section className="form-page"><div className="page-heading"><p>Loading site configuration…</p></div></section>;
  return <section className="form-page">
-  <div className="page-heading"><div><p>Configure the customer site from one place. Specialized controls remain available in Design, Streaming, SEO, Email, and OAuth.</p></div><div className="actions"><Button variant="ghost" onClick={load} disabled={saving}>Refresh</Button><Button onClick={()=>save(false)} disabled={saving}>Save</Button><Button onClick={()=>save(true)} disabled={saving||complete<5}>{c.setup_completed?'Republish':'Publish site'}</Button></div></div>
-  <Card title="Setup progress"><div className="stats"><div><strong>{complete}/{items.length}</strong><span>setup checks</span></div></div><div className="healthrows">{items.map(([label,ok])=><div key={label}><span className={'dot '+(ok?'':'warn')}/><b>{label}</b><small>{ok?'Ready':'Needs attention'}</small></div>)}</div></Card>
+  <div className="page-heading"><div><p>Configure the customer site from one place. Specialized controls remain available in Design, Streaming, SEO, Email, and OAuth.</p></div><div className="actions"><Button variant="ghost" onClick={load} disabled={saving}>Refresh</Button><Button onClick={()=>save(false)} disabled={saving}>Save</Button><Button onClick={()=>save(true)} disabled={saving||complete<items.length}>{c.setup_completed?'Republish':'Publish site'}</Button></div></div>
+  <Card title="Setup progress"><div className="stats"><div><strong>{readiness?.setupCompleted?'Published':'Draft'}</strong><span>site status</span></div><div><strong>{complete}/{items.length}</strong><span>setup checks</span></div></div><div className="healthrows">{items.map(([label,ok])=><div key={label}><span className={'dot '+(ok?'':'warn')}/><b>{label}</b><small>{ok?'Ready':'Needs attention'}</small></div>)}</div></Card>
   <Card title="Brand"><div className="form-grid">
    <label>Site name<input value={c.site_name} onChange={e=>set('site_name',e.target.value)} /></label>
    <label>Tagline<input value={c.tagline} onChange={e=>set('tagline',e.target.value)} /></label>
