@@ -4,7 +4,8 @@ interface Result{currentVersion:string;available:boolean;release:Release;checked
 interface Settings{channel:string;manifest_url:string;auto_check:boolean}
 const bytes=(n:number)=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
 export function UpdatesPage(){
- const [state,setState]=useState<any>(null);\n const [settings,setSettings]=useState<Settings>({channel:'stable',manifest_url:'',auto_check:true}); const [result,setResult]=useState<Result|null>(null);
+ const [state,setState]=useState<any>(null);
+ const [settings,setSettings]=useState<Settings>({channel:'stable',manifest_url:'',auto_check:true}); const [result,setResult]=useState<Result|null>(null);
  const [loading,setLoading]=useState(true),[checking,setChecking]=useState(false),[saving,setSaving]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState('');
  const load=async()=>{setLoading(true);setError('');try{const r=await fetch('/api/admin/updates');const j=await r.json();if(!r.ok)throw new Error(j.error||'Could not check for updates');setSettings(j.settings);setResult(j.result);const sr=await fetch('/api/admin/updates/release');if(sr.ok){const sj=await sr.json();setState(sj.state);}}catch(e){setError(e instanceof Error?e.message:'Could not load update system');}finally{setLoading(false);}};
  useEffect(()=>{load();},[]);
