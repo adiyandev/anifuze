@@ -1,4 +1,4 @@
-import {getProvider,decryptProviderCredential} from './providers.js';
+import {getProvider,recordProviderResult} from './providers.js';
 import {executeProviderRequest} from './providerConsole.js';
 
 const TEMPLATE=/\{(animeId|episodeId|episode|animeProviderId)\}/g;
@@ -52,9 +52,11 @@ export async function resolveStream({animeId,episode,episodeId,animeProviderId,p
  const errors=[];
  for(const provider of providers.filter(p=>p.enabled&&(!providerId||String(p.id)===String(providerId))).sort((a,b)=>Number(a.priority)-Number(b.priority))){
   try{
+   const started=Date.now();
    const sources=await resolveProvider(provider,vars);
+   await recordProviderResult(provider.id,{success:true,latencyMs:Date.now()-started,error:false});
    return {animeId:id,episode:Number(ep)||1,provider:{id:provider.id,name:provider.name,type:provider.type},sources};
-  }catch(error){errors.push({providerId:provider.id,providerName:provider.name,error:error?.message||'Provider failed'});}
+  }catch(error){await recordProviderResult(provider.id,{success:false,error:true}).catch(()=>{});errors.push({providerId:provider.id,providerName:provider.name,error:error?.message||'Provider failed'});}
  }
  return {animeId:id,episode:Number(ep)||1,provider:null,sources:[],errors};
 }
