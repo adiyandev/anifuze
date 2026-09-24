@@ -104,6 +104,9 @@ app.use('/api',providerDiagnosticsRouter);
 app.use('/api',analyticsRouter);
 app.use('/api',platformRouter);
 
+app.use((req,res,next)=>{if(req.path.startsWith('/api/'))return res.status(404).json({ok:false,error:'API route not found',requestId:req.requestId});next();});
+app.use((error,req,res,next)=>{if(res.headersSent)return next(error);console.error('AniFuze request error:',error);const status=Number(error?.status)||500;res.status(status>=400&&status<600?status:500).json({ok:false,error:config.nodeEnv==='production'?'Internal server error':String(error?.message||error),requestId:req.requestId});});
+
 const rateLimitCleanup=setInterval(pruneRateLimitBuckets,300000); rateLimitCleanup.unref?.();
 const providerHealthScheduler=setInterval(()=>{monitorProviderHealth().catch(()=>{});},300000);
 providerHealthScheduler.unref?.();
