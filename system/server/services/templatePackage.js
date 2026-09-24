@@ -1,9 +1,13 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {config} from '../config.js';
 
 const MAX_PACKAGE_BYTES=50*1024*1024;
+const execFileAsync=promisify(execFile);
+const TEMPLATE_ROOT=path.resolve(process.cwd(),'storage','templates');
 function verifySignature(buffer,signature){
  const publicKey=String(config.templatePublicKey||'').trim();
  if(!publicKey)throw new Error('Template signing key is not configured.');
@@ -66,4 +70,46 @@ export async function storeTemplatePackage(metadata,buffer){
  await fs.writeFile(temp,buffer,{mode:0o600});
  await fs.rename(temp,filePath);
  return filePath;
+}
+
+
+function safeArchivePath(entry){
+ const normalized=String(entry||'').replace(/\\/g,'/');
+ if(!normalized||normalized.startsWith('/')||normalized.includes('\\0'))return false;
+ const clean=path.posix.normalize(normalized);
+ return clean!=='.'&&!clean.startsWith('../')&&!clean.includes('/../')&&!path.posix.isAbsolute(clean);
+}
+export async function installTemplatePackage(metadata,buffer){
+ if(!metadata?.id)throw new Error('Template package has no template ID.');
+ const safeId=String(metadata.id).replace(/[^a-zA-Z0-9._-]/g,'_');
+ const safeVersion=String(metadata.version||'1.0.0').replace(/[^a-zA-Z0-9._-]/g,'_');
+ const root=path.join(TEMPLATE_ROOT,safeId);
+ const finalDir=path.join(root,safeVersion);
+ const tempDir=path.join(root,'.install-'+crypto.randomBytes(8).toString('hex'));
+ await fs.mkdir(tempDir,{recursive:true});
+ const archive=path.join(tempDir,'package.tar');
+ try{
+  await fs.writeFile(archive,buffer,{mode:0o600});
+  const {stdout}=await execFileAsync('tar',['-tf',archive],{maxBuffer:2*1024*1024,timeout:15000});
+  const entries=stdout.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+  if(!entries.length||entries.some(x=>!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
+  if(entries.some(x=>x==='anifuze-template.json'||x.endsWith('/anifuze-template.json')===false&&x===''))throw new Error('Invalid template package manifest.');
+  await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions'],{timeout:30000,maxBuffer:1024*1024});
+  const manifestCandidates=[path.join(tempDir,'anifuze-template.json')];
+  const manifestPath=manifestCandidates.find(async()=>false)||manifestCandidates[0];
+  let manifest;
+  try{manifest=JSON.parse(await fs.readFile(manifestPath,'utf8'));}catch{throw new Error('Template package manifest is missing or invalid.');}
+  if(String(manifest.id||'')!==String(metadata.id)||String(manifest.version||'')!==String(metadata.version))throw new Error('Template package manifest does not match marketplace metadata.');
+  if(String(manifest.type||'template')!=='template')throw new Error('Unsupported template package type.');
+  const configData=manifest.config&&typeof manifest.config==='object'?manifest.config:{};
+  const manifestFile=path.join(tempDir,'anifuze-template.json');
+  await fs.writeFile(manifestFile,JSON.stringify({...manifest,config:configData},null,2),{mode:0o600});
+  await fs.mkdir(root,{recursive:true});
+  await fs.rm(finalDir,{recursive:true,force:true});
+  await fs.rename(tempDir,finalDir);
+  return {path:finalDir,manifest};
+ }catch(error){
+  await fs.rm(tempDir,{recursive:true,force:true}).catch(()=>{});
+  throw error;
+ }
 }
