@@ -79,6 +79,41 @@ export async function storeTemplatePackage(metadata,buffer){
 }
 
 
+const PRESENTATION_KEYS=new Set(['primary','primaryColor','accent','accentColor','background','backgroundColor','surface','surfaceColor','text','textColor','muted','mutedColor','radius','cardRadius','font','fontFamily','effects','containerWidth','layout']);
+const MAX_MANIFEST_KEYS=64;
+const MAX_MANIFEST_DEPTH=6;
+const MAX_STRING_LENGTH=2048;
+
+function validateValue(value,depth=0,seen=new Set()){
+ if(depth>MAX_MANIFEST_DEPTH)throw new Error('Template manifest config is too deeply nested.');
+ if(typeof value==='string'){if(value.length>MAX_STRING_LENGTH)throw new Error('Template manifest contains an oversized string.');return;}
+ if(value===null||typeof value==='number'||typeof value==='boolean')return;
+ if(Array.isArray(value)){if(value.length>MAX_MANIFEST_KEYS)throw new Error('Template manifest contains too many array items.');value.forEach(x=>validateValue(x,depth+1,seen));return;}
+ if(typeof value==='object'){
+  if(seen.has(value))throw new Error('Template manifest config contains a circular reference.');
+  seen.add(value);
+  const keys=Object.keys(value); if(keys.length>MAX_MANIFEST_KEYS)throw new Error('Template manifest contains too many config keys.');
+  for(const key of keys){if(key==='__proto__'||key==='prototype'||key==='constructor')throw new Error('Template manifest contains a forbidden config key.');validateValue(value[key],depth+1,seen)}
+  seen.delete(value);return;
+ }
+ throw new Error('Template manifest contains an unsupported value type.');
+}
+
+export function validateTemplateManifest(manifest,metadata={}){
+ if(!manifest||typeof manifest!=='object'||Array.isArray(manifest))throw new Error('Template package manifest must be a JSON object.');
+ if(String(manifest.type||'template')!=='template')throw new Error('Unsupported template package type.');
+ if(!/^[a-zA-Z0-9][a-zA-Z0-9._-]{1,127}$/.test(String(manifest.id||'')))throw new Error('Template manifest ID is invalid.');
+ if(!/^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$/.test(String(manifest.version||'')))throw new Error('Template manifest version must use semantic versioning.');
+ if(metadata.id!=null&&String(manifest.id)!==String(metadata.id))throw new Error('Template package manifest does not match marketplace metadata.');
+ if(metadata.version!=null&&String(manifest.version)!==String(metadata.version))throw new Error('Template package manifest does not match marketplace metadata.');
+ if(manifest.name!=null&&(!String(manifest.name).trim()||String(manifest.name).length>255))throw new Error('Template manifest name is invalid.');
+ const configData=manifest.config;
+ if(configData==null||typeof configData!=='object'||Array.isArray(configData))throw new Error('Template manifest config must be an object.');
+ validateValue(configData);
+ for(const key of Object.keys(configData))if(!PRESENTATION_KEYS.has(key))throw new Error(\`Unsupported template config key: \${key}. Templates may only define presentation settings.\`);
+ return true;
+}
+
 function safeArchivePath(entry){
  const normalized=String(entry||'').replace(/\\/g,'/');
  if(!normalized||normalized.startsWith('/')||normalized.includes('\\0'))return false;
@@ -106,9 +141,8 @@ export async function installTemplatePackage(metadata,buffer){
   const manifestPath=path.join(tempDir,'anifuze-template.json');
   let manifest;
   try{manifest=JSON.parse(await fs.readFile(manifestPath,'utf8'));}catch{throw new Error('Template package manifest is missing or invalid.');}
-  if(String(manifest.id||'')!==String(metadata.id)||String(manifest.version||'')!==String(metadata.version))throw new Error('Template package manifest does not match marketplace metadata.');
-  if(String(manifest.type||'template')!=='template')throw new Error('Unsupported template package type.');
-  const configData=manifest.config&&typeof manifest.config==='object'?manifest.config:{};
+  validateTemplateManifest(manifest,metadata);
+  const configData=manifest.config;
   const manifestFile=path.join(tempDir,'anifuze-template.json');
   await fs.writeFile(manifestFile,JSON.stringify({...manifest,config:configData},null,2),{mode:0o600});
   await fs.mkdir(root,{recursive:true});
