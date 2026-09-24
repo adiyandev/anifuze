@@ -2,6 +2,7 @@ import {Router} from 'express';
 import {createUser,loginUser,getUserFromRequest,logoutUser,userCookie,clearUserCookie,sendVerificationEmail,verifyEmail,requestPasswordReset,resetPassword} from '../services/userAuth.js';
 import crypto from 'node:crypto';
 import {getGoogleOAuthConfig,getGoogleIdentity,loginWithGoogle} from '../services/oauth.js';
+import {createOAuthState,parseCookies,safeEqual} from '../services/oauthSecurity.js';
 const router=Router(),attempts=new Map();
 const allow=(key,max=8,windowMs=15*60*1000)=>{const now=Date.now(),x=attempts.get(key);if(!x||now-x.start>windowMs){attempts.set(key,{start:now,count:1});return true}x.count++;return x.count<=max};
 const setSession=(res,session)=>userCookie(res,session.id,session.remember?60*60*24*30:60*60*24);
@@ -20,7 +21,7 @@ router.get('/google',async(req,res)=>{
  try{
   const cfg=await getGoogleOAuthConfig();
   if(!cfg.google_enabled||!cfg.google_client_id||!cfg.google_client_secret||!cfg.google_redirect_uri)return res.status(503).send('Google sign-in is not configured.');
-  const state=crypto.randomBytes(32).toString('base64url');
+  const state=createOAuthState();
   const cookie=`anifuze_google_oauth_state=${encodeURIComponent(state)}; Max-Age=600; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`;
   res.setHeader('Set-Cookie',cookie);
   const params=new URLSearchParams({client_id:cfg.google_client_id,redirect_uri:cfg.google_redirect_uri,response_type:'code',scope:'openid email profile',state,access_type:'online',prompt:'select_account'});
@@ -29,8 +30,8 @@ router.get('/google',async(req,res)=>{
 });
 router.get('/google/callback',async(req,res)=>{
  try{
-  const cookies=Object.fromEntries(String(req.headers.cookie||'').split(';').filter(Boolean).map(x=>{const i=x.indexOf('=');return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1).trim())]}));
-  const returnedState=Buffer.from(String(req.query?.state||''));const savedState=Buffer.from(String(cookies.anifuze_google_oauth_state||''));if(!returnedState.length||returnedState.length!==savedState.length||!crypto.timingSafeEqual(returnedState,savedState))return res.status(400).send('Invalid OAuth state.');
+  const cookies=parseCookies(req.headers.cookie||'');
+  if(!safeEqual(req.query?.state,cookies.anifuze_google_oauth_state))return res.status(400).send('Invalid OAuth state.');
   if(!req.query?.code)return res.status(400).send('Google authorization was not completed.');
   const identity=await getGoogleIdentity(String(req.query.code));
   const session=await loginWithGoogle({identity,req});
