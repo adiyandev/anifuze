@@ -11,7 +11,7 @@ function decryptSecret(value){if(!value)return '';const raw=String(value);if(!ra
 const defaults={enabled:false,host:'',port:587,secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'};
 
 function cfgRow(r){return r.rows[0]?{...r.rows[0],enabled:Boolean(r.rows[0].enabled),secure:Boolean(r.rows[0].secure)}:defaults;}
-export async function getEmailSettings(){const row=await query('SELECT id,enabled,host,port,secure,username,password,from_email,from_name,updated_at FROM af_email_settings WHERE id=1');const value=cfgRow(row);return {...value,password:decryptSecret(row.rows[0]?.password||'')};}
+export async function getEmailSettings(){const row=await query('SELECT id,enabled,host,port,secure,username,from_email,from_name,updated_at FROM af_email_settings WHERE id=1');return cfgRow(row);}
 export async function saveEmailSettings(input={}){
  const current=await query('SELECT password FROM af_email_settings WHERE id=1'); const password=input.password!==undefined?String(input.password):decryptSecret(current.rows[0]?.password||'');
  const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:encryptSecret(password),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
@@ -28,7 +28,7 @@ function encodeBody(s){return Buffer.from(String(s),'utf8').toString('base64');}
 function command(socket,expected,cmd=''){return new Promise((resolve,reject)=>{let buf='';const timer=setTimeout(()=>{cleanup();reject(new Error('SMTP timeout.'));},15000);const onData=data=>{buf+=data.toString();const lines=buf.split(/\r?\n/);buf=lines.pop()||'';for(const line of lines){if(/^\d{3}( |$)/.test(line)){const code=Number(line.slice(0,3));cleanup();if(expected.includes(code))resolve(line);else reject(new Error('SMTP '+line));return;}}};const onErr=e=>{cleanup();reject(e)};const cleanup=()=>{clearTimeout(timer);socket.off('data',onData);socket.off('error',onErr)};socket.on('data',onData);socket.on('error',onErr);if(cmd)socket.write(cmd+'\r\n');});}
 
 async function smtpSend(to,subject,html,textBody=''){
- const s=await getEmailSettings();if(!s.enabled)throw new Error('Email delivery is disabled.');
+ const s=await getEmailSettings();const credential=await query('SELECT password FROM af_email_settings WHERE id=1');const password=decryptSecret(credential.rows[0]?.password||'');if(!s.enabled)throw new Error('Email delivery is disabled.');
  let socket=s.secure?tls.connect({host:s.host,port:s.port,rejectUnauthorized:true}):net.connect({host:s.host,port:s.port});
  await new Promise((resolve,reject)=>{socket.once('connect',resolve);socket.once('secureConnect',resolve);socket.once('error',reject);});
  await command(socket,[220]);
@@ -40,7 +40,7 @@ async function smtpSend(to,subject,html,textBody=''){
    socket=secureSocket;
    await command(socket,[250],'EHLO anifuze.local');
  }
- if(s.username){if(!s.password)throw new Error('SMTP password is required when a username is configured.');await command(socket,[235,334],'AUTH LOGIN');await command(socket,[334],encodeBody(s.username));await command(socket,[235],encodeBody(s.password));}
+ if(s.username){if(!password)throw new Error('SMTP password is required when a username is configured.');await command(socket,[235,334],'AUTH LOGIN');await command(socket,[334],encodeBody(s.username));await command(socket,[235],encodeBody(password));}
  await command(socket,[250],'MAIL FROM:<'+escapeHeader(s.from_email)+'>');
  await command(socket,[250],'RCPT TO:<'+escapeHeader(to)+'>');
  await command(socket,[354],'DATA');
