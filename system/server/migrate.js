@@ -32,6 +32,7 @@ export async function runMigrations(){
    newly.push(name);
   }catch(error){throw new Error('Migration '+name+' failed: '+(error?.message||error));}
  }
+ await query('UPDATE af_release_state SET current_version=$1,updated_at=CURRENT_TIMESTAMP WHERE id=1',[config.version]).catch(()=>{});
  return {applied:newly,total:names.length};
 }
 export async function migrationSnapshot(){return listAniFuzeTables();}
