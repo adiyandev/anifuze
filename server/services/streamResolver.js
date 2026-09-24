@@ -45,12 +45,12 @@ async function resolveProvider(provider,vars){
  if(!sources.length)throw new Error('Provider returned no playable sources.');
  return sources;
 }
-export async function resolveStream({animeId,episode,episodeId,animeProviderId}={}){
+export async function resolveStream({animeId,episode,episodeId,animeProviderId,providerId}={}){
  const id=String(animeId??'').trim();const ep=String(episode??'1').trim();if(!id)throw new Error('Anime ID is required.');
  const vars={animeId:id,episode:ep,episodeId:String(episodeId??ep),animeProviderId:String(animeProviderId??id)};
  const providers=await (await import('./providers.js')).listProviders();
  const errors=[];
- for(const provider of providers.filter(p=>p.enabled).sort((a,b)=>Number(a.priority)-Number(b.priority))){
+ for(const provider of providers.filter(p=>p.enabled&&(!providerId||String(p.id)===String(providerId))).sort((a,b)=>Number(a.priority)-Number(b.priority))){
   try{
    const sources=await resolveProvider(provider,vars);
    return {animeId:id,episode:Number(ep)||1,provider:{id:provider.id,name:provider.name,type:provider.type},sources};
