@@ -34,7 +34,7 @@ export async function executeInstallation({database,email,oauth,admin,domain,lic
  if(marketplaceUrl){const u=new URL(marketplaceUrl);if(u.protocol!=='https:'&&config.nodeEnv==='production')throw new Error('Provider marketplace URL must use HTTPS in production.');}
  const env=toEnv(database,status.identity.installationId,licenseKey??config.licenseKey,domain??config.domain,marketplaceUrl);
  try{
-  await fs.writeFile(ENV_FILE,env,{mode:0o600}); await fs.chmod(ENV_FILE,0o600).catch(()=>{});
+  const envTemp=ENV_FILE+'.tmp-'+process.pid+'-'+Date.now(); await fs.writeFile(envTemp,env,{mode:0o600}); await fs.chmod(envTemp,0o600).catch(()=>{}); await fs.rename(envTemp,ENV_FILE);
   await runMigrations(); await verifyStoredLicense(licenseKey);
   if(email)await saveInstallerEmailSettings(email);
   if(oauth)await saveOAuthSettings(oauth);
