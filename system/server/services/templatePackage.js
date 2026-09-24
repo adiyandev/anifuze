@@ -87,7 +87,8 @@ const PRESENTATION_KEYS=new Set(['primary','primaryColor','accent','accentColor'
 const MAX_MANIFEST_KEYS=64;
 const MAX_MANIFEST_DEPTH=6;
 const MAX_STRING_LENGTH=2048;
-const VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);\nconst MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
+const VALID_TEMPLATE_LICENSES=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','MPL-2.0','LGPL-2.1-only','LGPL-3.0-only','GPL-2.0-only','GPL-3.0-only']);
+const MANIFEST_KEYS=new Set(['type','id','version','name','description','author','category','license','preview','compatibility','config']);
 
 function validateValue(value,depth=0,seen=new Set()){
  if(depth>MAX_MANIFEST_DEPTH)throw new Error('Template manifest config is too deeply nested.');
