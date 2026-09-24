@@ -21,8 +21,8 @@ export async function saveOAuthSettings(input={}){
  const current=await getGoogleOAuthConfig();
  const provided=String(input.google_client_secret||'').trim();
  const clientSecret=provided?encrypt(provided):current.google_client_secret?encrypt(current.google_client_secret):null;
- if(enabled&&(!clientId||!clientSecret))throw new Error('Google sign-in requires a Client ID and Client Secret.');
- if(enabled&&redirectUri&&!/^https:\/\//i.test(redirectUri)&&config.nodeEnv==='production')throw new Error('Google redirect URI must use HTTPS in production.');
+ if(enabled&&(!clientId||!clientSecret||!redirectUri))throw new Error('Google sign-in requires a Client ID, Client Secret, and Redirect URI.');
+ if(enabled&&config.nodeEnv==='production'&&!/^https:\/\//i.test(redirectUri))throw new Error('Google redirect URI must use HTTPS in production.');
  await query('UPDATE af_oauth_settings SET google_enabled=$1,google_client_id=$2,google_client_secret=$3,google_redirect_uri=$4,updated_at=CURRENT_TIMESTAMP WHERE id=1',[enabled,clientId||null,clientSecret,redirectUri||null]);
  return getOAuthSettings();
 }
