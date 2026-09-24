@@ -2,6 +2,12 @@ import crypto from 'node:crypto';
 import {config} from '../config.js';
 
 const MAX_PACKAGE_BYTES=50*1024*1024;
+function verifySignature(buffer,signature){
+ const publicKey=String(config.templatePublicKey||'').trim();
+ if(!publicKey)throw new Error('Template signing key is not configured.');
+ if(!signature)throw new Error('Template package signature is missing.');
+ return crypto.verify(null,buffer,publicKey,Buffer.from(signature,'base64url'));
+}
 const parse=x=>{try{return typeof x==='string'?JSON.parse(x):x||{}}catch{return {}}};
 
 function serviceBase(){
@@ -44,5 +50,6 @@ export async function downloadVerifiedPackage(metadata){
  if(metadata.packageSize&&buffer.length!==metadata.packageSize)throw new Error('Template package size verification failed.');
  const hash=crypto.createHash('sha256').update(buffer).digest('hex');
  if(hash!==metadata.packageSha256.toLowerCase())throw new Error('Template package integrity verification failed.');
+ if(!verifySignature(buffer,metadata.packageSignature))throw new Error('Template package signature verification failed.');
  return buffer;
 }
