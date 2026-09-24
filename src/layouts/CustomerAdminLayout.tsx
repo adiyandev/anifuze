@@ -13,7 +13,7 @@ const groups=[
 ] as const;
 
 export function CustomerAdminLayout(){
- const loc=useLocation(); const {setRole}=useApp();
+ const loc=useLocation(); const {setRole,settings}=useApp();
  const path=loc.pathname;
  const activeTop=path==='/admin/dashboard'?'dashboard':path.startsWith('/admin/users')?'users':path.startsWith('/admin/anime')||path.startsWith('/admin/episodes')||path.startsWith('/admin/genres')||path.startsWith('/admin/schedule')?'content':path.startsWith('/admin/settings')?'settings':'settings';
  const title=path==='/admin/dashboard'?'Admin Dashboard':path.split('/').filter(Boolean).at(-1)?.replace(/-/g,' ')||'Dashboard';
