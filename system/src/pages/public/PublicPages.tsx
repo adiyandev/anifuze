@@ -136,7 +136,7 @@ export function AuthPage(){
      <button className="auth-submit" type="submit" disabled={busy}>{busy?'Signing in…':isRegister?'Create account':'Sign in'}</button>
     </form>
     <div className="auth-divider"><span>OR</span></div>
-    <button className="auth-google" type="button" onClick={()=>setError('Google sign-in is not enabled for this installation yet.')}>Continue with Google</button>
+    <button className="auth-google" type="button" onClick={()=>{window.location.assign('/api/auth/google')}} disabled={busy}>Continue with Google</button>
     {isRegister&&<p className="auth-terms">By creating an account, you agree to the site’s terms and privacy policy.</p>}
     <p className="auth-switch">{isRegister?'Already have an account?':'Don’t have an account?'} <Link to={isRegister?'/login':'/register'}>{isRegister?'Sign in':'Create one'}</Link></p>
    </div><Link className="auth-back" to="/">← Back to {siteName}</Link>
