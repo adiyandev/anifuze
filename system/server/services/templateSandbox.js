@@ -11,10 +11,16 @@ function extensionOf(value){
 export function validateTemplateSandboxEntries(entries){
  if(!Array.isArray(entries)||!entries.length)throw new Error('Template sandbox received no archive entries.');
  for(const raw of entries){
-  const entry=String(raw||'').replace(/\\/g,'/').replace(/\/$/,'');
-  if(!entry||entry==='.'||entry.includes('\\0'))throw new Error('Template package contains an invalid sandbox entry.');
+  const rawEntry=String(raw||'').replace(/\\/g,'/');
+  const isDirectory=rawEntry.endsWith('/');
+  const entry=rawEntry.replace(/\/$/,'');
+  if(!entry||entry==='.'||entry.includes('\\0')throw new Error('Template package contains an invalid sandbox entry.');
   if(entry.length>MAX_ASSET_PATH_LENGTH)throw new Error('Template package contains an oversized sandbox path.');
   if(ALLOWED_ROOT_FILES.has(entry))continue;
+  if(isDirectory) {
+   if(entry!=='assets'&&!entry.startsWith('assets/'))throw new Error('Template package contains a directory outside the presentation sandbox.');
+   continue;
+  }
   if(!entry.startsWith('assets/')||entry==='assets')throw new Error('Template package contains a file outside the presentation sandbox.');
   const ext=extensionOf(entry);
   if(FORBIDDEN_EXTENSIONS.has(ext))throw new Error('Template package contains executable content, which is not allowed.');
