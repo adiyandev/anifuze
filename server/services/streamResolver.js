@@ -18,7 +18,7 @@ function normalizeSources(raw,config,provider){
   const url=x?.url??x?.file??x?.src??x?.source;
   if(!url)return null;
   return {url:String(url),type:String(x?.type??x?.format??'auto'),quality:String(x?.quality??''),language:String(x?.language??x?.lang??''),providerId:provider.id,providerName:provider.name,index:i};
- }).filter(x=>x?.url&&/^https?:\\/\\//i.test(x.url));
+ }).filter(x=>x?.url&&/^https?:\/\//i.test(x.url));
 }
 async function resolveProvider(provider,vars){
  const config=provider.config_json||{};
@@ -29,7 +29,7 @@ async function resolveProvider(provider,vars){
   const template=config.urlTemplate||config.url_template||config.embedUrl;
   if(!template)throw new Error('Embed provider has no URL template configured.');
   const url=replaceTemplate(template,vars);
-  if(!/^https?:\\/\\//i.test(url))throw new Error('Provider produced an invalid playback URL.');
+  if(!/^https?:\/\//i.test(url))throw new Error('Provider produced an invalid playback URL.');
   return [{url,type:config.playbackType||'external',quality:config.quality||'',language:config.language||'',providerId:provider.id,providerName:provider.name,index:0}];
  }
  const source=config.source||{};
