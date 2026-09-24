@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {DEFAULT} from './appearance.js';
+test('appearance defaults are safe and explicit',()=>{assert.match(DEFAULT.primary_color,/^#[0-9a-f]{6}$/i);assert.ok(['Inter','Geist','System'].includes(DEFAULT.font_family));assert.ok(['wide','centered'].includes(DEFAULT.container_width));});

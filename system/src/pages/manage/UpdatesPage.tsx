@@ -1,0 +1,29 @@
+import {useEffect,useState} from 'react';
+interface Release{version:string;tag:string;url:string;name:string;publishedAt:string|null;notes:string;assets:{name:string;size:number;url:string}[]}
+interface Result{currentVersion:string;available:boolean;release:Release;checkedAt:string}
+interface Settings{channel:string;manifest_url:string;auto_check:boolean}
+const bytes=(n:number)=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
+export function UpdatesPage(){
+ const [settings,setSettings]=useState<Settings>({channel:'stable',manifest_url:'',auto_check:true}); const [result,setResult]=useState<Result|null>(null);
+ const [loading,setLoading]=useState(true),[checking,setChecking]=useState(false),[saving,setSaving]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState('');
+ const load=async()=>{setLoading(true);setError('');try{const r=await fetch('/api/admin/updates');const j=await r.json();if(!r.ok)throw new Error(j.error||'Could not check for updates');setSettings(j.settings);setResult(j.result);}catch(e){setError(e instanceof Error?e.message:'Could not load update system');}finally{setLoading(false);}};
+ useEffect(()=>{load();},[]);
+ const check=async()=>{setChecking(true);setError('');try{const r=await fetch('/api/admin/updates/check',{method:'POST'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Update check failed');setResult(j.result);}catch(e){setError(e instanceof Error?e.message:'Update check failed');}finally{setChecking(false);}};
+ const save=async()=>{setSaving(true);setSaved('');setError('');try{const r=await fetch('/api/admin/updates/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(settings)});const j=await r.json();if(!r.ok)throw new Error(j.error||'Failed to save update settings');setSettings(j.settings);setSaved('Update settings saved.');}catch(e){setError(e instanceof Error?e.message:'Failed to save update settings');}finally{setSaving(false);}};
+ return <div className="system-info-page updates-page admin-page">
+  <div className="page-heading"><div><span className="system-kicker">SYSTEM</span><h2>Update System</h2><p>Check the AniFuze release channel and see what version is available.</p></div><div className="page-actions"><button className="btn-secondary" onClick={check} disabled={checking||loading}>{checking?'Checking…':'Check now'}</button></div></div>
+  {error&&<div className="admin-alert error">{error}</div>}{saved&&<div className="maintenance-success">{saved}</div>}
+  <div className="updates-grid">
+   <section className="admin-panel"><div className="panel-heading"><div><h3>Version status</h3><p>Current installation versus the latest release.</p></div></div>
+    {loading?<div className="system-checks">Checking release information…</div>:result&&<><div className="update-status"><div><span>Installed</span><strong>v{result.currentVersion}</strong></div><div><span>Latest</span><strong>v{result.release.version}</strong></div><div><span>Status</span><strong className={result.available?'update-available':''}>{result.available?'Update available':'Up to date'}</strong></div></div><div className="update-release"><span className="system-kicker">{result.release.name||'Release'}</span><p>{result.release.publishedAt?new Date(result.release.publishedAt).toLocaleString():'Release date unavailable'}</p><a href={result.release.url} target="_blank" rel="noreferrer">View release ↗</a></div></>}
+   </section>
+   <section className="admin-panel"><div className="panel-heading"><div><h3>Update settings</h3><p>Configure how this installation checks for releases.</p></div></div>
+    <label className="maintenance-field"><span>Release channel</span><select value={settings.channel} onChange={e=>setSettings({...settings,channel:e.target.value})}><option value="stable">Stable</option><option value="beta">Beta</option><option value="nightly">Nightly</option></select></label>
+    <label className="maintenance-field"><span>Manifest URL</span><input value={settings.manifest_url} onChange={e=>setSettings({...settings,manifest_url:e.target.value})}/></label>
+    <label className="maintenance-toggle"><input type="checkbox" checked={settings.auto_check} onChange={e=>setSettings({...settings,auto_check:e.target.checked})}/><span>Enable automatic update checks</span></label>
+    <button className="btn-primary update-save" onClick={save} disabled={saving}>{saving?'Saving…':'Save settings'}</button>
+   </section>
+  </div>
+  {result&&<section className="admin-panel update-notes"><div className="panel-heading"><div><h3>Release notes</h3><p>Notes published with the latest release.</p></div></div><div className="update-notes-body">{result.release.notes||'No release notes were provided.'}</div>{result.release.assets.length>0&&<div className="update-assets"><strong>Release assets</strong>{result.release.assets.map(a=><a key={a.url} href={a.url} target="_blank" rel="noreferrer">{a.name}<span>{bytes(a.size)}</span></a>)}</div>}</section>}
+ </div>;
+}

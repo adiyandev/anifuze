@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS af_users (id VARCHAR(128) PRIMARY KEY,email VARCHAR(320) NOT NULL UNIQUE,display_name VARCHAR(80) NOT NULL,password_hash TEXT NOT NULL,enabled BOOLEAN NOT NULL DEFAULT TRUE,email_verified BOOLEAN NOT NULL DEFAULT FALSE,created_at TIMESTAMP NOT NULL,updated_at TIMESTAMP NOT NULL);
+CREATE TABLE IF NOT EXISTS af_user_sessions (id VARCHAR(128) PRIMARY KEY,user_id VARCHAR(128) NOT NULL,expires_at TIMESTAMP NOT NULL,created_at TIMESTAMP NOT NULL,last_seen_at TIMESTAMP NOT NULL,ip_address VARCHAR(255),user_agent TEXT);
+CREATE INDEX IF NOT EXISTS idx_af_user_sessions_user ON af_user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_af_user_sessions_expires ON af_user_sessions(expires_at);

@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS af_templates (
+ id VARCHAR(128) PRIMARY KEY,
+ name VARCHAR(255) NOT NULL,
+ version VARCHAR(32) NOT NULL DEFAULT '1.0.0',
+ status VARCHAR(32) NOT NULL DEFAULT 'installed',
+ config TEXT NOT NULL,
+ installed_at TIMESTAMP NOT NULL,
+ updated_at TIMESTAMP NOT NULL
+);
+CREATE TABLE IF NOT EXISTS af_template_settings (
+ id INTEGER PRIMARY KEY,
+ active_template_id VARCHAR(128) NOT NULL,
+ config TEXT NOT NULL,
+ updated_at TIMESTAMP NOT NULL
+);

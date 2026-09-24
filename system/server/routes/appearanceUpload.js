@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {mkdir,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+const router=Router();const ROOT=path.resolve(process.cwd(),'storage','uploads');const MAX=5*1024*1024;
+const types=new Map([['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/svg+xml','svg']]);
+router.post('/admin/appearance/upload',requireAdmin,requirePermission('appearance_manage'),async(req,res)=>{try{const {data,mime}=req.body||{};if(typeof data!=='string'||!types.has(mime))return res.status(400).json({ok:false,error:'Unsupported image upload.'});const raw=data.replace(/^data:[^;]+;base64,/,'');const bytes=Buffer.from(raw,'base64');if(!bytes.length||bytes.length>MAX)return res.status(400).json({ok:false,error:'Image must be between 1 byte and 5 MB.'});const ext=types.get(mime);if(mime==='image/png'&&!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))throw new Error('Invalid PNG.');if(mime==='image/jpeg'&&!bytes.subarray(0,3).equals(Buffer.from([255,216,255])))throw new Error('Invalid JPEG.');if(mime==='image/webp'&&bytes.subarray(0,4).toString()!=='RIFF')throw new Error('Invalid WebP.');if(mime==='image/svg+xml'&&/<script|onload=|javascript:/i.test(bytes.toString('utf8')))throw new Error('Unsafe SVG.');await mkdir(ROOT,{recursive:true});const name=crypto.randomUUID()+'.'+ext;await writeFile(path.join(ROOT,name),bytes,{flag:'wx',mode:0o640});res.json({ok:true,url:'/uploads/'+name});}catch(e){res.status(400).json({ok:false,error:e.message});}});
+export {router as appearanceUploadRouter};

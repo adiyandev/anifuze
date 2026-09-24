@@ -1,0 +1,11 @@
+import {Router} from 'express';
+import {listWatchHistory,getWatchProgress,saveWatchProgress,removeWatchHistory,clearWatchHistory} from '../services/watchProgress.js';
+import {getUserFromRequest} from '../services/userAuth.js';
+const router=Router();
+const requireUser=async(req,res,next)=>{const user=await getUserFromRequest(req);if(!user)return res.status(401).json({ok:false,error:'User authentication required.'});req.user=user;next();};
+router.get('/watch/history',requireUser,async(req,res)=>{try{res.json({ok:true,history:await listWatchHistory(req.user.id,{limit:req.query.limit})})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.get('/watch/progress',requireUser,async(req,res)=>{try{const animeId=String(req.query.anime_id||'');if(!animeId)return res.status(400).json({ok:false,error:'Anime id is required.'});res.json({ok:true,progress:await getWatchProgress(req.user.id,animeId,req.query.episode_id||null)})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.put('/watch/progress',requireUser,async(req,res)=>{try{res.json({ok:true,progress:await saveWatchProgress(req.user.id,req.body||{})})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.delete('/watch/history/:id',requireUser,async(req,res)=>{try{res.json(await removeWatchHistory(req.user.id,req.params.id))}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.delete('/watch/history',requireUser,async(req,res)=>{try{res.json(await clearWatchHistory(req.user.id))}catch(e){res.status(400).json({ok:false,error:e.message})}});
+export {router as watchProgressRouter};

@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {requireAdmin} from './auth.js';
+import {requirePermission} from '../auth/permissions.js';
+import {checkForUpdate,getUpdateSettings,saveUpdateSettings} from '../services/updates.js';
+import {recordAudit} from '../services/audit.js';
+export const updatesRouter=Router();
+updatesRouter.use(requireAdmin,requirePermission('updates_manage'));
+updatesRouter.get('/admin/updates',async(_req,res)=>{try{res.json({ok:true,settings:await getUpdateSettings(),result:await checkForUpdate()});}catch(error){res.status(502).json({ok:false,error:error.message,settings:await getUpdateSettings().catch(()=>null)});}});
+updatesRouter.post('/admin/updates/check',async(_req,res)=>{try{const result=await checkForUpdate();res.json({ok:true,result});}catch(error){res.status(502).json({ok:false,error:error.message});}});
+updatesRouter.put('/admin/updates/settings',async(req,res)=>{try{const settings=await saveUpdateSettings(req.body||{});await recordAudit({adminUserId:req.admin.id,action:'updates.settings_updated',resourceType:'updates',details:{channel:settings.channel,autoCheck:settings.auto_check},ipAddress:req.ip,userAgent:req.get('user-agent')});res.json({ok:true,settings});}catch(error){res.status(400).json({ok:false,error:error.message});}});

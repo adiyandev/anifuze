@@ -1,0 +1,9 @@
+import {Router} from 'express';import {getUserFromRequest} from '../services/userAuth.js';import {getProfile,updateProfile,listFavorites,listWatchlist,setCollection,migrateLocalCollections} from '../services/userData.js';
+const router=Router();const requireUser=async(req,res,next)=>{const user=await getUserFromRequest(req);if(!user)return res.status(401).json({ok:false,error:'Authentication required.'});req.user=user;next()};
+router.get('/user/profile',requireUser,async(req,res)=>{try{const profile=await getProfile(req.user.id);if(!profile)return res.status(404).json({ok:false,error:'User not found.'});res.json({ok:true,profile})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.patch('/user/profile',requireUser,async(req,res)=>{try{res.json({ok:true,profile:await updateProfile(req.user.id,req.body||{})})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.get('/user/favorites',requireUser,async(req,res)=>{try{res.json({ok:true,items:await listFavorites(req.user.id)})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.get('/user/watchlist',requireUser,async(req,res)=>{try{res.json({ok:true,items:await listWatchlist(req.user.id)})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.put('/user/collections/:kind/:animeId',requireUser,async(req,res)=>{if(!['favorites','watchlist'].includes(req.params.kind))return res.status(400).json({ok:false,error:'Invalid collection.'});try{res.json({ok:true,result:await setCollection(req.user.id,req.params.animeId,req.params.kind,Boolean(req.body?.enabled))})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+router.post('/user/migrate-local',requireUser,async(req,res)=>{try{res.json({ok:true,data:await migrateLocalCollections(req.user.id,req.body||{})})}catch(e){res.status(400).json({ok:false,error:e.message})}});
+export {router as userDataRouter};
