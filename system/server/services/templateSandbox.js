@@ -14,6 +14,8 @@ export function validateTemplateSandboxEntries(entries){
   const rawEntry=String(raw||'').replace(/\\/g,'/');
   const isDirectory=rawEntry.endsWith('/');
   const entry=rawEntry.replace(/\/$/,'');
+  const normalized=entry.split('/').filter(Boolean).join('/');
+  if(entry!==normalized||normalized.split('/').includes('..')||normalized.split('/').includes('.'))throw new Error('Template package contains an unsafe sandbox path.');
   if(!entry||entry==='.'||entry.includes('\\0')throw new Error('Template package contains an invalid sandbox entry.');
   if(entry.length>MAX_ASSET_PATH_LENGTH)throw new Error('Template package contains an oversized sandbox path.');
   if(ALLOWED_ROOT_FILES.has(entry))continue;
