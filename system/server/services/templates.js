@@ -1,6 +1,6 @@
 import {query} from '../db/index.js';
 import {config} from '../config.js';
-import {fetchTemplatePackageMetadata,downloadVerifiedPackage,storeTemplatePackage} from './templatePackage.js';
+import {fetchTemplatePackageMetadata,downloadVerifiedPackage,storeTemplatePackage,installTemplatePackage} from './templatePackage.js';
 
 const parse=x=>{try{return typeof x==='string'?JSON.parse(x):x||{}}catch{return {}}};
 export const normalizeTemplate=x=>({id:String(x?.id||'').trim(),name:String(x?.name||'').trim(),version:String(x?.version||'1.0.0'),status:String(x?.status||'available'),config:parse(x?.config),description:String(x?.description||''),category:String(x?.category||''),packageUrl:String(x?.packageUrl||x?.package_url||''),packageSha256:String(x?.packageSha256||x?.package_sha256||'').toLowerCase(),packageSignature:String(x?.packageSignature||x?.package_signature||''),packageSize:Number(x?.packageSize||x?.package_size||0),compatibility:parse(x?.compatibility)});
@@ -19,7 +19,7 @@ export async function getTemplate(id){const data=await central('/templates/'+enc
 export async function installTemplate(id){
  const remote=normalizeTemplate(await fetchTemplatePackageMetadata(id));
  const packageBuffer=await downloadVerifiedPackage(remote);
- const packagePath=await storeTemplatePackage(remote,packageBuffer);
+ const packagePath=await installTemplatePackage(remote,packageBuffer);
  if(!remote.id)throw new Error('Template was not found.');
  const now=new Date().toISOString();
  await query('INSERT INTO af_templates(id,name,version,status,config,installed_at,updated_at,package_url,package_sha256,package_signature,package_size,package_path,compatibility,description,category) VALUES($1,$2,$3,$4,$5,$6,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT(id) DO UPDATE SET name=$2,version=$3,status=$4,config=$5,updated_at=$6,package_url=$7,package_sha256=$8,package_signature=$9,package_size=$10,package_path=$11,compatibility=$12,description=$13,category=$14',[remote.id,remote.name,remote.version,'installed',JSON.stringify(remote.config),now,remote.packageUrl,remote.packageSha256,remote.packageSignature,packageBuffer.length,packagePath,JSON.stringify(remote.compatibility),remote.description,remote.category]);
