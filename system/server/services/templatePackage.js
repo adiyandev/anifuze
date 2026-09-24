@@ -60,6 +60,12 @@ export async function downloadVerifiedPackage(metadata){
  return buffer;
 }
 
+export async function removeStoredTemplate(id){
+ const safeId=String(id||'').replace(/[^a-zA-Z0-9._-]/g,'_');
+ const root=path.join(TEMPLATE_ROOT,safeId);
+ await fs.rm(root,{recursive:true,force:true});
+}
+
 export async function storeTemplatePackage(metadata,buffer){
  const safeId=metadata.id.replace(/[^a-zA-Z0-9._-]/g,'_');
  const safeVersion=String(metadata.version||'1.0.0').replace(/[^a-zA-Z0-9._-]/g,'_');
