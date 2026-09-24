@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Role, Settings } from '../types';
-import { settingsService } from '../services/mockServices';
 
 type Toast = { message: string; kind?: 'success' | 'error' | 'info' };
 type AppState = {
@@ -37,7 +36,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [adminVerified, setAdminVerified] = useState(false);
   const [customerUser, setCustomerUser] = useState<AppState['customerUser']>(null);
   const [customerAuthLoading, setCustomerAuthLoading] = useState(true);
-  const [settings, setSettings] = useState(settingsService.get());
+  const [settings, setSettings] = useState<Settings>({siteName:'AniFuze',tagline:'Build. Customize. Stream.',primary:'#22D3EE',accent:'#8B5CF6',logo:'✦'});
 
   const refreshAuth = async () => {
     try {
@@ -144,7 +143,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [note, setNote] = useState<Toast | null>(null);
   const updateRole = (r: Role) => setRoleState(r);
-  const refresh = () => setSettings(settingsService.get());
+  const refresh = () => { fetch('/api/site-config').then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d.config;if(s)setSettings(prev=>({...prev,siteName:s.siteName||prev.siteName,tagline:s.tagline||prev.tagline,primary:s.primary||prev.primary,accent:s.accent||prev.accent,logo:s.logoUrl||prev.logo}))}).catch(()=>{}); };
   const toast = (message: string, kind: Toast['kind'] = 'success') => {
     setNote({ message, kind });
     window.setTimeout(() => setNote(null), 3000);
