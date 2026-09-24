@@ -21,7 +21,6 @@ router.get('/google',async(req,res)=>{
   const cfg=await getGoogleOAuthConfig();
   if(!cfg.google_enabled||!cfg.google_client_id||!cfg.google_client_secret||!cfg.google_redirect_uri)return res.status(503).send('Google sign-in is not configured.');
   const state=crypto.randomBytes(32).toString('base64url');
-  res.cookie?.();
   const cookie=`anifuze_google_oauth_state=${encodeURIComponent(state)}; Max-Age=600; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`;
   res.setHeader('Set-Cookie',cookie);
   const params=new URLSearchParams({client_id:cfg.google_client_id,redirect_uri:cfg.google_redirect_uri,response_type:'code',scope:'openid email profile',state,access_type:'online',prompt:'select_account'});
@@ -35,8 +34,7 @@ router.get('/google/callback',async(req,res)=>{
   if(!req.query?.code)return res.status(400).send('Google authorization was not completed.');
   const identity=await getGoogleIdentity(String(req.query.code));
   const session=await loginWithGoogle({identity,req});
-  const maxAge=session.remember?60*60*24*30:60*60*24;
-  res.setHeader('Set-Cookie',[`anifuze_google_oauth_state=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`,`anifuze_user_session=${encodeURIComponent(session.id)}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV==='production'?'; Secure':''}`]);
+  userCookie(res,session.id,session.remember?60*60*24*30:60*60*24);
   res.redirect('/anifuze/'); 
  }catch(e){res.status(400).send(e.message||'Google sign-in failed.')}
 });
