@@ -4,7 +4,7 @@ import {requirePermission} from '../auth/permissions.js';
 import {resolveStream} from '../services/streamResolver.js';
 
 export const providerDiagnosticsRouter=Router();
-providerDiagnosticsRouter.use('/admin/providers/diagnostics',requireAdmin,requirePermission('providers_console'));
+providerDiagnosticsRouter.use(requireAdmin,requirePermission('providers_console'));
 
 providerDiagnosticsRouter.post('/admin/providers/diagnostics/stream',async(req,res)=>{
  try{
