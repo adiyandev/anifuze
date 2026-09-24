@@ -18,7 +18,7 @@ function splitSql(sql){
  }
  if(sql.slice(start).trim())out.push(sql.slice(start).trim()); return out;
 }
-function adapt(sql){return config.db.client==='postgres'?sql:sql.replace(/CREATE INDEX IF NOT EXISTS/gi,'CREATE INDEX');}
+function adapt(sql){return config.db.client==='postgres'?sql:sql.replace(/CREATE UNIQUE INDEX IF NOT EXISTS/gi,'CREATE UNIQUE INDEX').replace(/CREATE INDEX IF NOT EXISTS/gi,'CREATE INDEX');}
 export async function runMigrations(){
  await ensureHistory();
  const names=(await fs.readdir(migrationDir)).filter(x=>x.endsWith('.sql')).sort();
