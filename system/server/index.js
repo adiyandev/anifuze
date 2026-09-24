@@ -39,6 +39,7 @@ import {siteConfigRouter} from './routes/siteConfig.js';
 import {streamsRouter} from './routes/streams.js';
 import {providerDiagnosticsRouter} from './routes/providerDiagnostics.js';
 import {analyticsRouter} from './routes/analytics.js';
+import {platformRouter} from './routes/platform.js';
 import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from '../../installer/server/index.js';
@@ -89,6 +90,7 @@ app.use('/api',siteConfigRouter);
 app.use('/api',streamsRouter);
 app.use('/api',providerDiagnosticsRouter);
 app.use('/api',analyticsRouter);
+app.use('/api',platformRouter);
 
 // Process scheduled customer notifications without requiring a separate worker.
 const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});},60000);
