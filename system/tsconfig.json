@@ -1,1 +1,27 @@
-{"compilerOptions":{"target":"ES2022","useDefineForClassFields":true,"lib":["ES2022","DOM","DOM.Iterable"],"allowJs":false,"skipLibCheck":true,"esModuleInterop":true,"allowSyntheticDefaultImports":true,"strict":true,"forceConsistentCasingInFileNames":true,"module":"ESNext","moduleResolution":"Bundler","resolveJsonModule":true,"isolatedModules":true,"noEmit":true,"jsx":"react-jsx","baseUrl":".","paths":{"react":["./node_modules/react"],"react/*":["./node_modules/react/*"],"react-router-dom":["./node_modules/react-router-dom"],"lucide-react":["./node_modules/lucide-react"]}},"include":["src","../installer/ui"],"references":[]}
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "react": ["./node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],
+      "react/jsx-dev-runtime": ["./node_modules/@types/react/jsx-dev-runtime.d.ts"]
+    }
+  },
+  "include": ["src", "../installer/ui"],
+  "references": []
+}
