@@ -40,7 +40,7 @@ async function central(path){
  if(!base)throw new Error('AniFuze provider marketplace is not configured.');
  const url=new URL(path,base);
  if(url.protocol!=='https:'&&config.nodeEnv!=='development')throw new Error('Provider marketplace must use HTTPS.');
- const r=await fetch(url,{headers:{accept:'application/json','user-agent:'AniFuze-ProviderClient/'+config.version},signal:AbortSignal.timeout(15000)});
+ const r=await fetch(url,{headers:{accept:'application/json','user-agent':'AniFuze-ProviderClient/'+config.version},signal:AbortSignal.timeout(15000)});
  const data=await r.json().catch(()=>null);
  if(!r.ok||!data)throw new Error(data?.error||'Provider marketplace request failed.');
  return data;
