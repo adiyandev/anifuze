@@ -1,6 +1,4 @@
 import {useEffect,useState} from 'react';
-import {Card,StatCard,Badge} from '../../components/ui';
-const Table=({heads,rows}:{heads:string[];rows:any[][]})=><div className="table-wrap"><table><thead><tr>{heads.map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((x,j)=><td key={j}>{x}</td>)}</tr>)}</tbody></table></div>;
 export function PlatformDashboard(){
  const [data,setData]=useState<any>(null);const [error,setError]=useState('');
  useEffect(()=>{let active=true;fetch('/api/admin/platform/overview').then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load platform overview.');return d}).then(d=>{if(active)setData(d.overview)}).catch(e=>{if(active)setError(e instanceof Error?e.message:'Could not load platform overview.')});return()=>{active=false}},[]);
