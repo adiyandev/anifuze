@@ -13,7 +13,10 @@ export async function getProvider(id){const r=await query('SELECT id,name,type,b
 export async function saveProvider(id,body={}){
  const existing=id?await getProvider(id):null;if(id&&!existing)throw new Error('Provider not found.');
  const name=String(body.name??existing?.name??'').trim().slice(0,200);const type=String(body.type??existing?.type??'API');if(!name)throw new Error('Provider name is required.');if(!TYPES.has(type))throw new Error('Unsupported provider type.');
- const baseUrl=body.base_url===undefined?(existing?.base_url??null):String(body.base_url||'').trim()||null;
+ const baseUrl=body.base_url===undefined?(existing?.base_url??null):String(body.base_url||'').trim()||null; const mode=String(configJson?.mode||type).toLowerCase();
+ if(mode==='api'&&!baseUrl)throw new Error('API providers require a base URL.');
+ if(mode==='embed'&&!configJson?.urlTemplate&&!configJson?.url_template&&!configJson?.embedUrl)throw new Error('Embed providers require a playback URL template.');
+ if(mode==='api'&&!configJson?.source?.endpoint&&!configJson?.sourceEndpoint)throw new Error('API providers require a source endpoint.');
  let configJson=body.config===undefined?(existing?.config_json??{}):body.config;configJson=json(configJson??{});
  const priority=Number.isInteger(Number(body.priority??existing?.priority??1))?Number(body.priority??existing?.priority??1):1;if(priority<1||priority>999)throw new Error('Priority must be between 1 and 999.');
  const enabled=body.enabled===undefined?(existing?.enabled??true):body.enabled;if(typeof enabled!=='boolean')throw new Error('enabled must be boolean.');
