@@ -38,6 +38,7 @@ export function PublicLayout(){
   refresh();
   return()=>{active=false};
  },[location.pathname]);
+ useEffect(()=>{const key='anifuze_analytics_session';let session=sessionStorage.getItem(key);if(!session){session=crypto.randomUUID();sessionStorage.setItem(key,session)}fetch('/api/analytics/events',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({event_type:'page_view',session_id:session,path:location.pathname,referrer:document.referrer})}).catch(()=>{})},[location.pathname]);
  useEffect(()=>{let active=true;fetch('/api/navigation').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setNav(d.items||[])}).catch(()=>setNav([]));fetch('/api/footer').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)setFooter(d.footer)}).catch(()=>{if(active)setFooter(null)});return()=>{active=false}},[]);
  useEffect(()=>{let active=true;fetch('/api/seo').then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(active)applyMeta(d.seo,location.pathname)}).catch(()=>{if(active)document.title=settings.siteName||'AniFuze'});return()=>{active=false}},[location.pathname,settings.siteName]);
  const visibleNav=(nav.length?nav:[{id:'browse',label:'Browse',path:'/browse',icon:'Compass',visible:true,sort_order:10},{id:'latest',label:'Latest',path:'/latest',icon:'Bell',visible:true,sort_order:20},{id:'trending',label:'Trending',path:'/trending',icon:'BarChart3',visible:true,sort_order:30},{id:'schedule',label:'Schedule',path:'/schedule',icon:'CalendarDays',visible:true,sort_order:40}]).filter(x=>x.visible);
