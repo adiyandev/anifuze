@@ -5,7 +5,7 @@ import { useApp } from '../../contexts/AppContext';
 
 export function AdminLoginPage() {
   const nav = useNavigate();
-  const { refreshAuth, toast } = useApp();
+  const { refreshAuth } = useApp();
   const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -114,7 +114,7 @@ export function AdminLoginPage() {
               type="button"
               onClick={async () => {
                 try {
-                  const data = await setup();
+                  await setup();
                   setError('Authenticator secret generated. Copy it from the setup panel below.');
                 } catch (err) {
                   setError(err instanceof Error ? err.message : '2FA setup failed.');
