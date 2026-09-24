@@ -41,7 +41,7 @@ import {providerDiagnosticsRouter} from './routes/providerDiagnostics.js';
 import {analyticsRouter} from './routes/analytics.js';
 import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
-import {isInstallerLocked} from './installer/index.js';
+import {isInstallerLocked} from '../../installer/server/index.js';
 import {installationGate} from './middleware/installationGate.js';
 
 const app=express();
