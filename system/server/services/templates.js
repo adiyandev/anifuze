@@ -130,6 +130,8 @@ export async function rollbackTemplate(id,version){
  if(current)await snapshotInstalled(current);
  await query(`UPDATE af_templates SET name=$2,version=$3,status='installed',config=$4,installed_at=$5,updated_at=CURRENT_TIMESTAMP,package_url=$6,package_sha256=$7,package_signature=$8,package_size=$9,package_path=$10,compatibility=$11,description=$12,category=$13 WHERE id=$1`,
  [target.id,target.name,target.version,JSON.stringify(target.config),target.installed_at,target.package_url,target.package_sha256,target.package_signature,target.package_size,target.package_path,JSON.stringify(target.compatibility),target.description,target.category]);
+ const active=await getActiveTemplate();
+ if(active?.id===String(id))await query('UPDATE af_template_settings SET active_template_id=$1,config=$2,updated_at=CURRENT_TIMESTAMP WHERE id=1',[target.id,JSON.stringify(target.config)]);
  return getInstalledTemplate(id);
 }
 export async function removeTemplate(id){
