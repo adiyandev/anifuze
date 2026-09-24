@@ -152,13 +152,13 @@ export async function validateTemplatePackage(metadata,buffer){
   validateTemplateSandboxEntries(entries);
   if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
   const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
-  if(/\\s(?:->|link to)\\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
+  if(/\s(?:->|link to)\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
   let unpackedBytes=0;
   for(const line of details.split(/\r?\n/).filter(Boolean)){
    const type=line[0];
    if(type!=='-'&&type!=='d')throw new Error('Template package contains an unsupported archive entry type.');
    if(type==='-'){
-    const size=Number(line.trim().split(/\\s+/)[2]);
+    const size=Number(line.trim().split(/\s+/)[2]);
     if(!Number.isSafeInteger(size)||size<0)throw new Error('Template package contains an invalid file size.');
     if(size>MAX_ENTRY_BYTES)throw new Error('Template package contains an oversized file.');
     unpackedBytes+=size;
