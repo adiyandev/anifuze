@@ -9,7 +9,7 @@ const ignored=new Set(['node_modules','.git','dist','storage']);
 const forbidden=[/anifuze_demo_admin/i,/demo admin login/i,/mock data/i,/lorem ipsum/i,/coming soon/i,/fake data/i,/dummy data/i];
 async function walk(dir,out=[]){
  for(const entry of await fs.readdir(dir,{withFileTypes:true})){
-  if(ignored.has(entry.name))continue;
+  if(ignored.has(entry.name)||entry.name==='repoAudit.test.js')continue;
   const full=path.join(dir,entry.name);
   if(entry.isDirectory())await walk(full,out);
   else if(/\.(js|jsx|ts|tsx|json|css|sql|md|yml|yaml)$/.test(entry.name))out.push(full);
