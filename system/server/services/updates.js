@@ -3,6 +3,7 @@ import {config} from '../config.js';
 
 const DEFAULT_URL='https://api.github.com/repos/adiyandev/anifuze/releases/latest';
 const clean=(v,max)=>String(v??'').trim().slice(0,max);
+export function validateManifestUrl(value){const url=new URL(clean(value,1000));if(url.protocol!=='https:')throw new Error('Update manifest URL must use HTTPS.');const host=url.hostname.toLowerCase();if(host==='localhost'||host.endsWith('.localhost')||host==='127.0.0.1'||host==='0.0.0.0'||host==='::1'||/^10\./.test(host)||/^192\.168\./.test(host)||/^172\.(1[6-9]|2\d|3[0-1])\./.test(host))throw new Error('Update manifest URL must not target a private network address.');return url.toString();}
 const semver=v=>String(v??'').replace(/^v/i,'').split('-')[0].split('.').slice(0,3).map(n=>Number(n)||0).concat([0,0,0]).slice(0,3);
 export function compareVersions(a,b){const x=semver(a),y=semver(b);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]>y[i]?1:-1;}return 0;}
 export async function getUpdateSettings(){const r=await query('SELECT channel,manifest_url,auto_check,updated_at FROM af_update_settings WHERE id=1');return r.rows[0]||{channel:'stable',manifest_url:DEFAULT_URL,auto_check:true};}
@@ -10,6 +11,7 @@ export async function saveUpdateSettings(input={}){
  const current=await getUpdateSettings();
  const channel=['stable','beta','nightly'].includes(String(input.channel))?String(input.channel):current.channel;
  const manifestUrl=clean(input.manifest_url===undefined?current.manifest_url:input.manifest_url,1000)||DEFAULT_URL;
+ validateManifestUrl(manifestUrl);
  const autoCheck=input.auto_check===undefined?Boolean(current.auto_check):Boolean(input.auto_check);
  await query('UPDATE af_update_settings SET channel=$1,manifest_url=$2,auto_check=$3,updated_at=CURRENT_TIMESTAMP WHERE id=1',[channel,manifestUrl,autoCheck]);
  return getUpdateSettings();
@@ -20,7 +22,7 @@ function normalizeRelease(data){
 }
 export async function checkForUpdate(){
  const settings=await getUpdateSettings();
- const url=settings.manifest_url||DEFAULT_URL;
+ const url=validateManifestUrl(settings.manifest_url||DEFAULT_URL);
  const response=await fetch(url,{headers:{Accept:'application/vnd.github+json','User-Agent':'AniFuze-Update-Checker'},signal:AbortSignal.timeout(10000)});
  if(!response.ok)throw new Error('Update server returned HTTP '+response.status+'.');
  const release=normalizeRelease(await response.json());
