@@ -31,6 +31,15 @@ export const config = Object.freeze({
   version: process.env.ANIFUZE_VERSION ?? '1.0.0',
 });
 
+export function assertProductionConfig() {
+  if (config.nodeEnv !== 'production') return;
+  assertSupportedDatabase(config.db.client);
+  if (config.db.password === 'change-me') throw new Error('DB_PASSWORD must be changed in production.');
+  if (config.licenseKey === 'dev-license') console.warn('AniFuze production license key is not configured.');
+  if (config.domain === 'localhost') throw new Error('ANIFUZE_DOMAIN must be configured in production.');
+  if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535) throw new Error('PORT must be a valid TCP port.');
+}
+
 export function assertSupportedDatabase(client) {
   if (!['postgres','mysql','mariadb'].includes(client)) throw new Error('Unsupported DB_CLIENT: ' + client);
 }
