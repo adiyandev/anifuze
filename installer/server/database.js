@@ -21,7 +21,7 @@ export async function createDatabaseIfNeeded(d){
   return {created:false,permissionDenied:true,message};
  }finally{await closePool(pool);}
 }
-export function toEnv(d,installationId,licenseKey,domain){
- return ['NODE_ENV=production','DB_CLIENT='+d.client,'DB_HOST='+d.host,'DB_PORT='+Number(d.port),'DB_NAME='+d.name,'DB_USER='+d.user,'DB_PASSWORD='+quote(d.password),'DB_SSL='+Boolean(d.ssl),'ANIFUZE_INSTALLATION_ID='+quote(installationId),'ANIFUZE_LICENSE_KEY='+quote(licenseKey),'ANIFUZE_DOMAIN='+quote(domain),'ANIFUZE_LICENSE_SERVICE_URL='+quote(process.env.ANIFUZE_LICENSE_SERVICE_URL||'')].join('\\n')+'\\n';
+export function toEnv(d,installationId,licenseKey,domain,providerMarketplaceUrl=''){
+ return ['NODE_ENV=production','DB_CLIENT='+d.client,'DB_HOST='+d.host,'DB_PORT='+Number(d.port),'DB_NAME='+d.name,'DB_USER='+d.user,'DB_PASSWORD='+quote(d.password),'DB_SSL='+Boolean(d.ssl),'ANIFUZE_INSTALLATION_ID='+quote(installationId),'ANIFUZE_LICENSE_KEY='+quote(licenseKey),'ANIFUZE_DOMAIN='+quote(domain),'ANIFUZE_LICENSE_SERVICE_URL='+quote(process.env.ANIFUZE_LICENSE_SERVICE_URL||''),'ANIFUZE_PROVIDER_MARKETPLACE_URL='+quote(providerMarketplaceUrl)].join('\\n')+'\\n';
 }
 function quote(v){return '"'+String(v??'').replace(/\\/g,'\\\\').replace(/"/g,'\\\"').replace(/\n/g,'')+'"';}
