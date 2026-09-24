@@ -93,10 +93,9 @@ export async function installTemplatePackage(metadata,buffer){
   const {stdout}=await execFileAsync('tar',['-tf',archive],{maxBuffer:2*1024*1024,timeout:15000});
   const entries=stdout.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
   if(!entries.length||entries.some(x=>!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
-  if(entries.some(x=>x==='anifuze-template.json'||x.endsWith('/anifuze-template.json')===false&&x===''))throw new Error('Invalid template package manifest.');
+  if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
   await execFileAsync('tar',['-xf',archive,'-C',tempDir,'--no-same-owner','--no-same-permissions'],{timeout:30000,maxBuffer:1024*1024});
-  const manifestCandidates=[path.join(tempDir,'anifuze-template.json')];
-  const manifestPath=manifestCandidates.find(async()=>false)||manifestCandidates[0];
+  const manifestPath=path.join(tempDir,'anifuze-template.json');
   let manifest;
   try{manifest=JSON.parse(await fs.readFile(manifestPath,'utf8'));}catch{throw new Error('Template package manifest is missing or invalid.');}
   if(String(manifest.id||'')!==String(metadata.id)||String(manifest.version||'')!==String(metadata.version))throw new Error('Template package manifest does not match marketplace metadata.');
