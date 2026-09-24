@@ -1,4 +1,5 @@
 import {query} from '../db/index.js';
+import fs from 'node:fs/promises';
 import {config} from '../config.js';
 import {fetchTemplatePackageMetadata,downloadVerifiedPackage,installTemplatePackage,removeStoredTemplate} from './templatePackage.js';
 
@@ -68,7 +69,7 @@ export async function installTemplate(id){
  const compatibility=templateCompatibility(remote);
  if(!compatibility.compatible)throw new Error(`Template is incompatible: ${compatibility.reason}`);
  const existing=await getInstalledTemplate(remote.id);
- if(existing&&existing.version===remote.version){
+ if(existing&&existing.version===remote.version&&(!remote.packageSha256||remote.packageSha256===existing.package_sha256)){
   return existing;
  }
  if(existing)await snapshotInstalled(existing);
@@ -110,7 +111,8 @@ export async function checkTemplateUpdate(id){
  if(!installed)throw new Error('Template is not installed.');
  const remote=normalizeTemplate(await fetchTemplatePackageMetadata(id));
  const cmp=compareVersions(remote.version,installed.version);
- return {installed,remote,updateAvailable:cmp===null?remote.version!==installed.version:cmp>0,compatibility:templateCompatibility(remote)};
+ const packageChanged=Boolean(remote.packageSha256&&installed.package_sha256&&remote.packageSha256!==installed.package_sha256);
+ return {installed,remote,updateAvailable:cmp===null?remote.version!==installed.version||packageChanged:cmp>0||(cmp===0&&packageChanged),compatibility:templateCompatibility(remote)};
 }
 export async function updateTemplate(id){
  const check=await checkTemplateUpdate(id);
@@ -127,6 +129,10 @@ export async function rollbackTemplate(id,version){
  const versions=await listTemplateVersions(id);
  const target=versions.find(x=>x.version===String(version||''));
  if(!target)throw new Error('Rollback version is not installed.');
+ const compatibility=templateCompatibility(target);
+ if(!compatibility.compatible)throw new Error(`Template is incompatible: ${compatibility.reason}`);
+ if(!target.package_path)throw new Error('Rollback package path is missing.');
+ try{await fs.access(target.package_path);}catch{throw new Error('Rollback package is missing from template storage.');}
  if(current)await snapshotInstalled(current);
  await query(`UPDATE af_templates SET name=$2,version=$3,status='installed',config=$4,installed_at=$5,updated_at=CURRENT_TIMESTAMP,package_url=$6,package_sha256=$7,package_signature=$8,package_size=$9,package_path=$10,compatibility=$11,description=$12,category=$13 WHERE id=$1`,
  [target.id,target.name,target.version,JSON.stringify(target.config),target.installed_at,target.package_url,target.package_sha256,target.package_signature,target.package_size,target.package_path,JSON.stringify(target.compatibility),target.description,target.category]);
