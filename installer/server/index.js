@@ -19,7 +19,7 @@ export async function installerStatus(licenseKey=config.licenseKey,dbClient='pos
  if(licenseKey){if(config.nodeEnv==='development'&&licenseKey==='dev-license')l={valid:true,status:'development'};else if(licenseKey==='dev-license')l={valid:false,status:'missing'};}
  return {locked,requirements:r,license:l,identity:{installationId:i.installationId,domain:i.domain,licenseKey:licenseKey?'********':'missing'}};
 }
-export async function executeInstallation({database,email,oauth,admin,domain,licenseKey,deployment}={}){
+export async function executeInstallation({database,email,oauth,admin,domain,licenseKey,providerMarketplaceUrl,deployment}={}){
  if(await isInstallerLocked())throw new Error('AniFuze installer is already locked.');
  const status=await installerStatus(licenseKey,database?.client||'postgres');
  if(!status.requirements.ok)throw new Error('Server requirements are not satisfied.');
@@ -30,7 +30,9 @@ export async function executeInstallation({database,email,oauth,admin,domain,lic
  const target=deployment?.targetDir||config.deploymentTarget||''; const source=deployment?.sourceDir||config.releaseDir||'';
  if(target&&source)await deployLocalRelease({sourceDir:source,targetDir:target}); const beforeTables=await migrationSnapshot();
  const previous=await fs.readFile(ENV_FILE,'utf8').catch(()=>null);
- const env=toEnv(database,status.identity.installationId,licenseKey??config.licenseKey,domain??config.domain);
+ const marketplaceUrl=String(providerMarketplaceUrl??process.env.ANIFUZE_PROVIDER_MARKETPLACE_URL??'').trim();
+ if(marketplaceUrl){const u=new URL(marketplaceUrl);if(u.protocol!=='https:'&&config.nodeEnv==='production')throw new Error('Provider marketplace URL must use HTTPS in production.');}
+ const env=toEnv(database,status.identity.installationId,licenseKey??config.licenseKey,domain??config.domain,marketplaceUrl);
  try{
   await fs.writeFile(ENV_FILE,env,{mode:0o600}); await fs.chmod(ENV_FILE,0o600).catch(()=>{});
   await runMigrations(); await verifyStoredLicense(licenseKey);
