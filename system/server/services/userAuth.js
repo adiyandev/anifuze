@@ -56,3 +56,25 @@ export async function resetPassword(token,password){
  await query("UPDATE af_users SET password_hash=$2,updated_at=CURRENT_TIMESTAMP WHERE id=$1",[row.user_id,hash]);
  await query("DELETE FROM af_user_sessions WHERE user_id=$1",[row.user_id]);return true;
 }
+
+export async function listUserSessions(userId,currentSessionId){
+ const r=await query('SELECT id,created_at,last_seen_at,expires_at,ip_address,user_agent,remember_me FROM af_user_sessions WHERE user_id=$1 AND expires_at>CURRENT_TIMESTAMP ORDER BY last_seen_at DESC',[String(userId)]);
+ return r.rows.map(s=>({...s,current:String(s.id)===String(currentSessionId)}));
+}
+export async function revokeUserSession(userId,sessionId){
+ const r=await query('DELETE FROM af_user_sessions WHERE user_id=$1 AND id=$2',[String(userId),String(sessionId)]);
+ if(!r.rowCount)throw new Error('Session not found.');
+ return true;
+}
+export async function revokeOtherUserSessions(userId,currentSessionId){
+ const r=await query('DELETE FROM af_user_sessions WHERE user_id=$1 AND id<>$2',[String(userId),String(currentSessionId)]);
+ return Number(r.rowCount||0);
+}
+export async function changeUserPassword(userId,currentPassword,newPassword,currentSessionId){
+ if(String(newPassword||'').length<12)throw new Error('New password must be at least 12 characters.');
+ const r=await query('SELECT password_hash FROM af_users WHERE id=$1 AND enabled=TRUE AND status=\'active\'',[String(userId)]);
+ const user=r.rows[0];if(!user||!(await verifyPassword(String(currentPassword||''),user.password_hash)))throw new Error('Current password is incorrect.');
+ await query('UPDATE af_users SET password_hash=$2,updated_at=CURRENT_TIMESTAMP WHERE id=$1',[String(userId),await hashPassword(String(newPassword))]);
+ await revokeOtherUserSessions(userId,currentSessionId);
+ return true;
+}
