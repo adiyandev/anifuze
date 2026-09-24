@@ -38,3 +38,20 @@ test('template manifest validation rejects prototype-pollution keys',()=>{
 test('template manifest validation rejects invalid versions',()=>{
  assert.throws(()=>validateTemplateManifest({id:'bad',version:'1',config:{primary:'#fff'}}),/semantic versioning/);
 });
+
+test('template manifest validation accepts authoring metadata',()=>{
+ assert.equal(validateTemplateManifest({id:'midnight',version:'1.2.3',name:'Midnight',description:'A dark presentation theme.',author:'AniFuze',category:'Dark',license:'MIT',config:{primary:'#ff2d95'}},{id:'midnight',version:'1.2.3'}),true);
+});
+
+test('template manifest validation rejects unknown top-level keys',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',config:{primary:'#fff'},routes:['/admin']}),/unsupported key/);
+});
+
+test('template manifest validation rejects oversized metadata',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',description:'x'.repeat(2049),config:{primary:'#fff'}}),/description is too long/);
+});
+
+test('template manifest validation rejects invalid author and category metadata',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',author:'',config:{primary:'#fff'}}),/author is invalid/);
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',category:'x'.repeat(101),config:{primary:'#fff'}}),/category is invalid/);
+});
