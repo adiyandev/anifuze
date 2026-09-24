@@ -146,30 +146,6 @@ export async function validateTemplatePackage(metadata,buffer){
   await fs.writeFile(archive,buffer,{mode:0o600});
   const manifest=await validateTemplatePackage(metadata,buffer);
 
-  const entries=stdout.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  if(!entries.length)throw new Error('Template package is empty.');
-  if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('Template package contains too many files.');
-  if(entries.some(x=>x.length>MAX_PATH_LENGTH||!safeArchivePath(x)))throw new Error('Template package contains an unsafe archive path.');
-  if(!entries.some(x=>x==='anifuze-template.json'))throw new Error('Template package manifest is missing.');
-  const {stdout:details}=await execFileAsync('tar',['-tvf',archive],{maxBuffer:4*1024*1024,timeout:15000});
-  if(/\s(?:->|link to)\s/.test(details))throw new Error('Template package cannot contain symbolic or hard links.');
-  let unpackedBytes=0;
-  for(const line of details.split(/\r?\n/).filter(Boolean)){
-   const type=line[0];
-   if(type!=='-'&&type!=='d')throw new Error('Template package contains an unsupported archive entry type.');
-   if(type==='-'){
-    const size=Number(line.trim().split(/\s+/)[2]);
-    if(!Number.isSafeInteger(size)||size<0)throw new Error('Template package contains an invalid file size.');
-    if(size>MAX_ENTRY_BYTES)throw new Error('Template package contains an oversized file.');
-    unpackedBytes+=size;
-    if(unpackedBytes>MAX_UNPACKED_BYTES)throw new Error('Template package expands beyond the allowed size.');
-   }
-  }
-  const {stdout:manifestText}=await execFileAsync('tar',['-xOf',archive,'anifuze-template.json'],{maxBuffer:MAX_STRING_LENGTH*8,timeout:15000});
-  let manifest;
-  try{manifest=JSON.parse(manifestText);}catch{throw new Error('Template package manifest is missing or invalid.');}
-  validateTemplateManifest(manifest,metadata);
-  return manifest;
  }finally{await fs.rm(tempRoot,{recursive:true,force:true}).catch(()=>{});}
 }
 
