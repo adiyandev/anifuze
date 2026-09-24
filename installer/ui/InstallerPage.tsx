@@ -21,6 +21,7 @@ const steps=[
  {label:'Database',icon:Database},
  {label:'Email',icon:Mail},
  {label:'OAuth',icon:ShieldCheck},
+ {label:'Providers',icon:Sparkles},
  {label:'Owner',icon:ShieldCheck},
  {label:'Complete',icon:CheckCircle2}
 ];
@@ -35,6 +36,7 @@ export function InstallerPage(){
  const[db,setDb]=useState({client:'postgres',host:'127.0.0.1',port:'5432',name:'anifuze',user:'',password:'',ssl:false});
  const[email,setEmail]=useState({enabled:false,host:'',port:'587',secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'});
  const[oauth,setOauth]=useState({google_enabled:false,google_client_id:'',google_client_secret:'',google_redirect_uri:''});
+ const[providerMarketplaceUrl,setProviderMarketplaceUrl]=useState('');
  const[admin,setAdmin]=useState({email:'',password:'',confirm:''});
  const[loading,setLoading]=useState(true);
 
@@ -90,11 +92,15 @@ export function InstallerPage(){
    setStep(6);return;
   }
   if(step===6){
+   if(providerMarketplaceUrl.trim()){try{const u=new URL(providerMarketplaceUrl.trim());if(u.protocol!=='https:'&&window.location.protocol==='https:')throw new Error('Provider marketplace URL must use HTTPS.')}catch(e){setError(e instanceof Error?e.message:'Enter a valid provider marketplace URL.');return}}
+   setStep(7);return;
+  }
+  if(step===7){
    if(!admin.email.includes('@')){setError('Enter a valid owner email.');return}
    if(admin.password.length<12||!/[A-Z]/.test(admin.password)||!/[a-z]/.test(admin.password)||!/[0-9]/.test(admin.password)){setError('Use a strong password with at least 12 characters, uppercase, lowercase and a number.');return}
    if(admin.password!==admin.confirm){setError('Passwords do not match.');return}
    setBusy(true);
-   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,email,oauth,admin,licenseKey})});setStep(7)}
+   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,email,oauth,admin,licenseKey,providerMarketplaceUrl})});setStep(7)}
    catch(e){setError(e instanceof Error?e.message:'Installation failed.')}
    finally{setBusy(false)}
   }
@@ -185,6 +191,12 @@ export function InstallerPage(){
       </div>
      </div>}
 
+     {!loading&&step===7&&<div className="install-panel">
+      <div className="install-icon"><Sparkles size={27}/></div><div className="install-kicker">STEP 08</div><h2>Connect the provider marketplace</h2><p>Optional. Set the HTTPS endpoint for your central AniFuze provider marketplace. You can leave this blank and configure it later.</p>
+      <label className="install-field"><span>Provider marketplace URL</span><div className="install-input-wrap"><Sparkles size={16}/><input autoFocus value={providerMarketplaceUrl} onChange={e=>setProviderMarketplaceUrl(e.target.value)} placeholder="https://providers.example.com" autoComplete="url"/></div></label>
+      <div className="install-note"><ShieldCheck size={15}/><span>Production installations only accept HTTPS provider marketplace endpoints.</span></div>
+     </div>
+
      {!loading&&step===7&&<div className="install-complete">
       <div className="install-complete-icon"><CheckCircle2 size={48}/></div><div className="install-kicker">INSTALLATION COMPLETE</div><h1>AniFuze is ready.</h1><p>Your database was configured, the Owner account was created, and the installer has been locked.</p>
       <div className="install-complete-grid"><span><Check size={15}/> License activated</span><span><Check size={15}/> Database migrated</span><span><Check size={15}/> Installer locked</span></div>
@@ -193,7 +205,7 @@ export function InstallerPage(){
 
      {error&&<div className="install-error"><AlertTriangle size={16}/><span>{error}</span></div>}
 
-     {!loading&&step<7&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===6?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
+     {!loading&&step<8&&<footer className="install-actions"><button className="install-secondary" disabled={step===0||busy} onClick={back}><ArrowLeft size={16}/> Back</button><button className="install-primary" disabled={busy} onClick={next}>{busy?<><Loader2 size={16} className="install-spin"/> Working…</>:step===0?'Begin installation':step===7?'Install AniFuze':'Continue'}{!busy&&<ArrowRight size={16}/>}</button></footer>}
     </div>
    </div>
   </section>
