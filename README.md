@@ -245,10 +245,10 @@ For preorder information, licensing, pricing, and release details, contact the A
 AniFuze is being developed toward a complete production platform.
 
 Current development includes:
-* [ ] Standalone installer bootstrap
-* [ ] Installer-only customer package
-* [ ] Central signed release downloader
-* [ ] Atomic system installation and activation
+* [x] Standalone installer bootstrap
+* [x] Installer-only customer package
+* [x] Central signed release downloader
+* [x] Atomic system installation and activation
 
 * [x] Admin platform foundation
 * [x] Customer authentication
@@ -265,12 +265,12 @@ Current development includes:
 * [x] Provider diagnostics
 * [x] Real analytics
 * [x] Central template architecture
-* [ ] Production OAuth
-* [ ] Production email delivery
-* [ ] Protected release distribution
-* [ ] Production installer package
-* [ ] Update delivery system
-* [ ] Final production security audit
+* [x] Production OAuth
+* [x] Production email delivery
+* [x] Protected release distribution
+* [x] Production installer package
+* [x] Update delivery system
+* [x] Final production security audit
 * [ ] Full production release
 
 ---
