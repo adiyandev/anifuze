@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "server": "node server/index.js",
-    "dev:server": "node --watch server/index.js",
-    "test:server": "node --test"
+    "dev": "npm --prefix system run dev",
+    "build": "npm --prefix system run build",
+    "preview": "npm --prefix system run preview",
+    "server": "npm --prefix system run server",
+    "dev:server": "npm --prefix system run dev:server",
+    "test:server": "npm --prefix system run test:server"
   },
   "dependencies": {
     "react": "^18.3.1",
