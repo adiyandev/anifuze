@@ -1,4 +1,4 @@
-import {createPoolForDatabase,closePool} from '../db/index.js';
+import {createPoolForDatabase,closePool} from '../../system/server/db/index.js';
 const validClient=c=>['postgres','mysql','mariadb'].includes(c);
 const ident=s=>String(s).replace(/[^a-zA-Z0-9_$-]/g,'');
 export async function testDatabase(d){
