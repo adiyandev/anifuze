@@ -6,7 +6,6 @@ import { useApp } from '../../contexts/AppContext';
 export function AdminLoginPage() {
   const nav = useNavigate();
   const { refreshAuth, toast } = useApp();
-  const isDemo = typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
   const [step, setStep] = useState<'credentials' | '2fa' | 'setup'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,15 +18,6 @@ export function AdminLoginPage() {
     setError('');
 
     try {
-      if (step === 'credentials' && isDemo) {
-        if (!email.trim() || !password) throw new Error('Enter any email and password to continue.');
-        window.localStorage.setItem('anifuze_demo_admin', JSON.stringify({ email, role: 'owner' }));
-        await refreshAuth();
-        toast('Demo admin login successful.');
-        nav('/admin/dashboard');
-        return;
-      }
-
       if (step === 'credentials') {
         const response = await fetch('/api/auth/admin/login', {
           method: 'POST',
@@ -90,16 +80,15 @@ export function AdminLoginPage() {
     <div className="admin-login-page">
       <div className="admin-login-card">
         <div className="admin-login-brand">
-          <span>✦</span>
-          <strong>AniFuze</strong>
-          <small>ADMIN PANEL</small>
+          <div className="admin-login-logo">A</div>
+          <div><strong>AniFuze</strong><small>ADMIN CONSOLE</small></div>
         </div>
 
         {step === 'credentials' ? (
           <>
-            <div className="admin-login-icon"><LockKeyhole size={22} /></div>
-            <h1>Admin sign in</h1>
-            <p>Secure access to your AniFuze installation.</p>
+            <div className="admin-login-icon"><LockKeyhole size={20} /></div>
+            <h1>Sign in</h1>
+            <p>Use your administrator account to continue.</p>
             <form onSubmit={submit}>
               <label>
                 Email
@@ -107,23 +96,23 @@ export function AdminLoginPage() {
               </label>
               <label>
                 Password
-                <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} minLength={isDemo ? 1 : 12} required />
+                <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} minLength={12} required />
               </label>
-              <button className="button" type="submit">Continue</button>
+              <button className="button admin-login-submit" type="submit">Continue</button>
             </form>
           </>
         ) : step === 'setup' ? (
           <>
             <div className="admin-login-icon"><ShieldCheck size={22} /></div>
             <h1>Set up 2FA</h1>
-            <p>Your Owner account requires an authenticator before access is granted.</p>
+            <p>Your administrator account needs an authenticator before access is granted.</p>
             <button
               className="button"
               type="button"
               onClick={async () => {
                 try {
                   const data = await setup();
-                  window.prompt('Save this authenticator secret', data.secret);
+                  setError('Authenticator secret generated. Copy it from the setup panel below.');
                 } catch (err) {
                   setError(err instanceof Error ? err.message : '2FA setup failed.');
                 }
