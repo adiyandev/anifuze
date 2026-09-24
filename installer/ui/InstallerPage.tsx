@@ -21,8 +21,8 @@ const steps=[
  {label:'Database',icon:Database},
  {label:'Email',icon:Mail},
  {label:'OAuth',icon:ShieldCheck},
- {label:'Providers',icon:Sparkles},
  {label:'Owner',icon:ShieldCheck},
+ {label:'Providers',icon:Sparkles},
  {label:'Complete',icon:CheckCircle2}
 ];
 
@@ -59,51 +59,14 @@ export function InstallerPage(){
 
  const next=async()=>{
   setError('');
-  if(step===0){
-   if(status?.locked){setError('This installation is already locked.');return}
-   setStep(1);return;
-  }
-  if(step===1){
-   if(!licenseKey.trim()){setError('Enter your AniFuze product key.');return}
-   setBusy(true);
-   try{const result=await api('/api/installer/license',{method:'POST',body:JSON.stringify({licenseKey})});setStatus(s=>s?{...s,license:result.license}:s);setStep(2)}
-   catch(e){setError(e instanceof Error?e.message:'License verification failed.')}
-   finally{setBusy(false)}
-   return;
-  }
-  if(step===2){
-   if(!requirementsOk){setError('Resolve every failed server requirement before continuing.');return}
-   setStep(3);return;
-  }
-  if(step===3){
-   if(!db.host||!db.name||!db.user){setError('Database host, name, and username are required.');return}
-   setBusy(true);
-   try{await api('/api/installer/database',{method:'POST',body:JSON.stringify(db)});setStep(4)}
-   catch(e){setError(e instanceof Error?e.message:'Database connection failed.')}
-   finally{setBusy(false)}
-   return;
-  }
-  if(step===4){
-   if(email.enabled&&(!email.host||!email.from_email)){setError('SMTP host and sender email are required when email is enabled.');return}
-   setStep(5);return;
-  }
-  if(step===5){
-   if(oauth.google_enabled&&(!oauth.google_client_id||!oauth.google_client_secret)){setError('Google sign-in requires a Client ID and Client Secret.');return}
-   setStep(6);return;
-  }
-  if(step===6){
-   if(providerMarketplaceUrl.trim()){try{const u=new URL(providerMarketplaceUrl.trim());if(u.protocol!=='https:'&&window.location.protocol==='https:')throw new Error('Provider marketplace URL must use HTTPS.')}catch(e){setError(e instanceof Error?e.message:'Enter a valid provider marketplace URL.');return}}
-   setStep(7);return;
-  }
-  if(step===7){
-   if(!admin.email.includes('@')){setError('Enter a valid owner email.');return}
-   if(admin.password.length<12||!/[A-Z]/.test(admin.password)||!/[a-z]/.test(admin.password)||!/[0-9]/.test(admin.password)){setError('Use a strong password with at least 12 characters, uppercase, lowercase and a number.');return}
-   if(admin.password!==admin.confirm){setError('Passwords do not match.');return}
-   setBusy(true);
-   try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,email,oauth,admin,licenseKey,providerMarketplaceUrl})});setStep(7)}
-   catch(e){setError(e instanceof Error?e.message:'Installation failed.')}
-   finally{setBusy(false)}
-  }
+  if(step===0){if(status?.locked){setError('This installation is already locked.');return}setStep(1);return;}
+  if(step===1){if(!licenseKey.trim()){setError('Enter your AniFuze product key.');return}setBusy(true);try{const result=await api('/api/installer/license',{method:'POST',body:JSON.stringify({licenseKey})});setStatus(s=>s?{...s,license:result.license}:s);setStep(2)}catch(e){setError(e instanceof Error?e.message:'License verification failed.')}finally{setBusy(false)}return;}
+  if(step===2){if(!requirementsOk){setError('Resolve every failed server requirement before continuing.');return}setStep(3);return;}
+  if(step===3){if(!db.host||!db.name||!db.user){setError('Database host, name, and username are required.');return}setBusy(true);try{await api('/api/installer/database',{method:'POST',body:JSON.stringify(db)});setStep(4)}catch(e){setError(e instanceof Error?e.message:'Database connection failed.')}finally{setBusy(false)}return;}
+  if(step===4){if(email.enabled&&(!email.host||!email.from_email)){setError('SMTP host and sender email are required when email is enabled.');return}setStep(5);return;}
+  if(step===5){if(oauth.google_enabled&&(!oauth.google_client_id||!oauth.google_client_secret)){setError('Google sign-in requires a Client ID and Client Secret.');return}setStep(6);return;}
+  if(step===6){if(!admin.email.includes('@')){setError('Enter a valid owner email.');return}if(admin.password.length<12||!/[A-Z]/.test(admin.password)||!/[a-z]/.test(admin.password)||!/[0-9]/.test(admin.password)){setError('Use a strong password with at least 12 characters, uppercase, lowercase and a number.');return}if(admin.password!==admin.confirm){setError('Passwords do not match.');return}setStep(7);return;}
+  if(step===7){if(providerMarketplaceUrl.trim()){try{const u=new URL(providerMarketplaceUrl.trim());if(u.protocol!=='https:'&&window.location.protocol==='https:')throw new Error('Provider marketplace URL must use HTTPS.')}catch(e){setError(e instanceof Error?e.message:'Enter a valid provider marketplace URL.');return}}setBusy(true);try{await api('/api/installer/install',{method:'POST',body:JSON.stringify({database:db,email,oauth,admin,licenseKey,providerMarketplaceUrl})});setStep(8)}catch(e){setError(e instanceof Error?e.message:'Installation failed.')}finally{setBusy(false)}}
  };
 
  const back=()=>{setError('');if(!busy&&step>0)setStep(step-1)};
