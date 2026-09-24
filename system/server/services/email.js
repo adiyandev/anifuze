@@ -17,9 +17,8 @@ export async function saveEmailSettings(input={}){
  const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:encryptSecret(password),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
  if(value.enabled&&(!value.host||!value.from_email))throw new Error('SMTP host and sender email are required.');
  if(value.port<1||value.port>65535)throw new Error('Invalid SMTP port.');
- await query(`INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at)
- VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP)
- ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP`,[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
+ if(process.env.DB_CLIENT==='postgres')await query(`INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP`,[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
+ else await query(`INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,?,?,?,?,?,?,?, ?,CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE enabled=VALUES(enabled),host=VALUES(host),port=VALUES(port),secure=VALUES(secure),username=VALUES(username),password=VALUES(password),from_email=VALUES(from_email),from_name=VALUES(from_name),updated_at=CURRENT_TIMESTAMP`,[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
  return getEmailSettings();
 }
 
@@ -65,7 +64,7 @@ export async function ensureEmailTemplates(){
   ['reset-password','Reset your AniFuze password','<h2>Password reset</h2><p>Hello {{username}},</p><p>Use this code to reset your password:</p><p><strong>{{code}}</strong></p>','Hello {{username}},\n\nYour password reset code is {{code}}.'],
   ['notification','{{title}}','<h2>{{title}}</h2><p>{{message}}</p>','{{title}}\n\n{{message}}']
  ];
- for(const [tid,sub,html,text] of templates)await query(`INSERT INTO af_email_templates(id,name,subject,html,text,created_at,updated_at) VALUES($1,$1,$2,$3,$4,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(id) DO NOTHING`,[tid,sub,html,text]);
+ for(const [tid,sub,html,text] of templates){if(process.env.DB_CLIENT==='postgres')await query(`INSERT INTO af_email_templates(id,name,subject,html,text,created_at,updated_at) VALUES($1,$1,$2,$3,$4,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(id) DO NOTHING`,[tid,sub,html,text]);else await query(`INSERT IGNORE INTO af_email_templates(id,name,subject,html,text,created_at,updated_at) VALUES(?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`,[tid,sub,html,text]);}
 }
 export async function listEmailTemplates(){await ensureEmailTemplates();return (await query('SELECT id,name,subject,html,text,enabled,created_at,updated_at FROM af_email_templates ORDER BY id')).rows;}
 export async function updateEmailTemplate(templateId,input={}){
@@ -78,6 +77,6 @@ export async function saveInstallerEmailSettings(input={}){
  const value={enabled:Boolean(input.enabled),host:String(input.host||'').trim(),port:Number(input.port)||587,secure:Boolean(input.secure),username:String(input.username||'').trim(),password:encryptSecret(String(input.password||'')),from_email:String(input.from_email||'').trim(),from_name:String(input.from_name||'AniFuze').trim()};
  if(value.enabled&&(!value.host||!value.from_email))throw new Error('SMTP host and sender email are required.');
  if(value.port<1||value.port>65535)throw new Error('Invalid SMTP port.');
- await query('INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP',[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
+ if(process.env.DB_CLIENT==='postgres')await query('INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,$1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET enabled=$1,host=$2,port=$3,secure=$4,username=$5,password=$6,from_email=$7,from_name=$8,updated_at=CURRENT_TIMESTAMP',[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);else await query('INSERT INTO af_email_settings(id,enabled,host,port,secure,username,password,from_email,from_name,updated_at) VALUES(1,?,?,?,?,?,?,?, ?,CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE enabled=VALUES(enabled),host=VALUES(host),port=VALUES(port),secure=VALUES(secure),username=VALUES(username),password=VALUES(password),from_email=VALUES(from_email),from_name=VALUES(from_name),updated_at=CURRENT_TIMESTAMP',[value.enabled,value.host,value.port,value.secure,value.username,value.password,value.from_email,value.from_name]);
  return getEmailSettings();
 }
