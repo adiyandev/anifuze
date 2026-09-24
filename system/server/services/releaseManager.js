@@ -4,17 +4,13 @@ import path from 'node:path';
 import {config} from '../config.js';
 import {query} from '../db/index.js';
 import {createBackup} from './backups.js';
-import {compareVersions} from './updates.js';
+import {compareVersions,validateManifestUrl} from './updates.js';
 
 const VERSION=/^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const clean=v=>String(v??'').trim();
 const releaseDir=()=>path.resolve(config.releaseDir||path.join(process.cwd(),'storage','releases'));
 
-function validHttpsUrl(value){
-  const u=new URL(clean(value));
-  if(u.protocol!=='https:')throw new Error('Release package URL must use HTTPS.');
-  return u;
-}
+function validHttpsUrl(value){return new URL(validateManifestUrl(value));}
 export async function getReleaseState(){
   const r=await query('SELECT * FROM af_release_state WHERE id=1');
   return r.rows[0]||{current_version:config.version,staged_version:null,status:'idle'};
