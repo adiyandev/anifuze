@@ -73,8 +73,7 @@ export function createProviderClient(provider){
    if(result.status<200||result.status>=300)throw new Error('Provider returned HTTP '+result.status+'.');
    let raw;try{raw=JSON.parse(result.body||'{}')}catch{throw new Error('Provider returned non-JSON data.');}
    return {raw,status:result.status,time_ms:result.time_ms,data:operation==='getSources'?normalizeProviderResponse(raw):raw};
-  },
-  search:context=>this.call('search',context)
+  }
  };
 }
 export async function invokeProviderOperation(providerId,operation,context={}){
