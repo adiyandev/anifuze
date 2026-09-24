@@ -23,6 +23,7 @@ export const config = Object.freeze({
   licenseKey: required('ANIFUZE_LICENSE_KEY', 'dev-license'),
   licenseServiceUrl: process.env.ANIFUZE_LICENSE_SERVICE_URL ?? '',
   templateServiceUrl: process.env.ANIFUZE_TEMPLATE_SERVICE_URL ?? '',
+ templatePublicKey: process.env.ANIFUZE_TEMPLATE_PUBLIC_KEY ?? '',
   releaseDir: process.env.ANIFUZE_RELEASE_DIR ?? '',
   deploymentTarget: process.env.ANIFUZE_DEPLOYMENT_TARGET ?? '',
   domain: required('ANIFUZE_DOMAIN', 'localhost'),
