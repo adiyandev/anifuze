@@ -25,7 +25,7 @@ function applyMeta(seo:any,path:string){
 }
 
 export function PublicLayout(){
- const{settings,role,customerUser,logoutCustomer}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);const[unreadNotifications,setUnreadNotifications]=useState(0);
+ const{settings,role,customerUser,logoutCustomer}=useApp();const location=useLocation();const[open,setOpen]=useState(false);const[nav,setNav]=useState<NavItem[]>([]);const[footer,setFooter]=useState<any>(null);const[unreadNotifications,setUnreadNotifications]=useState(0);const[template,setTemplate]=useState<any>(null);
  useEffect(()=>{
   let active=true;
   const refresh=async()=>{
