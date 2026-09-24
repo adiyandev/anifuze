@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeTemplate,listTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate} from './templates.js';
+import {validateTemplateManifest} from './templatePackage.js';
 
 test('template service exposes the central marketplace contract',()=>{
  assert.equal(typeof normalizeTemplate,'function');
@@ -20,4 +21,20 @@ test('template normalization provides safe marketplace defaults',()=>{
 test('template normalization safely handles malformed config',()=>{
  const template=normalizeTemplate({id:'starter',name:'Starter',config:'not-json'});
  assert.deepEqual(template.config,{});
+});
+
+test('template manifest validation accepts presentation-only config',()=>{
+ assert.equal(validateTemplateManifest({id:'midnight',version:'1.2.3',type:'template',name:'Midnight',config:{primary:'#ff2d95',accent:'#7c3aed',radius:'12px',font:'Inter'}},{id:'midnight',version:'1.2.3'}),true);
+});
+
+test('template manifest validation rejects non-presentation config',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',config:{apiUrl:'https://example.com'}}),/presentation settings/);
+});
+
+test('template manifest validation rejects prototype-pollution keys',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1.0.0',config:{constructor:{}}}),/forbidden config key/);
+});
+
+test('template manifest validation rejects invalid versions',()=>{
+ assert.throws(()=>validateTemplateManifest({id:'bad',version:'1',config:{primary:'#fff'}}),/semantic versioning/);
 });
