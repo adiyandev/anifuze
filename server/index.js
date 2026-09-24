@@ -42,6 +42,7 @@ import {analyticsRouter} from './routes/analytics.js';
 import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from './installer/index.js';
+import {installationGate} from './middleware/installationGate.js';
 
 const app=express();
 app.disable('x-powered-by');
@@ -50,6 +51,7 @@ app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1
 
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
 app.use('/api/installer',installerRouter);
+app.use(installationGate);
 app.use('/api/auth',authRouter);
 app.use('/api/auth',userAuthRouter);
 app.use('/api',userDataRouter);
