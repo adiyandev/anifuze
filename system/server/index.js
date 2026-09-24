@@ -1,5 +1,5 @@
 import express from 'express';
-import {config} from './config.js';
+import {config,assertProductionConfig} from './config.js';
 import {healthCheck} from './db/index.js';
 import {runMigrations} from './migrate.js';
 import {installerRouter} from './routes/installer.js';
@@ -47,10 +47,16 @@ import {maintenanceGate} from './services/maintenance.js';
 import {processDueNotifications} from './services/notifications.js';
 import {isInstallerLocked} from '../../installer/server/index.js';
 import {installationGate} from './middleware/installationGate.js';
+import {securityHeaders,requestId,apiRateLimit,pruneRateLimitBuckets} from './middleware/security.js';
+import {releaseRouter} from './routes/release.js';
 
 const app=express();
 app.disable('x-powered-by');
-app.use(express.json({limit:'100mb'}));
+app.set('trust proxy', config.nodeEnv === 'production' ? 1 : false);
+app.use(requestId);
+app.use(securityHeaders);
+app.use(apiRateLimit);
+app.use(express.json({limit:'10mb',strict:true}));
 app.use('/uploads',express.static('storage/uploads',{fallthrough:false,maxAge:'1h',index:false}));
 
 app.get('/api/health',async(_req,res)=>{try{res.json({ok:true,service:'anifuze',database:await healthCheck()});}catch{res.status(503).json({ok:false,error:'Database unavailable'});}});
@@ -88,6 +94,7 @@ app.use('/api',systemInfoRouter);
 app.use('/api',cacheRouter);
 app.use('/api',maintenanceRouter);
 app.use('/api',updatesRouter);
+app.use('/api',releaseRouter);
 app.use('/api',licenseRouter);
 app.use('/api',supportRouter);
 app.use('/api',oauthRouter);
@@ -97,6 +104,7 @@ app.use('/api',providerDiagnosticsRouter);
 app.use('/api',analyticsRouter);
 app.use('/api',platformRouter);
 
+const rateLimitCleanup=setInterval(pruneRateLimitBuckets,300000); rateLimitCleanup.unref?.();
 const providerHealthScheduler=setInterval(()=>{monitorProviderHealth().catch(()=>{});},300000);
 providerHealthScheduler.unref?.();
 const notificationScheduler=setInterval(()=>{processDueNotifications().catch(()=>{});
@@ -105,5 +113,8 @@ notificationScheduler.unref?.();
 processDueNotifications().catch(()=>{});
 app.get('/api/system/install',(_req,res)=>res.json({installationId:config.installationId,domain:config.domain,nodeEnv:config.nodeEnv}));
 
-const start=async()=>{if(await isInstallerLocked())await runMigrations();app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
+let server;
+const shutdown=async(signal)=>{console.log('AniFuze shutting down ('+signal+')');for(const timer of [providerHealthScheduler,notificationScheduler,rateLimitCleanup])clearInterval(timer);if(server)await new Promise(resolve=>server.close(resolve));process.exit(0);};
+process.once('SIGTERM',()=>shutdown('SIGTERM')); process.once('SIGINT',()=>shutdown('SIGINT'));
+const start=async()=>{assertProductionConfig();if(await isInstallerLocked())await runMigrations();server=app.listen(config.port,()=>console.log('AniFuze server listening on :' + config.port));};
 start().catch(error=>{console.error('AniFuze startup failed:',error.message);process.exit(1);});
