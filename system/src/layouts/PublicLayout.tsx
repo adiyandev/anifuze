@@ -55,6 +55,7 @@ export function PublicLayout(){
    {f.show_brand&&<div className="vault-footer-brand"><Link className="vault-brand" to="/"><span>{siteLogo||'✦'}</span><strong>{siteName}</strong></Link><p>{footerText}</p></div>}
    {f.show_navigation&&<div className="vault-footer-column"><span>Explore</span>{visibleNav.slice(0,5).map(item=><Link key={item.id} to={item.path}>{item.label}</Link>)}</div>}
    {f.show_account&&<div className="vault-footer-column"><span>Account</span>{customerUser?<><Link to="/profile">My profile</Link><button className="vault-footer-link" onClick={async()=>{await logoutCustomer();}}>Sign out</button></>:<><Link to="/login">Sign in</Link><Link to="/register">Create account</Link></>}</div>}
+   <div className="vault-footer-socials">{Object.entries(siteConfig?.socialLinks||{}).map(([name,url])=><a key={name} href={String(url)} target="_blank" rel="noreferrer noopener">{name}</a>)}</div>
    <div className="vault-footer-bottom"><small>© {new Date().getFullYear()} {f.copyright_text||siteName}</small>{f.show_powered_by&&<small>Built with {siteName}</small>}</div>
   </footer>}
  </div>
