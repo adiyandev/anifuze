@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeTemplate,listTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate} from './templates.js';
+import {normalizeTemplate,listTemplates,listMarketplaceTemplates,decorateMarketplaceTemplates,getTemplate,installTemplate,listInstalledTemplates,getActiveTemplate,activateTemplate} from './templates.js';
 import {validateTemplateManifest,validateTemplatePackage} from './templatePackage.js';
 import {validateTemplateSandboxEntries} from './templateSandbox.js';
 
@@ -74,4 +74,28 @@ test('template sandbox rejects executable content and files outside assets',()=>
 test('template sandbox rejects unsafe asset paths',()=>{
  assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','assets/../secret.css']),/unsafe sandbox path/);
  assert.throws(()=>validateTemplateSandboxEntries(['anifuze-template.json','../secret.css']),/unsafe sandbox path/);
+});
+
+test('marketplace operation metadata merges installed state and compatibility',()=>{
+ const items=decorateMarketplaceTemplates([
+  {id:'midnight',name:'Midnight',version:'2.0.0',compatibility:{minVersion:'1.5.0'}},
+  {id:'legacy',name:'Legacy',version:'1.0.0',compatibility:{maxVersion:'1.0.0'}}
+ ],[
+  {id:'midnight',version:'1.0.0',status:'installed',package_sha256:'old'},
+  {id:'legacy',version:'0.9.0',status:'installed'}
+ ],'1.6.0');
+ assert.equal(items[0].installed,true);
+ assert.equal(items[0].installedVersion,'1.0.0');
+ assert.equal(items[0].updateAvailable,true);
+ assert.equal(items[0].compatibility.compatible,true);
+ assert.equal(items[1].installed,true);
+ assert.equal(items[1].compatibility.compatible,false);
+ assert.equal(items[1].updateAvailable,true);
+});
+test('marketplace operation metadata handles same-version package changes',()=>{
+ const items=decorateMarketplaceTemplates([{id:'midnight',name:'Midnight',version:'1.0.0',packageSha256:'new'}],[{id:'midnight',version:'1.0.0',package_sha256:'old'}],'1.0.0');
+ assert.equal(items[0].updateAvailable,true);
+});
+test('marketplace service contract exposes operation-aware listing',()=>{
+ assert.equal(typeof listMarketplaceTemplates,'function');
 });
