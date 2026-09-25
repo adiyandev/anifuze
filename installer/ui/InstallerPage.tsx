@@ -33,7 +33,7 @@ export function InstallerPage(){
  const[busy,setBusy]=useState(false);
  const[error,setError]=useState('');
  const[licenseKey,setLicenseKey]=useState('');
- const[db,setDb]=useState({client:'postgres',host:'127.0.0.1',port:'5432',name:'anifuze',user:'',password:'',ssl:false});
+ const[db,setDb]=useState({client:'postgres',host:'127.0.0.1',port:'5432',name:'anifuze',user:'',password:'',ssl:true});
  const[email,setEmail]=useState({enabled:false,host:'',port:'587',secure:false,username:'',password:'',from_email:'',from_name:'AniFuze'});
  const[oauth,setOauth]=useState({google_enabled:false,google_client_id:'',google_client_secret:'',google_redirect_uri:''});
  const[providerMarketplaceUrl,setProviderMarketplaceUrl]=useState('');
@@ -111,13 +111,13 @@ export function InstallerPage(){
      {!loading&&step===3&&<div className="install-panel">
       <div className="install-icon"><Database size={27}/></div><div className="install-kicker">STEP 04</div><h2>Connect your database</h2><p>Use the database credentials provided by your hosting provider. We'll test the connection before installation.</p>
       <div className="install-form">
-       <label>Database engine<select value={db.client} onChange={e=>setDb({...db,client:e.target.value,port:e.target.value==='postgres'?'5432':'3306'})}><option value="postgres">PostgreSQL</option><option value="mysql">MySQL</option><option value="mariadb">MariaDB</option></select></label>
+       <label>Database engine<select value="postgres" disabled><option value="postgres">PostgreSQL</option></select></label>
        <label>Host<input value={db.host} onChange={e=>setDb({...db,host:e.target.value})}/></label>
        <label>Port<input value={db.port} onChange={e=>setDb({...db,port:e.target.value})}/></label>
        <label>Database name<input value={db.name} onChange={e=>setDb({...db,name:e.target.value})}/></label>
        <label>Username<input value={db.user} onChange={e=>setDb({...db,user:e.target.value})}/></label>
        <label>Password<input type="password" value={db.password} onChange={e=>setDb({...db,password:e.target.value})}/></label>
-       <label className="install-check"><input type="checkbox" checked={db.ssl} onChange={e=>setDb({...db,ssl:e.target.checked})}/><span>Use encrypted database connection</span></label>
+       <label className="install-check"><input type="checkbox" checked={db.ssl} onChange={e=>setDb({...db,ssl:e.target.checked})}/><span>Use encrypted PostgreSQL connection</span></label>
       </div>
      </div>}
 
