@@ -6,7 +6,8 @@ export async function verifyLicenseKey(licenseKey){
  const key=String(licenseKey??'').trim();
  if(!key) return {valid:false,status:'missing',error:'Product key is required.'};
  if(config.nodeEnv==='development'&&key==='dev-license') return {valid:true,status:'development'};
- const endpoint=String(config.licenseServiceUrl||'').trim();
+ const endpoint=String(config.licenseServiceUrl||process.env.ANIFUZE_LICENSE_SERVICE_URL||'https://animefusion.onrender.com').trim().replace(/\/$/,'');
+ if(config.nodeEnv==='production'&&(!endpoint.startsWith('https://')))return {valid:false,status:'unconfigured',error:'Production license service must use HTTPS.'};
  if(!endpoint)return {valid:false,status:'unconfigured',error:'License service URL is not configured.'};
  try{
   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json','user-agent':'AniFuze-Installer'},body:JSON.stringify({licenseKey:key,installationId:config.installationId,domain:config.domain,version:config.version}),signal:AbortSignal.timeout(10000)});
