@@ -16,7 +16,7 @@ export async function isInstallerLocked(){return fs.access(LOCK_FILE).then(()=>t
 export async function installerStatus(licenseKey=config.licenseKey,dbClient='postgres'){
  const r=await checkRequirements({dbClient}); const i=getInstallationIdentity(); const locked=await isInstallerLocked();
  let l={valid:false,status:'missing'};
- if(licenseKey){if(config.nodeEnv==='development'&&licenseKey==='dev-license')l={valid:true,status:'development'};else if(licenseKey==='dev-license')l={valid:false,status:'missing'};}
+ if(licenseKey){const checked=await verifyLicenseKey(licenseKey);l={valid:Boolean(checked.valid),status:checked.status||'invalid',plan:checked.plan||null,customer:checked.customer||null,expiresAt:checked.expiresAt||null,error:checked.error||null};}
  return {locked,requirements:r,license:l,identity:{installationId:i.installationId,domain:i.domain,licenseKey:licenseKey?'********':'missing'}};
 }
 export async function executeInstallation({database,email,oauth,admin,domain,licenseKey,providerMarketplaceUrl,deployment}={}){
