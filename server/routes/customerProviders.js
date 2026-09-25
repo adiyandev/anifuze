@@ -14,7 +14,7 @@ async function verifyEntitlement(req){
  const local=await query('SELECT key_hash,status,metadata FROM af_license WHERE id=1');
  const license=local.rows[0];if(!license?.key_hash||!['active','grace'].includes(String(license.status)))throw new Error('An active AniFuze license is required.');
  const endpoint=licenseService();if(!endpoint)throw new Error('AniFuze license service is not configured.');
- const response=await fetch(endpoint+'/api/license/verify',{method:'POST',headers:{'content-type':'application/json','accept':'application/json','user-agent':'AniFuze-Provider-Client'},body:JSON.stringify({licenseHash:license.key_hash,installationId:config.installationId,domain:config.domain,version:config.version})});
+ const response=await fetch(endpoint+'/api/license/verify',{method:'POST',headers:{'content-type':'application/json','accept':'application/json','user-agent':'AniFuze-Provider-Client'},body:JSON.stringify({licenseKey:config.licenseKey,installationId:config.installationId,domain:config.domain,version:config.version})});
  const data=await response.json().catch(()=>({}));if(!response.ok||data.valid!==true)throw new Error(data.error||'AniFuze license verification failed.');return data;
 }
 router.use(customer);
