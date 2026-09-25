@@ -21,7 +21,7 @@ export const config = Object.freeze({
   },
   installationId: required('ANIFUZE_INSTALLATION_ID', 'dev-installation'),
   licenseKey: required('ANIFUZE_LICENSE_KEY', 'dev-license'),
-  licenseServiceUrl: process.env.ANIFUZE_LICENSE_SERVICE_URL ?? '',
+  licenseServiceUrl: process.env.ANIFUZE_LICENSE_SERVICE_URL ?? 'https://animefusion.onrender.com',
   templateServiceUrl: process.env.ANIFUZE_TEMPLATE_SERVICE_URL ?? '',
   providerMarketplaceUrl: process.env.ANIFUZE_PROVIDER_MARKETPLACE_URL ?? '',
   templatePublicKey: process.env.ANIFUZE_TEMPLATE_PUBLIC_KEY ?? '',
