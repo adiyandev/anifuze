@@ -35,6 +35,7 @@ export async function executeInstallation({database,email,oauth,admin,domain,lic
  const env=toEnv(database,status.identity.installationId,licenseKey??config.licenseKey,domain??config.domain,marketplaceUrl);
  try{
   const envTemp=ENV_FILE+'.tmp-'+process.pid+'-'+Date.now(); await fs.writeFile(envTemp,env,{mode:0o600}); await fs.chmod(envTemp,0o600).catch(()=>{}); await fs.rename(envTemp,ENV_FILE);
+  process.env.DB_CLIENT=database.client; process.env.DB_HOST=database.host; process.env.DB_PORT=String(database.port); process.env.DB_NAME=database.name; process.env.DB_USER=database.user; process.env.DB_PASSWORD=String(database.password??''); process.env.DB_SSL=String(Boolean(database.ssl)); process.env.ANIFUZE_INSTALLATION_ID=status.identity.installationId; process.env.ANIFUZE_LICENSE_KEY=String(licenseKey??''); process.env.ANIFUZE_DOMAIN=String(domain??config.domain); process.env.ANIFUZE_LICENSE_SERVICE_URL=String(config.licenseServiceUrl||process.env.ANIFUZE_LICENSE_SERVICE_URL||'https://animefusion.onrender.com');
   await runMigrations(); await verifyStoredLicense(licenseKey);
   if(email)await saveInstallerEmailSettings(email);
   if(oauth)await saveOAuthSettings(oauth);
